@@ -67,7 +67,7 @@ namespace Inventory.MVC.Models
     }
 
     public class VerifyPhoneNumberViewModel
-    {
+    { 
         [Required]
         [Display(Name = "Code")]
         public string Code { get; set; }
