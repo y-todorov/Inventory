@@ -17,7 +17,7 @@ namespace Inventory.DAL
 
         public string ModifiedBy { get; set; }
 
-        public virtual void Adding()
+        public virtual void Adding() 
         {
             SetCreatedOnCreatedBy();
             SetModifiedOnModifiedBy();
