@@ -1,4 +1,5 @@
-﻿@model object
+﻿@using Inventory.MVC.Resources
+@model object
 
 @(
  Html.Kendo().ComboBoxFor(m => m)
@@ -7,7 +8,7 @@
             .DataValueField("Id")
             .Filter(FilterType.Contains)
             .IgnoreCase(true)
-            .Placeholder("Изберете стойност ...")
+            .Placeholder(ViewModelResources.PlaceHolderTextStringForeignKey)
             .Suggest(false)
             .MinLength(0)
             .Animation(pab => pab.Open(eb => eb.Duration(AnimationDuration.Fast)).Close(eb => eb.Duration(AnimationDuration.Fast)))

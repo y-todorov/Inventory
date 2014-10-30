@@ -3,5 +3,5 @@
 @*@Html.TextBoxFor(model => model, new {@class = "k-textbox"})*@
 
 @(Html.Kendo().TextBoxFor(m => m)
-          .HtmlAttributes(new { style = "width:100%", placeholder="Въведете текст ..." })
+          .HtmlAttributes(new { style = "width:100%", placeholder=Inventory.MVC.Resources.ViewModelResources.PlaceHolderTextString })
 )

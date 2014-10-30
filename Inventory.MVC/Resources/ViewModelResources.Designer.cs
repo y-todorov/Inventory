@@ -61,6 +61,51 @@ namespace Inventory.MVC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Въведете число ....
+        /// </summary>
+        public static string PlaceHolderTextDecimal {
+            get {
+                return ResourceManager.GetString("PlaceHolderTextDecimal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Въведете цяло число ....
+        /// </summary>
+        public static string PlaceHolderTextLong {
+            get {
+                return ResourceManager.GetString("PlaceHolderTextLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Въведете текст ....
+        /// </summary>
+        public static string PlaceHolderTextString {
+            get {
+                return ResourceManager.GetString("PlaceHolderTextString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Въведете дата ....
+        /// </summary>
+        public static string PlaceHolderTextStringDate {
+            get {
+                return ResourceManager.GetString("PlaceHolderTextStringDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Изберете стойност ....
+        /// </summary>
+        public static string PlaceHolderTextStringForeignKey {
+            get {
+                return ResourceManager.GetString("PlaceHolderTextStringForeignKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Категория.
         /// </summary>
         public static string ProductViewModel_CategoryId_Name {
