@@ -1,0 +1,7 @@
+﻿@model object
+
+@*@Html.TextBoxFor(model => model, new {@class = "k-textbox"})*@
+
+@(Html.Kendo().TextBoxFor(m => m)
+          .HtmlAttributes(new { style = "width:100%", placeholder="Въведете текст ..." })
+)

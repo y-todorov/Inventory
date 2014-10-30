@@ -1,0 +1,60 @@
+﻿@model object
+
+@(
+ Html.Kendo().ComboBoxFor(m => m)
+        //.BindTo(((SelectList)ViewData[ViewData.TemplateInfo.GetFullHtmlFieldName("") + "_Data"]).OrderBy(it => it.Text))
+            .DataTextField("Name")
+            .DataValueField("Id")
+            .Filter(FilterType.Contains)
+            .IgnoreCase(true)
+            .Placeholder("Изберете стойност ...")
+            .Suggest(false)
+            .MinLength(0)
+            .Animation(pab => pab.Open(eb => eb.Duration(AnimationDuration.Fast)).Close(eb => eb.Duration(AnimationDuration.Fast)))
+            .DataSource(ros => ros.Custom().Transport(t =>
+                                t.Read("Read" + ViewData.ModelMetadata.AdditionalValues["modelType"], "ForeignKey"))
+                               
+                .Schema(s => s.Data("Data")))
+                .HtmlAttributes(new { style = "width:100%" })
+)
+@*http://stackoverflow.com/questions/9681107/asp-net-mvc-editortemplates-uihint-with-parameters*@
+@*// Това е важно заради това е Data тук .Schema(s => s.Data("Data"))) !!! Това ще позволи да се изпозлва OutputCache при Read, защото
+        като се донавят нови категории, те се дърпат със заявка от сървъра
+    ViewData.ModelMetadata = Tova e polezeno
+    {
+    Data: [
+    {
+    Name: "Зеленчуци",
+    Id: 1,
+    CreatedOn: "/Date(1414524618635)/",
+    CreatedBy: null,
+    ModifiedOn: "/Date(1414524618635)/",
+    ModifiedBy: null
+    },
+    {
+    Name: "Хлебни",
+    Id: 4,
+    CreatedOn: "/Date(1414524618635)/",
+    CreatedBy: null,
+    ModifiedOn: "/Date(1414524618635)/",
+    ModifiedBy: null
+    }
+    ],
+    Total: 2,
+    AggregateResults: null,
+    Errors: null
+    }*@
+
+@*@model object
+
+    @(
+     Html.Kendo().ComboBoxFor(m => m)
+                .BindTo(((SelectList)ViewData[ViewData.TemplateInfo.GetFullHtmlFieldName("") + "_Data"]).OrderBy(it => it.Text))
+                .Filter(FilterType.Contains)
+                .IgnoreCase(true)
+                .Placeholder("Избор ...")
+                .Suggest(false)
+                .MinLength(0)
+                .Animation(pab => pab.Open(eb => eb.Duration(AnimationDuration.Fast)).Close(eb => eb.Duration(AnimationDuration.Fast)))
+                .DataSource(ros => ros.ServerFiltering(false))
+    )*@

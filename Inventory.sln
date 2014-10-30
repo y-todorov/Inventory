@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C0DCC10E-8603-439A-9522-0E7550A8E04D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.DAL", "Inventory.DAL\Inventory.DAL.csproj", "{CDF0FAC6-7294-4091-9FAA-84ED3C44AED4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.MVC", "Inventory.MVC\Inventory.MVC.csproj", "{0EE92CF8-158D-4B9B-88A3-F10C584C60A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.Utils", "Inventory.Utils\Inventory.Utils.csproj", "{1514EE34-B223-456F-A18D-4D3B88664C41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.Tests", "Inventory.Tests\Inventory.Tests.csproj", "{397BB8EF-2F16-495D-BF7D-D12840746F23}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8177BF70-4DA6-41F0-8E02-7DDB421B060D}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{ED4CA4E5-4CB0-409B-8EE5-A5753106BF29}"
+	ProjectSection(SolutionItems) = preProject
+		UsefulLinks.txt = UsefulLinks.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CDF0FAC6-7294-4091-9FAA-84ED3C44AED4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDF0FAC6-7294-4091-9FAA-84ED3C44AED4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDF0FAC6-7294-4091-9FAA-84ED3C44AED4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDF0FAC6-7294-4091-9FAA-84ED3C44AED4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EE92CF8-158D-4B9B-88A3-F10C584C60A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EE92CF8-158D-4B9B-88A3-F10C584C60A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EE92CF8-158D-4B9B-88A3-F10C584C60A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EE92CF8-158D-4B9B-88A3-F10C584C60A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1514EE34-B223-456F-A18D-4D3B88664C41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1514EE34-B223-456F-A18D-4D3B88664C41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1514EE34-B223-456F-A18D-4D3B88664C41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1514EE34-B223-456F-A18D-4D3B88664C41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{397BB8EF-2F16-495D-BF7D-D12840746F23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{397BB8EF-2F16-495D-BF7D-D12840746F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{397BB8EF-2F16-495D-BF7D-D12840746F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{397BB8EF-2F16-495D-BF7D-D12840746F23}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{397BB8EF-2F16-495D-BF7D-D12840746F23} = {C0DCC10E-8603-439A-9522-0E7550A8E04D}
+	EndGlobalSection
+EndGlobal

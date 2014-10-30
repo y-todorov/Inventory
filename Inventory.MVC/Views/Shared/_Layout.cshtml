@@ -1,0 +1,26 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="description" content="Inventory Management" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" type="image/x-icon" href="~/Content/favicon.ico" />
+    <link href="~/Content/CssBundle.css" rel="stylesheet" />
+    @*DO NOT USER defer and async. Some scripts like jquery must be loaded first at times*@
+    <script src="~/Scripts/JsBundle.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
+    <script src="~/signalr/hubs"></script>
+</head>
+<body>
+    <header>
+        <span id="centeredNotification" style="display:none;"></span>
+        <span id="popupNotification" style="display:none;"></span>
+    </header>
+    <div id="body">
+        @RenderBody()
+    </div>
+    <footer></footer>
+</body>
+</html>
