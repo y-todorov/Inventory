@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -14,22 +15,32 @@ namespace Inventory.MVC.Controllers
 {
     public class ForeignKeyController : ControllerBase
     {
-        public async Task<ActionResult> ReadProductCategoryViewModel([DataSourceRequest] DataSourceRequest request, InventoryContext context)
+        public ActionResult ReadProductCategoryViewModel([DataSourceRequest] DataSourceRequest request, InventoryContext context)
         {
-            JsonResult result = await ReadBase<ProductCategory, ProductCategoryViewModel>(request, context.Elements.OfType<ProductCategory>());
+            JsonResult result = ReadBase<ProductCategory, ProductCategoryViewModel>(request, context.Elements.OfType<ProductCategory>());
             return result;
         }
 
-        public async Task<ActionResult> ReadProductStoreViewModel([DataSourceRequest] DataSourceRequest request, InventoryContext context)
+        public ActionResult ReadProductStoreViewModel([DataSourceRequest] DataSourceRequest request, InventoryContext context)
         {
-            JsonResult result = await ReadBase<ProductStore, ProductStoreViewModel>(request, context.Elements.OfType<ProductStore>());
+            JsonResult result = ReadBase<ProductStore, ProductStoreViewModel>(request, context.Elements.OfType<ProductStore>());
             return result;
         }
 
-        public async Task<ActionResult> ReadProductUnitMeasureViewModel([DataSourceRequest] DataSourceRequest request, InventoryContext context)
+        public ActionResult ReadProductUnitMeasureViewModel([DataSourceRequest] DataSourceRequest request, InventoryContext context)
         {
-            JsonResult result =  await ReadBase<ProductUnitMeasure, ProductUnitMeasureViewModel>(request, context.Elements.OfType<ProductUnitMeasure>());
+            JsonResult result =  ReadBase<ProductUnitMeasure, ProductUnitMeasureViewModel>(request, context.Elements.OfType<ProductUnitMeasure>());
             return result;
+        }
+
+        public IEnumerable<ProductCategoryViewModel> ReadAllCategories()
+        {
+            using (InventoryContext context = new InventoryContext())
+            {
+                var list = context.Elements.OfType<ProductCategory>().ToList();
+                var viewModels = list.AsQueryable().Project().To<ProductCategoryViewModel>();
+                return viewModels;
+            }
         }
     }
 }

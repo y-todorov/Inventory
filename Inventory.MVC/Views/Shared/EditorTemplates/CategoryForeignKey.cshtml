@@ -1,7 +1,8 @@
-﻿@model object
+﻿@using Inventory.MVC.Models
+@model object
 
 @(
-        Html.Kendo().DropDownListFor(m => m)
+ Html.Kendo().DropDownListFor<ProductViewModel>(m => m.CategoryId)
             .BindTo((SelectList) ViewData[ViewData.TemplateInfo.GetFullHtmlFieldName("") + "_Data"])
 )
 

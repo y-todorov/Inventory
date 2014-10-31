@@ -32,9 +32,9 @@ namespace Inventory.MVC.Controllers
             return jr;
         }
 
-        public async Task<JsonResult> ReadBase<TEntityType, TViewModelType>([DataSourceRequest] DataSourceRequest request, IQueryable<TEntityType> query)
+        public JsonResult ReadBase<TEntityType, TViewModelType>([DataSourceRequest] DataSourceRequest request, IQueryable<TEntityType> query)
         {
-            var task = await query.ToListAsync();
+            var task = query;
             var viewModels = task.AsQueryable().Project().To<TViewModelType>();
             DataSourceResult dataSourceResult = viewModels.ToDataSourceResult(request);
             JsonResult jresult = Json(dataSourceResult);

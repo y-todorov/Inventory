@@ -1,0 +1,9 @@
+﻿@using Inventory.MVC.Controllers
+
+@model object
+
+@(Html.Kendo().DropDownListFor(m => m)
+      .DataValueField("Id")
+      .DataTextField("Name")
+      .BindTo((new ForeignKeyController()).ReadAllCategories())
+      )

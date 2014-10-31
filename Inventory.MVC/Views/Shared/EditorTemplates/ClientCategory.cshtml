@@ -1,9 +1,0 @@
-﻿@using RecipiesMVC.Models;
-
-@model CategoryViewModel
-
-@(Html.Kendo().DropDownListFor(m => m)
-      .DataValueField("CategoryId")
-      .DataTextField("Name")
-      .BindTo((System.Collections.IEnumerable) ViewData["categories"])
-      )

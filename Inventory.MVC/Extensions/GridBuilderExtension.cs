@@ -11,6 +11,7 @@ using Inventory.MVC.Controllers;
 using Kendo.Mvc.UI;
 using Kendo.Mvc.UI.Fluent;
 using Inventory.DAL;
+using Inventory.MVC.Models;
 
 namespace Inventory.MVC.Extensions
 {
@@ -60,6 +61,7 @@ namespace Inventory.MVC.Extensions
 
                 .DataSource(dataSource => dataSource
                     .Ajax()
+                    .Batch(false)
                     .Create(ControllerConstants.CreateCommandName, entityTypeName)
                     .Read(ControllerConstants.ReadCommandName, entityTypeName)
                     .Update(ControllerConstants.UpdateCommandName, entityTypeName)
@@ -74,6 +76,8 @@ namespace Inventory.MVC.Extensions
                         m.Field("CreatedBy", typeof(string)).Editable(false);
                         m.Field("ModifiedOn", typeof(DateTime?)).Editable(false);
                         m.Field("ModifiedBy", typeof(string)).Editable(false);
+                        
+                       
                     }
                     ));
 
@@ -93,8 +97,25 @@ namespace Inventory.MVC.Extensions
                              propertyInfo.GetCustomAttributes<RelationAttribute>().FirstOrDefault();
                         if (rellAttribute != null)
                         {
-                            columns.ForeignKey(propertyInfo.Name, testContext.Set(rellAttribute.EntityType), rellAttribute.DataValueField, rellAttribute.DataTextField)
-                                .EditorViewData(new {entityType=rellAttribute.EntityType}) ;
+
+                            IEnumerator enumerator =
+                               testContext.Set(rellAttribute.EntityType).AsQueryable().GetEnumerator();
+                            List<Element> objects = new List<Element>();
+
+                            // THIS FIXES THE MANY QUERIES PROBLEM :) :) :)
+                            while (enumerator.MoveNext())
+                            {
+                                objects.Add((Element)enumerator.Current);
+                            }
+
+                            var test = testContext.Elements.OfType<ProductCategory>()
+                                .Select(pc => new {value = pc.Id, text = pc.Name});
+
+                            columns.ForeignKey(propertyInfo.Name,
+                                test, "value",
+                                "text");
+                                
+                                //.EditorViewData(new {entityType=rellAttribute.EntityType}) ;
 
                                     //        columns.ForeignKey(propertyInfo.Name,
                                     //objects, rellAttribute.DataFieldValue, rellAttribute.DataFieldText)
@@ -128,7 +149,11 @@ namespace Inventory.MVC.Extensions
                     columns.Command(command => { command.Edit().Text(string.Empty); command.Destroy().Text(string.Empty); });
                 });
 
-            builder.ToolBar(t => t.Create().Text("Добави")); // това е бъг, трябва да си е преведено
+            builder.ToolBar(t =>
+            {
+                t.Create();//.Text("Добави");
+                //t.Save();
+            }); // това е бъг, трябва да си е преведено
 
             return builder;
         }

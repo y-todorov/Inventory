@@ -25,7 +25,7 @@ namespace Inventory.MVC.Controllers
 
         public ActionResult Read([DataSourceRequest] DataSourceRequest request, InventoryContext context)
         {
-            JsonResult result = ReadBase<Product, ProductViewModel>(request, context.Products).Result;
+            JsonResult result = ReadBase<Product, ProductViewModel>(request, context.Products);
             return result;
         }
 

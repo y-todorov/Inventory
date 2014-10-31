@@ -12,6 +12,7 @@ using Inventory.DAL;
 
 namespace Inventory.MVC.Models
 {
+    //http://www.telerik.com/forums/foreignkey-column-does-not-produce-dropdown-list-in-popup-editing
     public class ProductViewModel : ViewModelBase
     {
         [Display(ResourceType = typeof (ViewModelResources),
@@ -47,7 +48,7 @@ namespace Inventory.MVC.Models
             Name = "ProductViewModel_CategoryId_Name")]
         [UIHint("GridForeignKey")]
         [RelationAttribute(EntityType = typeof(ProductCategory), DataTextField = "Name", DataValueField = "Id")]
-        [AdditionalMetadata("modelType", "ProductCategoryViewModel")]
+        //[AdditionalMetadata("modelType", "ProductCategoryViewModel")]
 
         public long? CategoryId { get; set; }
 
@@ -55,14 +56,14 @@ namespace Inventory.MVC.Models
             Name = "ProductViewModel_UnitMeasureId_Name")]
         [UIHint("GridForeignKey")]
         [RelationAttribute(EntityType = typeof(ProductUnitMeasure), DataTextField = "Name", DataValueField = "Id")]
-        [AdditionalMetadata("modelType", "ProductUnitMeasureViewModel")]
+        //[AdditionalMetadata("modelType", "ProductUnitMeasureViewModel")]
         public long? UnitMeasureId { get; set; }
 
         [Display(ResourceType = typeof (ViewModelResources),
             Name = "ProductViewModel_StoreId_Name")]
         [UIHint("GridForeignKey")]
         [RelationAttribute(EntityType = typeof(ProductStore), DataTextField = "Name", DataValueField = "Id")]
-        [AdditionalMetadata("modelType", "ProductStoreViewModel")]
+        //[AdditionalMetadata("modelType", "ProductStoreViewModel")]
         public long? StoreId { get; set; }
     }
 }

@@ -17,9 +17,9 @@
 @(
  Html.Kendo().Grid(Model)
         .AddBaseOptions()
-            .Name("ProductViewModelGrid")
+                .Name("ProductViewModelGrid")
 
-            .DataSource(dataSource => dataSource
+            @*.DataSource(dataSource => dataSource
         .SignalR()
         .AutoSync(false)
         .Events(events => events.Push(@<text>
@@ -49,7 +49,7 @@
                 model.Field(m => m.Id).Editable(false);
             })
         )
-        )
+        )*@
 )
 
 @*<script src="@Url.Content("~/Scripts/jquery.signalR-2.0.2.min.js")"></script>
