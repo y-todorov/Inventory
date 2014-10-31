@@ -3,20 +3,20 @@
 
 @(
  Html.Kendo().ComboBoxFor(m => m)
-        //.BindTo(((SelectList)ViewData[ViewData.TemplateInfo.GetFullHtmlFieldName("") + "_Data"]).OrderBy(it => it.Text))
-            .DataTextField("Name")
-            .DataValueField("Id")
+        .BindTo(((SelectList)ViewData[ViewData.TemplateInfo.GetFullHtmlFieldName("") + "_Data"]).OrderBy(it => it.Text))
+            //.DataTextField("Name")
+            //.DataValueField("Id")
             .Filter(FilterType.Contains)
             .IgnoreCase(true)
             .Placeholder(ViewModelResources.PlaceHolderTextStringForeignKey)
             .Suggest(false)
             .MinLength(0)
             .Animation(pab => pab.Open(eb => eb.Duration(AnimationDuration.Fast)).Close(eb => eb.Duration(AnimationDuration.Fast)))
-            .DataSource(ros => ros.Custom().Transport(t =>
-                                t.Read("Read" + ViewData.ModelMetadata.AdditionalValues["modelType"], "ForeignKey"))
+            //.DataSource(ros => ros.Custom().Transport(t =>
+            //                    t.Read("Read" + ViewData.ModelMetadata.AdditionalValues["modelType"], "ForeignKey"))
                                
-                .Schema(s => s.Data("Data")))
-                .HtmlAttributes(new { style = "width:100%" })
+            //    .Schema(s => s.Data("Data")))
+                .HtmlAttributes(new { style = "width:100%" }) 
 )
 @*http://stackoverflow.com/questions/9681107/asp-net-mvc-editortemplates-uihint-with-parameters*@
 @*// Това е важно заради това е Data тук .Schema(s => s.Data("Data"))) !!! Това ще позволи да се изпозлва OutputCache при Read, защото

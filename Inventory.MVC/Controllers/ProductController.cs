@@ -20,7 +20,7 @@ namespace Inventory.MVC.Controllers
         //[OutputCache(Duration=600, Location= OutputCacheLocation.ServerAndClient)]
         public ActionResult Index()
         {
-            return View();
+            return View(); 
         }
 
         public ActionResult Read([DataSourceRequest] DataSourceRequest request, InventoryContext context)

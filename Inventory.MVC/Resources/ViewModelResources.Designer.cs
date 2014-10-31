@@ -230,5 +230,41 @@ namespace Inventory.MVC.Resources {
                 return ResourceManager.GetString("ViewModel_Id", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Създаден от.
+        /// </summary>
+        public static string ViewModelBase_CreatedBy_Name {
+            get {
+                return ResourceManager.GetString("ViewModelBase_CreatedBy_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Създаден на.
+        /// </summary>
+        public static string ViewModelBase_CreatedOn_Name {
+            get {
+                return ResourceManager.GetString("ViewModelBase_CreatedOn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Променен от.
+        /// </summary>
+        public static string ViewModelBase_ModifiedBy_Name {
+            get {
+                return ResourceManager.GetString("ViewModelBase_ModifiedBy_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Променен на.
+        /// </summary>
+        public static string ViewModelBase_ModifiedOn_Name {
+            get {
+                return ResourceManager.GetString("ViewModelBase_ModifiedOn_Name", resourceCulture);
+            }
+        }
     }
 }

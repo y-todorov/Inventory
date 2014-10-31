@@ -93,8 +93,11 @@ namespace Inventory.MVC.Extensions
                              propertyInfo.GetCustomAttributes<RelationAttribute>().FirstOrDefault();
                         if (rellAttribute != null)
                         {
-                            columns.ForeignKey(propertyInfo.Name, testContext.Set(rellAttribute.EntityType), "Id", "Name")
+                            columns.ForeignKey(propertyInfo.Name, testContext.Set(rellAttribute.EntityType), rellAttribute.DataValueField, rellAttribute.DataTextField)
                                 .EditorViewData(new {entityType=rellAttribute.EntityType}) ;
+
+                                    //        columns.ForeignKey(propertyInfo.Name,
+                                    //objects, rellAttribute.DataFieldValue, rellAttribute.DataFieldText)
                             continue;
                         }
                        // test

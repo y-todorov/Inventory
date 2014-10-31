@@ -171,6 +171,18 @@
   <data name="RequiredErrorMessage" xml:space="preserve">
     <value>Полето {0} е задължително!</value>
   </data>
+  <data name="ViewModelBase_CreatedBy_Name" xml:space="preserve">
+    <value>Създаден от</value>
+  </data>
+  <data name="ViewModelBase_CreatedOn_Name" xml:space="preserve">
+    <value>Създаден на</value>
+  </data>
+  <data name="ViewModelBase_ModifiedBy_Name" xml:space="preserve">
+    <value>Променен от</value>
+  </data>
+  <data name="ViewModelBase_ModifiedOn_Name" xml:space="preserve">
+    <value>Променен на</value>
+  </data>
   <data name="ViewModel_Id" xml:space="preserve">
     <value>#</value>
   </data>

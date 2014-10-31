@@ -46,7 +46,7 @@ namespace Inventory.MVC.Models
         [Display(ResourceType = typeof (ViewModelResources),
             Name = "ProductViewModel_CategoryId_Name")]
         [UIHint("GridForeignKey")]
-        [RelationAttribute(EntityType=typeof(ProductCategory), DataTextField="Name", DataValueField="Id")]
+        [RelationAttribute(EntityType = typeof(ProductCategory), DataTextField = "Name", DataValueField = "Id")]
         [AdditionalMetadata("modelType", "ProductCategoryViewModel")]
 
         public long? CategoryId { get; set; }
