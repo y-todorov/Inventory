@@ -219,6 +219,7 @@
     <Compile Include="Infrastructure\Tasks\IRunOnError.cs" />
     <Compile Include="Infrastructure\Tasks\TaskRegistry.cs" />
     <Compile Include="Infrastructure\TransactionPerRequest.cs" />
+    <Compile Include="ModelBinders\YordanDateTimeModelBinder.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\ElementViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -509,6 +510,9 @@
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\globalize.culture.bg-BG.js" />
+    <Content Include="Scripts\globalize.culture.bg.js" />
+    <Content Include="Scripts\globalize.js" />
     <Content Include="Scripts\jquery.signalR-2.0.2.js" />
     <Content Include="Scripts\jquery.signalR-2.0.2.min.js" />
     <Content Include="Scripts\jquery.signalR-2.1.2.js" />
@@ -517,6 +521,7 @@
     <Content Include="Scripts\JQuery\jquery-1.8.2.js" />
     <Content Include="Scripts\JQuery\jquery-2.1.1.js" />
     <Content Include="Scripts\JQuery\jquery.signalR-2.1.2.js" />
+    <Content Include="Scripts\JQuery\jquery.validate.globalize.js" />
     <Content Include="Scripts\JQuery\jquery.validate.js" />
     <Content Include="Scripts\JQuery\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\JsBundle.js" />

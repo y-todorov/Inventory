@@ -11,9 +11,11 @@
   <!--The order of the <file> elements determines the order of the files in the bundle.-->
   <files>
     <file>/Scripts/JQuery/jquery-1.8.2.js</file>
-    <!--<file>/Scripts/JQuery/jquery.validate.js</file>
-    <file>/Scripts/JQuery/jquery.validate.unobtrusive.js</file>-->
-    <file>/Scripts/modernizr.2.6.2.js</file>
+    <file>/Scripts/globalize.js</file>
+    <file>/Scripts/globalize.culture.bg-BG.js</file>
+    <file>/Scripts/JQuery/jquery.validate.js</file>
+    <file>/Scripts/JQuery/jquery.validate.globalize.js</file>
+    <file>/Scripts/JQuery/jquery.validate.unobtrusive.js</file>
     <file>/Scripts/Kendo/kendo.all.js</file>
     <file>/Scripts/Kendo/kendo.angular.js</file>
     <file>/Scripts/Kendo/kendo.aspnetmvc.js</file>

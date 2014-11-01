@@ -7,6 +7,7 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using Inventory.MVC.Infrastructure;
 using Inventory.MVC.Infrastructure.Tasks;
+using Inventory.MVC.ModelBinders;
 using StructureMap;
 
 namespace Inventory.MVC
@@ -27,6 +28,8 @@ namespace Inventory.MVC
 
         protected void Application_Start()
         {
+            //System.Web.Mvc.ModelBinders.Binders.Add(typeof(DateTime?), new YordanDateTimeModelBinder()); // Като се каже save от клиента тогава минаваме от тук.
+
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
