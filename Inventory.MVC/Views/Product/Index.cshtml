@@ -13,53 +13,51 @@
       .Position(position => position.Top(0).Left(0))
       )
 
-
 @(
- Html.Kendo().Grid<ProductViewModel>()
-        .AddBaseOptions()
-                .Name("ProductViewModelGrid") //.DataSource(dataSource => dataSource.Ajax().Events(events => events.Error("errorHandler")))
-                
-
-            @*.DataSource(dataSource => dataSource
-        .SignalR()
-        .AutoSync(false)
-        .Events(events => events.Push(@<text>
-            function(e) {
-            var notification = $("#notification").data("kendoNotification");
-            notification.success(e.type);
-            }
-        </text>))
-        .PageSize(10)
-        .Transport(tr => tr
-            .Promise("hubStart")
-            .Hub("hub")
-            .Client(c => c
-                .Read("read")
-                .Create("create")
-                .Update("update")
-                .Destroy("destroy"))
-            .Server(s => s
-                .Read("read")
-                .Create("create")
-                .Update("update")
-                .Destroy("destroy")))
-        .Schema(schema => schema
-            .Model(model =>
-            {
-                model.Id(m => m.Id);
-                model.Field(m => m.Id).Editable(false);
-            })
-        )
-        )*@
+        Html.Kendo().Grid<ProductViewModel>()
+            .AddBaseOptions()
+            .Name("ProductViewModelGrid")
+            .DataSource(dataSource => dataSource
+                .SignalR()
+                .AutoSync(false)
+                .Events(events => events.Error("errorHandler")
+                    .Push(@<text>
+                               function(e) {
+                               var notification = $("#notification").data("kendoNotification");
+                               notification.success(e.type);
+                               }
+                           </text>))
+                .PageSize(10)
+                .Transport(tr => tr
+                    .Promise("hubStart")
+                    .Hub("hub")
+                    .Client(c => c
+                        .Read("read")
+                        .Create("create")
+                        .Update("update")
+                        .Destroy("destroy"))
+                    .Server(s => s
+                        .Read("read")
+                        .Create("create")
+                        .Update("update")
+                        .Destroy("destroy")))
+                .Schema(schema => schema
+                    .Model(model =>
+                    {
+                        model.Id(m => m.Id);
+                        model.Field(m => m.Id).Editable(false);
+                    })
+                )
             )
+      )
 
 <script type="text/javascript">
     function errorHandler(e) {
         if (e.errors) {
             var message = "Errors:\n";
-            $.each(e.errors, function (key, value) {
+            $.each(e.errors, function(key, value) {
                 if ('errors' in value) {
-                    $.each(value.errors, function () {
+                    $.each(value.errors, function() {
                         message += this + "\n";
                     });
                 }
@@ -68,91 +66,3 @@
         }
     }
 </script>
-
-
-
-@*<script src="@Url.Content("~/Scripts/jquery.signalR-2.0.2.min.js")"></script>
-<script src="@Url.Content("~/signalr/hubs")"></script>*@
-
-@*<script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
-@*<script src="~/signalr/hubs"></script>
-
-<script>
-    var hub = $.connection.productHub;
-    var hubStart = $.connection.hub.start();
-</script>
-
-@(Html.Kendo().Notification()
-      .Name("notification")
-      .Width("100%")
-      .Position(position => position.Top(0).Left(0))
-)
-
-@(Html.Kendo().Grid<ProductViewModel>()
-    .Name("Grid")
-    .Columns(columns =>
-    {
-        columns.Bound(p => p.Name);
-        columns.Bound(p => p.UnitPrice).Width(140);
-        columns.Bound(p => p.UnitsInStock).Width(80);
-        columns.Command(command =>
-        {
-            command.Destroy();
-        }).Width(110);
-    })
-    .ToolBar(toolbar =>
-    {
-        toolbar.Create();
-    })
-    .Editable(editable => editable.Mode(GridEditMode.InCell))
-    .Pageable()
-    .Navigatable()
-    .Sortable()
-    .Scrollable()
-    .DataSource(dataSource => dataSource
-        .SignalR()
-        .AutoSync(false)
-        .Events(events => events.Push(@<text>
-            function(e) {
-            var notification = $("#notification").data("kendoNotification");
-            notification.success(e.type);
-            }
-        </text>))
-        .PageSize(10)
-        .Transport(tr => tr
-            .Promise("hubStart")
-            .Hub("hub")
-            .Client(c => c
-                .Read("read")
-                .Create("create")
-                .Update("update")
-                .Destroy("destroy"))
-            .Server(s => s
-                .Read("read")
-                .Create("create")
-                .Update("update")
-                .Destroy("destroy")))
-        .Schema(schema => schema
-            .Model(model =>
-            {
-                model.Id(m => m.Id);
-                model.Field(m => m.Id).Editable(false);
-            })
-        )
-    )
-)
-
-<br />
-<div class="configuration-horizontal">
-    <span class="configHead">Information</span>
-    <p>
-        This demo demonstrates real-time push-notifications from <a href="http://signalr.net/">SignalR</a>.
-    </p>
-    <p>
-        To see the real-time updates:
-    </p>
-    <ol>
-        <li>Open this page in another browser window by clicking <a href="signalr" target="_new">here</a></li>
-        <li>Create, update or destroy grid items.</li>
-    </ol>
-</div>*@
