@@ -15,43 +15,53 @@ namespace Inventory.MVC.Models
     //http://www.telerik.com/forums/foreignkey-column-does-not-produce-dropdown-list-in-popup-editing
     public class ProductViewModel : ViewModelBase
     {
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_Name_Name")]
         public string Name { get; set; }
 
-        [Required(ErrorMessageResourceType = typeof (ViewModelResources),
+        [Required(ErrorMessageResourceType = typeof(ViewModelResources),
             ErrorMessageResourceName = "RequiredErrorMessage")]
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_Code_Name",
             ShortName = "ProductViewModel_Code_ShortName",
             Prompt = "ProductViewModel_Code_Prompt",
             Description = "ProductViewModel_Code_Description")]
         public string Code { get; set; }
 
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_UnitPrice_Name")]
         public decimal? UnitPrice { get; set; }
 
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_UnitsInStock_Name")]
         public decimal? UnitsInStock { get; set; }
 
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_UnitsOnOrder_Name")]
         public decimal? UnitsOnOrder { get; set; }
 
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_ReorderLevel_Name")]
         public decimal? ReorderLevel { get; set; }
 
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
+          Name = "ProductViewModel_SellStartDate_Name")]
+        [DataType(DataType.Date)]
+        public DateTime? SellStartDate { get; set; }
+
+        [Display(ResourceType = typeof(ViewModelResources),
+          Name = "ProductViewModel_SellEndDate_Name")]
+        [DataType(DataType.Date)]
+        public DateTime? SellEndDate { get; set; }
+
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_CategoryId_Name")]
         [UIHint("GridForeignKey")]
         [RelationAttribute(EntityType = typeof(ProductCategory), DataTextField = "Name", DataValueField = "Id")]
         [AdditionalMetadata("modelType", "ProductCategoryViewModel")]
         public long? CategoryId { get; set; }
 
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_UnitMeasureId_Name")]
         [UIHint("GridForeignKey")]
         [RelationAttribute(EntityType = typeof(ProductUnitMeasure), DataTextField = "Name", DataValueField = "Id")]

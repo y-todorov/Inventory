@@ -1,4 +1,6 @@
-﻿namespace Inventory.DAL
+﻿using System;
+
+namespace Inventory.DAL
 {
     public class Product : EntityBase
     {
@@ -15,6 +17,11 @@
         public decimal? ReorderLevel { get; set; }
 
         public decimal? Quantity { get; set; }
+
+        public DateTime? SellStartDate { get; set; }
+
+        public DateTime? SellEndDate { get; set; }
+
 
         public long? CategoryId { get; set; }
         public ProductCategory Category { get; set; }

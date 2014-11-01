@@ -61,6 +61,42 @@ namespace Inventory.MVC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to dd.mm.yyyy.
+        /// </summary>
+        public static string DateFormatString {
+            get {
+                return ResourceManager.GetString("DateFormatString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Изберете дата.
+        /// </summary>
+        public static string DateFormatStringEmptyMessage {
+            get {
+                return ResourceManager.GetString("DateFormatStringEmptyMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dd.mm.yyyy  H:mm:ss.
+        /// </summary>
+        public static string DateTimeFormatString {
+            get {
+                return ResourceManager.GetString("DateTimeFormatString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Изберете дата и час.
+        /// </summary>
+        public static string DateTimeFormatStringEmptyMessage {
+            get {
+                return ResourceManager.GetString("DateTimeFormatStringEmptyMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Въведете число ....
         /// </summary>
         public static string PlaceHolderTextDecimal {
@@ -165,6 +201,24 @@ namespace Inventory.MVC.Resources {
         public static string ProductViewModel_ReorderLevel_Name {
             get {
                 return ResourceManager.GetString("ProductViewModel_ReorderLevel_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Край продажба.
+        /// </summary>
+        public static string ProductViewModel_SellEndDate_Name {
+            get {
+                return ResourceManager.GetString("ProductViewModel_SellEndDate_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Начало продажба.
+        /// </summary>
+        public static string ProductViewModel_SellStartDate_Name {
+            get {
+                return ResourceManager.GetString("ProductViewModel_SellStartDate_Name", resourceCulture);
             }
         }
         

@@ -28,7 +28,7 @@ namespace Inventory.MVC
 
         protected void Application_Start()
         {
-            //System.Web.Mvc.ModelBinders.Binders.Add(typeof(DateTime?), new YordanDateTimeModelBinder()); // Като се каже save от клиента тогава минаваме от тук.
+            System.Web.Mvc.ModelBinders.Binders.Add(typeof(DateTime?), new YordanDateTimeModelBinder()); // Като се каже save от клиента тогава минаваме от тук.
 
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DateFormatString" xml:space="preserve">
+    <value>dd.mm.yyyy</value>
+  </data>
+  <data name="DateFormatStringEmptyMessage" xml:space="preserve">
+    <value>Изберете дата</value>
+  </data>
+  <data name="DateTimeFormatString" xml:space="preserve">
+    <value>dd.mm.yyyy  H:mm:ss</value>
+  </data>
+  <data name="DateTimeFormatStringEmptyMessage" xml:space="preserve">
+    <value>Изберете дата и час</value>
+  </data>
   <data name="PlaceHolderTextDecimal" xml:space="preserve">
     <value>Въведете число ...</value>
   </data>
@@ -152,6 +164,12 @@
   </data>
   <data name="ProductViewModel_ReorderLevel_Name" xml:space="preserve">
     <value>Праг</value>
+  </data>
+  <data name="ProductViewModel_SellEndDate_Name" xml:space="preserve">
+    <value>Край продажба</value>
+  </data>
+  <data name="ProductViewModel_SellStartDate_Name" xml:space="preserve">
+    <value>Начало продажба</value>
   </data>
   <data name="ProductViewModel_StoreId_Name" xml:space="preserve">
     <value>Склад</value>

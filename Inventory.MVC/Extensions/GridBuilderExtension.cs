@@ -72,9 +72,9 @@ namespace Inventory.MVC.Extensions
                     {
                         m.Id("Id");
                         m.Field("Id", typeof(long)).Editable(false);
-                        //m.Field("CreatedOn", typeof(DateTime?)).Editable(false).DefaultValue(DateTime.Now); // Mnogo problemi s Model.IsValid 
+                        m.Field("CreatedOn", typeof(DateTime?)).Editable(false).DefaultValue(DateTime.Now); // Mnogo problemi s Model.IsValid 
                         //m.Field("CreatedBy", typeof(string)).Editable(false);
-                        //m.Field("ModifiedOn", typeof(DateTime?)).Editable(false).DefaultValue(DateTime.Now); // Mnogo problemi s Model.IsValid 
+                        m.Field("ModifiedOn", typeof(DateTime?)).Editable(false).DefaultValue(DateTime.Now); // Mnogo problemi s Model.IsValid 
                         //m.Field("ModifiedBy", typeof(string)).Editable(false);
 
                         //m.Field("StoreId", typeof (long?));
@@ -150,7 +150,7 @@ namespace Inventory.MVC.Extensions
                             propertyInfo.Name == "CreatedBy")
                         {
                             //continue; // временно ги махам докато разбера как да са readonly е  Popup едит
-                            columns.Bound(propertyInfo.Name).Format("{0:dd/MM/yyyy HH:mm:ss}").Visible(false);
+                            columns.Bound(propertyInfo.Name).Visible(false);
                             continue;
                         }
                         if (propertyInfo.Name == "ModifiedOn" ||

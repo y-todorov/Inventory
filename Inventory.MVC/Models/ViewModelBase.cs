@@ -19,8 +19,8 @@ namespace Inventory.MVC.Models
         public long Id { get; set; }
 
         //[ReadOnly(true)]
-        [HiddenInput(DisplayValue = false)] // временно
-        [DataType(DataType.DateTime), DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm:ss}", ApplyFormatInEditMode = true)]
+        //[HiddenInput(DisplayValue = false)] // временно
+        [DataType(DataType.DateTime)]
         [Display(ResourceType = typeof(ViewModelResources),
             Name = "ViewModelBase_CreatedOn_Name")]
         public DateTime? CreatedOn { get; set; }
@@ -32,8 +32,8 @@ namespace Inventory.MVC.Models
         public string CreatedBy { get; set; }
 
         //[ReadOnly(true)]
-        [HiddenInput(DisplayValue = false)] // временно
-        [DataType(DataType.DateTime), DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm:ss}", ApplyFormatInEditMode = true)]
+        //[HiddenInput(DisplayValue = false)] // временно
+        [DataType(DataType.DateTime)]
         [Display(ResourceType = typeof(ViewModelResources),
         Name = "ViewModelBase_ModifiedOn_Name")]
         public DateTime? ModifiedOn { get; set; }
