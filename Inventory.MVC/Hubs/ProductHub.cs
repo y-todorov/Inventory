@@ -7,6 +7,8 @@ using AutoMapper.QueryableExtensions;
 using Inventory.MVC.Models;
 using Microsoft.AspNet.SignalR;
 using Inventory.DAL;
+using StructureMap;
+using Inventory.MVC.Infrastructure;
 
 namespace SignalRLocalHub.Hubs
 {
@@ -19,48 +21,9 @@ namespace SignalRLocalHub.Hubs
             //productService = new ProductService(new SampleEntities());
         }
 
-        public IEnumerable<ProductViewModel> Read()
-        {
-            using (InventoryContext context = new InventoryContext())
-            {
-                var res = context.Products.Project().To<ProductViewModel>().ToList();
-                return res;
-            }
-        }
-
-        public void Update(ProductViewModel product)
-        {
-            using (InventoryContext context = new InventoryContext())
-            {
-                var entity = context.Products.Find(product.Id);
-
-                Mapper.Map(product, entity);
-
-                context.SaveChanges();
-
-                Mapper.Map(entity, product);
-            }
-            
-            Clients.Others.update(product);
-        }
-
-        public void Destroy(ProductViewModel product)
-        {
-            using (InventoryContext context = new InventoryContext())
-            {
-                var entity = context.Products.Find(product.Id);
-
-                context.Products.Remove(entity);
-
-                context.SaveChanges();
-            }
-            
-            Clients.Others.destroy(product);
-        }
-
         public ProductViewModel Create(ProductViewModel product)
         {
-            using (InventoryContext context = new InventoryContext())
+            using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
             {
                 var entity = Mapper.Map<Product>(product);
                 context.Products.Add(entity);
@@ -71,6 +34,45 @@ namespace SignalRLocalHub.Hubs
             Clients.Others.create(product);
 
             return product;
+        }
+
+        public IEnumerable<ProductViewModel> Read()
+        {
+            using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
+            {
+                var res = context.Products.Project().To<ProductViewModel>().ToList();
+                return res;
+            }
+        }
+
+        public void Update(ProductViewModel product)
+        {
+            using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
+            {
+                var entity = context.Products.Find(product.Id);
+
+                Mapper.Map(product, entity);
+
+                context.SaveChanges();
+
+                Mapper.Map(entity, product);
+            }
+
+            Clients.Others.update(product);
+        }
+
+        public void Destroy(ProductViewModel product)
+        {
+            using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
+            {
+                var entity = context.Products.Find(product.Id);
+
+                context.Products.Remove(entity);
+
+                context.SaveChanges();
+            }
+
+            Clients.Others.destroy(product);
         }
     }
 }

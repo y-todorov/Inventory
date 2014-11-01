@@ -188,6 +188,7 @@
     <Compile Include="Attributes\DateDisplayAttributeYordan.cs" />
     <Compile Include="Attributes\RelationAttribute.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\ControllerBase.cs" />
     <Compile Include="Controllers\ControllerConstants.cs" />
     <Compile Include="Controllers\ForeignKeyController.cs" />
@@ -220,6 +221,7 @@
     <Compile Include="Infrastructure\Tasks\IRunOnError.cs" />
     <Compile Include="Infrastructure\Tasks\TaskRegistry.cs" />
     <Compile Include="Infrastructure\TransactionPerRequest.cs" />
+    <Compile Include="Infrastructure\Utils.cs" />
     <Compile Include="ModelBinders\YordanDateTimeModelBinder.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\ElementViewModel.cs" />
@@ -1338,6 +1340,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Test\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="sitemap.sitemap" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Category\Index.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

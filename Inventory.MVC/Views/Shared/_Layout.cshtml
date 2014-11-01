@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNet.Identity
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -14,6 +15,19 @@
     </head>
     <body>
         <header>
+            @(Html.Kendo().Menu()
+            .Name("Menu")
+            .BindTo("sitemap")
+            //.Items(children =>
+            //{
+            //    children.Add().Text("You're logged in as " + @User.Identity.GetUserName()).Items(innerChildren =>
+            //    {
+            //        innerChildren.Add().Text("Manage your account").Action("Manage", "Account");
+            //        innerChildren.Add().Text("Log out").Action("LogOff", "Account");
+            //    });
+            //})
+            .SecurityTrimming(false) // causes EXTREMELY slow debugging.
+            )
             <span id="centeredNotification" style="display:none;"></span>
             <span id="popupNotification" style="display:none;"></span>
         </header>
