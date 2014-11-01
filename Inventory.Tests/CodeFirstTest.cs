@@ -22,7 +22,7 @@ namespace Inventory.Tests
         
         public void SaveProductTest()
         {
-            return;
+            //return;
             using (var context = new InventoryContext())
             {
                 //context.Database.Log = Trace.WriteLine;

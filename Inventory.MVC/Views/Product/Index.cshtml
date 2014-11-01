@@ -13,11 +13,12 @@
       .Position(position => position.Top(0).Left(0))
       )
 
-@model IEnumerable<ProductViewModel>
+
 @(
- Html.Kendo().Grid(Model)
+ Html.Kendo().Grid<ProductViewModel>()
         .AddBaseOptions()
-                .Name("ProductViewModelGrid")
+                .Name("ProductViewModelGrid") //.DataSource(dataSource => dataSource.Ajax().Events(events => events.Error("errorHandler")))
+                
 
             @*.DataSource(dataSource => dataSource
         .SignalR()
@@ -50,7 +51,25 @@
             })
         )
         )*@
-)
+            )
+
+<script type="text/javascript">
+    function errorHandler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+</script>
+
+
 
 @*<script src="@Url.Content("~/Scripts/jquery.signalR-2.0.2.min.js")"></script>
 <script src="@Url.Content("~/signalr/hubs")"></script>*@

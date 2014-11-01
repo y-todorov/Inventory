@@ -33,7 +33,7 @@ namespace Inventory.MVC.Extensions
         // It is EXTREMELY important NOT to set the name here. This is because of details grids. There name MUST be  .Name("ProductInventoryViewModelGrid_#=ProductInventoryHeaderId#")
         public static GridBuilder<T> AddBaseOptions<T>(this GridBuilder<T> builder) where T : class
         {
-            
+
             Type viewModelEntityType = typeof(T);
             string entityTypeName = viewModelEntityType.Name.Substring(0, viewModelEntityType.Name.IndexOf("ViewModel"));
             builder
@@ -72,12 +72,17 @@ namespace Inventory.MVC.Extensions
                     {
                         m.Id("Id");
                         m.Field("Id", typeof(long)).Editable(false);
-                        m.Field("CreatedOn", typeof(DateTime?)).Editable(false);
-                        m.Field("CreatedBy", typeof(string)).Editable(false);
-                        m.Field("ModifiedOn", typeof(DateTime?)).Editable(false);
-                        m.Field("ModifiedBy", typeof(string)).Editable(false);
-                        
-                       
+                        //m.Field("CreatedOn", typeof(DateTime?)).Editable(false).DefaultValue(DateTime.Now); // Mnogo problemi s Model.IsValid 
+                        //m.Field("CreatedBy", typeof(string)).Editable(false);
+                        //m.Field("ModifiedOn", typeof(DateTime?)).Editable(false).DefaultValue(DateTime.Now); // Mnogo problemi s Model.IsValid 
+                        //m.Field("ModifiedBy", typeof(string)).Editable(false);
+
+                        //m.Field("StoreId", typeof (long?));
+                        //m.Field("CategoryId", typeof(long?));
+
+                        //m.Field("UnitMeasureId", typeof(long?));
+
+
                     }
                     ));
 
@@ -98,30 +103,39 @@ namespace Inventory.MVC.Extensions
                         if (rellAttribute != null)
                         {
 
-                            IEnumerator enumerator =
-                               testContext.Set(rellAttribute.EntityType).AsQueryable().GetEnumerator();
-                            List<Element> objects = new List<Element>();
+                            //IEnumerator enumerator =
+                            //   testContext.Set(rellAttribute.EntityType).AsQueryable().GetEnumerator();
+                            //List<dynamic> objects = new List<dynamic>();
 
-                            // THIS FIXES THE MANY QUERIES PROBLEM :) :) :)
-                            while (enumerator.MoveNext())
-                            {
-                                objects.Add((Element)enumerator.Current);
-                            }
-
-                            var test = testContext.Elements.OfType<ProductCategory>()
-                                .Select(pc => new {value = pc.Id, text = pc.Name});
+                            //// THIS FIXES THE MANY QUERIES PROBLEM :) :) :)
+                            //while (enumerator.MoveNext())
+                            //{
+                            //    objects.Add((dynamic)enumerator.Current);
+                            //}
 
                             columns.ForeignKey(propertyInfo.Name,
-                                test, "value",
-                                "text");
-                                
-                                //.EditorViewData(new {entityType=rellAttribute.EntityType}) ;
+                                testContext.Set(rellAttribute.EntityType).AsQueryable(), rellAttribute.DataValueField,
+                                rellAttribute.DataTextField);
 
-                                    //        columns.ForeignKey(propertyInfo.Name,
-                                    //objects, rellAttribute.DataFieldValue, rellAttribute.DataFieldText)
+                            //var sel = objects.Select(o => new { Id = o.Id, Name = o.Name}).ToList();
+
+                            //var test = testContext.Elements.OfType<ProductCategory>()
+                            //    .Select(pc => new { value = pc.Id, text = pc.Name });
+
+                //            columns.ForeignKey(propertyInfo.Name, new SelectList(new[]{
+                //    new {text="t1",value = "1"},
+                //    new {text="t2",value = "2"},
+                //    new {text="t3",value = "3"},
+                //}, "value", "text"));
+
+
+                            //.EditorViewData(new {entityType=rellAttribute.EntityType}) ;
+
+                            //        columns.ForeignKey(propertyInfo.Name,
+                            //objects, rellAttribute.DataFieldValue, rellAttribute.DataFieldText)
                             continue;
                         }
-                       // test
+                        // test
                         //if (propertyInfo.Name == "CategoryId")
                         //{
                         //    columns.ForeignKey(propertyInfo.Name,
@@ -133,14 +147,19 @@ namespace Inventory.MVC.Extensions
                             continue;
                         }
                         if (propertyInfo.Name == "CreatedOn" ||
-                            propertyInfo.Name == "CreatedBy" ||
-                            propertyInfo.Name == "ModifiedOn" ||
-                            propertyInfo.Name == "ModifiedBy")
+                            propertyInfo.Name == "CreatedBy")
                         {
                             //continue; // временно ги махам докато разбера как да са readonly е  Popup едит
-                            columns.Bound(propertyInfo.Name).Hidden(); //.Title(transaltedName);
+                            columns.Bound(propertyInfo.Name).Format("{0:dd/MM/yyyy HH:mm:ss}").Visible(false);
+                            continue;
                         }
-                        else
+                        if (propertyInfo.Name == "ModifiedOn" ||
+                        propertyInfo.Name == "ModifiedBy")
+                        {
+                            columns.Bound(propertyInfo.Name).Visible(false);
+                            continue;
+                        }
+                        //else
                         {
                             columns.Bound(propertyInfo.Name); //.Title(transaltedName);
                         }

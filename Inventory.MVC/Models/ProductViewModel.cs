@@ -59,7 +59,7 @@ namespace Inventory.MVC.Models
         //[AdditionalMetadata("modelType", "ProductUnitMeasureViewModel")]
         public long? UnitMeasureId { get; set; }
 
-        [Display(ResourceType = typeof (ViewModelResources),
+        [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_StoreId_Name")]
         [UIHint("GridForeignKey")]
         [RelationAttribute(EntityType = typeof(ProductStore), DataTextField = "Name", DataValueField = "Id")]

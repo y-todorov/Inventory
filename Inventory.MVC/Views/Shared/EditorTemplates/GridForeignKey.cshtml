@@ -1,8 +1,10 @@
-﻿@model object
+﻿@*http://stackoverflow.com/questions/19729850/kendo-grid-foreign-key-dropdown-does-not-update-grid-cell-after-update?answertab=votes#tab-top*@
+@model object
 
 @(
         Html.Kendo().DropDownListFor(m => m)
             .BindTo((SelectList) ViewData[ViewData.TemplateInfo.GetFullHtmlFieldName("") + "_Data"])
+                .HtmlAttributes(new { data_value_primitive = true }) // Това е супер важно, без него не се ъпдейтват пропертитата !!!
 )
 
 
