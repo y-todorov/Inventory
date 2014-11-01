@@ -23,56 +23,29 @@ namespace SignalRLocalHub.Hubs
 
         public ProductViewModel Create(ProductViewModel product)
         {
-            using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
-            {
-                var entity = Mapper.Map<Product>(product);
-                context.Products.Add(entity);
-                context.SaveChanges();
-                // Това се прави за да може да се покаже в UI новите стойности, които са автоматично генерирани от базата, като Id, например
-                Mapper.Map(entity, product);
-            }
-            Clients.Others.create(product);
-
-            return product;
+            ProductViewModel createdProductViewModel = Utils.CreateBase<Product, ProductViewModel>(product);
+            Clients.Others.create(createdProductViewModel);
+            return createdProductViewModel;
         }
 
         public IEnumerable<ProductViewModel> Read()
         {
-            using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
-            {
-                var res = context.Products.Project().To<ProductViewModel>().ToList();
-                return res;
-            }
+            var result = Utils.ReadBase<Product, ProductViewModel>().AsEnumerable();
+            return result;
         }
 
         public void Update(ProductViewModel product)
         {
-            using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
-            {
-                var entity = context.Products.Find(product.Id);
-
-                Mapper.Map(product, entity);
-
-                context.SaveChanges();
-
-                Mapper.Map(entity, product);
-            }
-
-            Clients.Others.update(product);
+            var updatedProduct = Utils.UpdateBase<Product, ProductViewModel>(product);
+            
+            Clients.Others.update(updatedProduct);
         }
 
         public void Destroy(ProductViewModel product)
         {
-            using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
-            {
-                var entity = context.Products.Find(product.Id);
+            var deletedProductViewProduct = Utils.UpdateBase<Product, ProductViewModel>(product);
 
-                context.Products.Remove(entity);
-
-                context.SaveChanges();
-            }
-
-            Clients.Others.destroy(product);
+            Clients.Others.destroy(deletedProductViewProduct);
         }
     }
 }
