@@ -22,7 +22,7 @@ namespace Inventory.Tests
         
         public void SaveProductTest()
         {
-            //return;
+            return;
             using (var context = new InventoryContext())
             {
                 //context.Database.Log = Trace.WriteLine;
@@ -54,9 +54,9 @@ namespace Inventory.Tests
                 var st1 = new ProductStore { Name = "Кухня" };
                 var pum1 = new ProductUnitMeasure { Name = "Пакет" };
 
-                prod.Category = pc1;
-                prod.Store = st1;
-                prod.UnitMeasure = pum1;
+                prod1.Category = pc1;
+                prod1.Store = st1;
+                prod1.UnitMeasure = pum1;
 
                 context.Products.Add(prod1);
 
