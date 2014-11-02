@@ -1,0 +1,7 @@
+@model DateTime?
+
+@(Html.Kendo().DatePickerFor(m => m)
+
+      //.HtmlAttributes(new Dictionary<string, object> { { "data-val", false }, })
+        .HtmlAttributes(new { style = "width: 650px; height:600px; display: none" })
+)

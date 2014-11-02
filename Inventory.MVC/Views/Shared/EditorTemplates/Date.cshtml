@@ -1,3 +1,4 @@
 @model DateTime?
 
-@(Html.Kendo().DatePickerFor(m => m)) //.Format(Inventory.MVC.Resources.ViewModelResources.DateFormatString))
+@(Html.Kendo().DatePickerFor(m => m)
+      .HtmlAttributes(new { style = "width:100%" })) 
