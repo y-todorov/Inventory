@@ -3,50 +3,14 @@
 @using Kendo.Mvc.UI;
 
 <script>
-    var hub = $.connection.productHub;
+    var crudHub = $.connection.crudHub;
     var hubStart = $.connection.hub.start();
 </script>
 
-@(Html.Kendo().Notification()
-      .Name("notification")
-      .Width("100%")
-      .Position(position => position.Top(0).Left(0))
-)
 
 @(
  Html.Kendo().Grid<ProductCategoryViewModel>()
             .AddBaseOptions()
             .Name("ProductCategoryViewModelGrid")
-            .DataSource(dataSource => dataSource
-                .SignalR()
-                .AutoSync(false)
-                .Events(events => events.Error("errorHandler")
-                    .Push(@<text>
-                        function(e) {
-                        var notification = $("#notification").data("kendoNotification");
-                        notification.success(e.type);
-                        }
-                    </text>))
-                    .PageSize(10)
-                    .Transport(tr => tr
-                        .Promise("hubStart")
-                        .Hub("hub")
-                        .Client(c => c
-                            .Read("read")
-                            .Create("create")
-                            .Update("update")
-                            .Destroy("destroy"))
-                        .Server(s => s
-                            .Read("read")
-                            .Create("create")
-                            .Update("update")
-                            .Destroy("destroy")))
-                    .Schema(schema => schema
-                        .Model(model =>
-                        {
-                            model.Id(m => m.Id);
-                            model.Field(m => m.Id).Editable(false);
-                        })
-                    )
-                )
-)
+    )
+   

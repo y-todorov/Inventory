@@ -40,5 +40,30 @@ namespace SignalRLocalHub.Hubs
             var deletedProductViewModel = Utils.UpdateBase<Product, ProductViewModel>(product);
             Clients.Others.destroyProduct(deletedProductViewModel);
         }
+
+        public ProductCategoryViewModel CreateProductCategory(ProductCategoryViewModel product)
+        {
+            ProductCategoryViewModel createdProductCategoryViewModel = Utils.CreateBase<ProductCategory, ProductCategoryViewModel>(product);
+            Clients.Others.createProductCategory(createdProductCategoryViewModel);
+            return createdProductCategoryViewModel;
+        }
+
+        public IEnumerable<ProductCategoryViewModel> ReadProductCategory()
+        {
+            var productCategoryViewModels = Utils.ReadBase<ProductCategory, ProductCategoryViewModel>().AsEnumerable();
+            return productCategoryViewModels;
+        }
+
+        public void UpdateProductCategory(ProductCategoryViewModel product)
+        {
+            var updatedProductCategoryViewModel = Utils.UpdateBase<ProductCategory, ProductCategoryViewModel>(product);
+            Clients.Others.updateProductCategory(updatedProductCategoryViewModel);
+        }
+
+        public void DestroyProductCategory(ProductCategoryViewModel productCategory)
+        {
+            var deletedProductCategoryViewModel = Utils.UpdateBase<ProductCategory, ProductCategoryViewModel>(productCategory);
+            Clients.Others.destroyProduct(deletedProductCategoryViewModel);
+        }
     }
 }
