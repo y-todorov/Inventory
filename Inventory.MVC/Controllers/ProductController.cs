@@ -17,12 +17,7 @@ namespace Inventory.MVC.Controllers
     public class ProductController : ControllerBase
     {
         //http://demos.telerik.com/aspnet-mvc/grid/editing-popup Proèti me!
-        //[OutputCache(Duration=600, Location= OutputCacheLocation.ServerAndClient)]
-        public ActionResult Index()
-        {
-            return View(); 
-        }
-
+ 
         public ActionResult Read([DataSourceRequest] DataSourceRequest request, InventoryContext context)
         {
             JsonResult result = ReadBase<Product, ProductViewModel>(request, context.Products);

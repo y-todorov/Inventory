@@ -9,7 +9,7 @@ using KendoMVCWrappers.Models;
 
 namespace Inventory.MVC.Controllers
 {
-    public class TestController : Controller
+    public class TestController : ControllerBase
     {
          public static List<Person> people = new List<Person>();
 

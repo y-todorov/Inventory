@@ -6,12 +6,8 @@ using System.Web.Mvc;
 
 namespace Inventory.MVC.Controllers
 {
-    public class StoreController : Controller
+    public class StoreController : ControllerBase
     {
-        // GET: Store
-        public ActionResult Index()
-        {
-            return View();
-        }
+      
     }
 }

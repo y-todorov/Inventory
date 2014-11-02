@@ -6,12 +6,11 @@ using System.Web.Mvc;
 
 namespace Inventory.MVC.Controllers
 {
-    public class CategoryController : Controller
+    public class CategoryController : ControllerBase
     {
-        // GET: Category
-        public ActionResult Index()
-        {
-            return View();
-        }
+        //public ActionResult Index()
+        //{
+        //    return View();
+        //}
     }
 }

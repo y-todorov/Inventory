@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Caching;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Inventory.DAL;
@@ -17,6 +18,12 @@ namespace Inventory.MVC.Controllers
 {
     public class ControllerBase : Controller
     {
+        [OutputCache(Duration=3600, Location=OutputCacheLocation.Any)]
+        public virtual ActionResult Index()
+        {
+            return View();
+        }
+
         protected override JsonResult Json(object data, string contentType, System.Text.Encoding contentEncoding,
            JsonRequestBehavior behavior)
         {

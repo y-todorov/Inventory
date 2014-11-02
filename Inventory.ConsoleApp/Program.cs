@@ -5,16 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Inventory.Utils;
-using Xunit;
 
-namespace Inventory.Tests.Database
+namespace Inventory.ConsoleApp
 {
-    public class TransferDatabaseTest
+    class Program
     {
-        [Fact]
-        public void Transer()
+        static void Main(string[] args)
         {
-            //return;
             string source = ConfigurationManager.ConnectionStrings["source"].ConnectionString;
             string destination = ConfigurationManager.ConnectionStrings["destination"].ConnectionString;
 
