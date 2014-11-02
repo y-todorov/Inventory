@@ -61,7 +61,7 @@ namespace Inventory.MVC.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to dd.mm.yyyy.
+        ///   Looks up a localized string similar to {0:dd.mm.yyyy &apos;г.&apos;}.
         /// </summary>
         public static string DateFormatString {
             get {
@@ -79,7 +79,7 @@ namespace Inventory.MVC.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to dd.mm.yyyy  H:mm:ss.
+        ///   Looks up a localized string similar to {0:dd.mm.yyyy &apos;г.&apos;  H:mm:ss}.
         /// </summary>
         public static string DateTimeFormatString {
             get {
@@ -93,6 +93,24 @@ namespace Inventory.MVC.Resources {
         public static string DateTimeFormatStringEmptyMessage {
             get {
                 return ResourceManager.GetString("DateTimeFormatStringEmptyMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Изберете дата.
+        /// </summary>
+        public static string PlaceHolderTextDate {
+            get {
+                return ResourceManager.GetString("PlaceHolderTextDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Изберете дата и час.
+        /// </summary>
+        public static string PlaceHolderTextDateTime {
+            get {
+                return ResourceManager.GetString("PlaceHolderTextDateTime", resourceCulture);
             }
         }
         

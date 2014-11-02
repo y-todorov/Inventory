@@ -3,16 +3,9 @@
 @using Kendo.Mvc.UI;
 
 <script>
-    var hub = $.connection.productHub;
+var crudHub = $.connection.crudHub;
     var hubStart = $.connection.hub.start();
 </script>
-
-@(Html.Kendo().Notification()
-      .Name("notification")
-      .Width("100%")
-      .Position(position => position.Top(0).Left(0))
-      )
-
 @(
         Html.Kendo().Grid<ProductViewModel>()
             .AddBaseOptions()
@@ -30,7 +23,7 @@
                 .PageSize(10)
                 .Transport(tr => tr
                     .Promise("hubStart")
-                    .Hub("hub")
+                        .Hub("crudHub")
                     .Client(c => c
                         .Read("read")
                         .Create("create")
@@ -50,19 +43,3 @@
                 )
             )
       )
-
-<script type="text/javascript">
-    function errorHandler(e) {
-        if (e.errors) {
-            var message = "Errors:\n";
-            $.each(e.errors, function(key, value) {
-                if ('errors' in value) {
-                    $.each(value.errors, function() {
-                        message += this + "\n";
-                    });
-                }
-            });
-            alert(message);
-        }
-    }
-</script>

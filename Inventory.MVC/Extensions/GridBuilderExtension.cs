@@ -12,6 +12,7 @@ using Kendo.Mvc.UI;
 using Kendo.Mvc.UI.Fluent;
 using Inventory.DAL;
 using Inventory.MVC.Models;
+using Inventory.MVC.Resources;
 
 namespace Inventory.MVC.Extensions
 {
@@ -92,12 +93,12 @@ namespace Inventory.MVC.Extensions
                             continue;
                         }
                         if (propertyInfo.Name == "CreatedOn" ||
-                            propertyInfo.Name == "CreatedBy")
+                            propertyInfo.Name == "ModifiedOn")
                         {
-                            columns.Bound(propertyInfo.Name).Hidden();
+                            columns.Bound(propertyInfo.Name).Hidden().Format(ViewModelResources.DateTimeFormatString); // ebalo si e mamicata. poneje e hidden i ne se ose6ta za formata i go pokazva na angiiski
                             continue;
                         }
-                        if (propertyInfo.Name == "ModifiedOn" ||
+                        if (propertyInfo.Name == "CreatedBy" ||
                         propertyInfo.Name == "ModifiedBy")
                         {
                             columns.Bound(propertyInfo.Name).Hidden();

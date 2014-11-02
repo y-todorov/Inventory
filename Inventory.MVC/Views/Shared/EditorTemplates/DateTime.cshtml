@@ -1,4 +1,6 @@
 @model DateTime?
 
 @(Html.Kendo().DateTimePickerFor(m => m)
-      .HtmlAttributes(new { style = "width:100%" }))
+
+     .HtmlAttributes(new { style = "width:100%", placeholder = Inventory.MVC.Resources.ViewModelResources.PlaceHolderTextDateTime })
+)

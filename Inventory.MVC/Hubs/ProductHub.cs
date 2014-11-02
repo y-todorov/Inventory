@@ -9,18 +9,13 @@ using Microsoft.AspNet.SignalR;
 using Inventory.DAL;
 using StructureMap;
 using Inventory.MVC.Infrastructure;
+using Microsoft.AspNet.SignalR.Hubs;
 
 namespace SignalRLocalHub.Hubs
 {
-    public class ProductHub : Hub
+    [HubName("crudHub")]
+    public class CrudHub : Hub
     {
-        //private ProductService productService;
-
-        public ProductHub()
-        {
-            //productService = new ProductService(new SampleEntities());
-        }
-
         public ProductViewModel Create(ProductViewModel product)
         {
             ProductViewModel createdProductViewModel = Utils.CreateBase<Product, ProductViewModel>(product);

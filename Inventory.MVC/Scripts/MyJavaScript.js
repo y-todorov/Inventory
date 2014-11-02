@@ -10,6 +10,20 @@ $(document).ready(function () {
     $("input[type=submit]").addClass("k-button");
 });
 
+function errorHandler(e) {
+    if (e.errors) {
+        var message = "Errors:\n";
+        $.each(e.errors, function (key, value) {
+            if ('errors' in value) {
+                $.each(value.errors, function () {
+                    message += this + "\n";
+                });
+            }
+        });
+        alert(message);
+    }
+}
+
 $(document).ready(function () {
 
     var centered = $("#centeredNotification").kendoNotification({

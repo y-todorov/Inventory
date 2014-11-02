@@ -118,15 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DateFormatString" xml:space="preserve">
-    <value>dd.mm.yyyy</value>
+    <value>{0:dd.mm.yyyy 'г.'}</value>
   </data>
   <data name="DateFormatStringEmptyMessage" xml:space="preserve">
     <value>Изберете дата</value>
   </data>
   <data name="DateTimeFormatString" xml:space="preserve">
-    <value>dd.mm.yyyy  H:mm:ss</value>
+    <value>{0:dd.mm.yyyy 'г.'  H:mm:ss}</value>
   </data>
   <data name="DateTimeFormatStringEmptyMessage" xml:space="preserve">
+    <value>Изберете дата и час</value>
+  </data>
+  <data name="PlaceHolderTextDate" xml:space="preserve">
+    <value>Изберете дата</value>
+  </data>
+  <data name="PlaceHolderTextDateTime" xml:space="preserve">
     <value>Изберете дата и час</value>
   </data>
   <data name="PlaceHolderTextDecimal" xml:space="preserve">
