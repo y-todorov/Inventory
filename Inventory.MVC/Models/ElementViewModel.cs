@@ -9,7 +9,8 @@ namespace Inventory.MVC.Models
 {
     public class ElementViewModel : ViewModelBase
     {
-        [Required]
+             [Required(ErrorMessageResourceType = typeof(ViewModelResources),
+            ErrorMessageResourceName = "RequiredErrorMessage")]
          [Display(ResourceType = typeof(ViewModelResources),
             Name = "ElementViewModel_Name_Name")]
         public string Name { get; set; }
