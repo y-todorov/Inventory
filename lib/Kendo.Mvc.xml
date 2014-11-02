@@ -547,9 +547,19 @@
               Looks up a localized string similar to Edit.
             </summary>
         </member>
+        <member name="P:Kendo.Mvc.Resources.Messages.Grid_Excel">
+            <summary>
+              Looks up a localized string similar to Export to Excel.
+            </summary>
+        </member>
         <member name="P:Kendo.Mvc.Resources.Messages.Grid_Lock">
             <summary>
               Looks up a localized string similar to Lock.
+            </summary>
+        </member>
+        <member name="P:Kendo.Mvc.Resources.Messages.Grid_Pdf">
+            <summary>
+              Looks up a localized string similar to Export to PDF.
             </summary>
         </member>
         <member name="P:Kendo.Mvc.Resources.Messages.Grid_SaveChanges">
@@ -1650,6 +1660,40 @@
              &lt;%= Html.Kendo().AutoComplete()
                         .Name("AutoComplete")
                         .Events(events => events.DataBound("dataBound"))
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AutoCompleteEventBuilder.Filtering(System.Func{System.Object,System.Object})">
+            <summary>
+            Defines the inline handler of the Filtering client-side event
+            </summary>
+            <param name="handler">The handler code wrapped in a text tag (Razor syntax).</param>
+            <example>
+            <code lang="CS">
+             @(Html.Kendo().AutoComplete()
+                       .Name("AutoComplete")
+                       .Events(events => events.Filtering(
+                            @&lt;text&gt;
+                            function(e) {
+                                //event handling code
+                            }
+                            &lt;/text&gt;
+                       ))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AutoCompleteEventBuilder.Filtering(System.String)">
+            <summary>
+            Defines the name of the JavaScript function that will handle the the Filtering client-side event.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the event.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().AutoComplete()
+                        .Name("AutoComplete")
+                        .Events(events => events.Filtering("filtering"))
             %&gt;
             </code>
             </example>
@@ -20097,6 +20141,40 @@
             </code>
             </example>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.ComboBoxEventBuilder.Filtering(System.Func{System.Object,System.Object})">
+            <summary>
+            Defines the inline handler of the Filtering client-side event
+            </summary>
+            <param name="handler">The handler code wrapped in a text tag (Razor syntax).</param>
+            <example>
+            <code lang="CS">
+             @(Html.Kendo().ComboBox()
+                       .Name("ComboBox")
+                       .Events(events => events.Filtering(
+                            @&lt;text&gt;
+                            function(e) {
+                                //event handling code
+                            }
+                            &lt;/text&gt;
+                       ))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.ComboBoxEventBuilder.Filtering(System.String)">
+            <summary>
+            Defines the name of the JavaScript function that will handle the the Filtering client-side event.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the event.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().ComboBox()
+                        .Name("ComboBox")
+                        .Events(events => events.Filtering("filtering"))
+            %&gt;
+            </code>
+            </example>
+        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.ComboBoxEventBuilder.Open(System.String)">
             <summary>
              Defines the name of the JavaScript function that will handle the the Open client-side event.
@@ -20238,6 +20316,115 @@
             <summary>
             Items are oredered vertically
             </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.DataSourceTreeListModelDescriptorFactory`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> Model definition.
+            </summary>
+            <typeparam name="TModel">Type of the model</typeparam>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> Model definition.
+            </summary>
+            <typeparam name="TModel">Type of the model</typeparam>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactoryBase`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> Model definition.
+            </summary>
+            <typeparam name="TModel">Type of the model</typeparam>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactoryBase`1.Id(System.String)">
+            <summary>
+            Specify the member used to identify an unique Model instance.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Id(System.String)">
+            <summary>
+            Specify the member used to identify an unique Model instance.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Id``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used to identify an unique Model instance.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Field``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Describes a Model field
+            </summary>
+            <typeparam name="TValue">Field type</typeparam>
+            <param name="expression">Member access expression which describes the field</param>        
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Field(System.String,System.Type)">
+            <summary>
+            Describes a Model field
+            </summary>
+            <param name="memberName">Field name</param>
+            <param name="memberType">Field type</param>        
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Field``1(System.String)">
+            <summary>
+            Describes a Model field
+            </summary>
+            <typeparam name="TValue">Field type</typeparam>
+            <param name="memberName">Member name</param>        
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceTreeListModelDescriptorFactory`1.ParentId``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for parentId.
+            </summary>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceTreeListModelDescriptorFactory`1.ParentId``1(System.String)">
+            <summary>
+            Specify the member used for parentId.
+            </summary>
+            <param name="fieldName">The member name.</param>
+            <typeparam name="TValue">Type of the field</typeparam>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.CheckBoxBuilder">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="!:checkbox"/> component.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.CheckBoxBuilder.Checked(System.Boolean)">
+            <summary>
+            Checkes or unchecks the checkbox.
+            </summary>
+            <param name="isChecked"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.CheckBoxBuilder.Enable(System.Boolean)">
+            <summary>
+            Enables or disables the checkbox.
+            </summary>
+            <param name="isEnabled"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.RadioButtonBuilder">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.RadioButton"/> component.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.RadioButtonBuilder.Checked(System.Boolean)">
+            <summary>
+            Checkes or unchecks the radio button.
+            </summary>
+            <param name="isChecked"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.RadioButtonBuilder.Enable(System.Boolean)">
+            <summary>
+            Enables or disables the radio button.
+            </summary>
+            <param name="isEnabled"></param>
+            <returns></returns>
         </member>
         <member name="T:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilderBase`2">
             <summary>    
@@ -20421,6 +20608,681 @@
             </summary>
             <param name="enabled">If true changes will be automatically synced, otherwise false.</param>        
         </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> Model definition.
+            </summary>
+            <typeparam name="TModel">Type of the model</typeparam>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.From``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the from.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.From(System.String)">
+            <summary>
+            Specify the member used for the from.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.To``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the To.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.To(System.String)">
+            <summary>
+            Specify the member used for the height.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.FromX``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the fromX.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.FromX(System.String)">
+            <summary>
+            Specify the member used for the fromX.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.FromY``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the fromY.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.FromY(System.String)">
+            <summary>
+            Specify the member used for the fromY.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.ToX``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the toX.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.ToX(System.String)">
+            <summary>
+            Specify the member used for the toX.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.ToY``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the toY.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.ToY(System.String)">
+            <summary>
+            Specify the member used for the toY.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.Type``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the type.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.Type(System.String)">
+            <summary>
+            Specify the member used for the type.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.Text``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the text.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory`1.Text(System.String)">
+            <summary>
+            Specify the member used for the text.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.DiagramConnectionDataSourceBuilder`1">
+            <summary>
+            Defines the fluent interface for configuring the Gantt <see cref="T:Kendo.Mvc.UI.DataSource"/>.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramConnectionDataSourceBuilder`1.Model(System.Action{Kendo.Mvc.UI.Fluent.DiagramConnectionModelDescriptorFactory{`0}})">
+            <summary>
+            Configures Model properties
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.DiagramShapeDataSourceBuilder`1">
+            <summary>
+            Defines the fluent interface for configuring the Gantt <see cref="T:Kendo.Mvc.UI.DataSource"/>.
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> AJAX create/update/destroy operation bindings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Update(System.Action{Kendo.Mvc.UI.Fluent.CrudOperationBuilder})">
+            <summary>
+            Configures the URL for Update operation.
+            </summary>        
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Update(System.String,System.String)">
+            <summary>
+            Sets controller and action for Update operation.
+            </summary>
+            <param name="actionName">Action name</param>
+            <param name="controllerName">Controller Name</param>        
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Update(System.String,System.String,System.Object)">
+            <summary>
+            Sets controller, action and routeValues for Update operation.
+            </summary>
+            <param name="actionName">Action name</param>
+            <param name="controllerName">Controller Name</param>        
+            <param name="routeValues">Route values</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Create(System.Action{Kendo.Mvc.UI.Fluent.CrudOperationBuilder})">
+            <summary>
+            Configures the URL for Create operation.
+            </summary> 
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Create(System.String,System.String)">
+            <summary>
+            Sets controller and action for Create operation.
+            </summary>
+            <param name="actionName">Action name</param>
+            <param name="controllerName">Controller Name</param>                
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Create(System.String,System.String,System.Object)">
+            <summary>
+            Sets controller, action and routeValues for Create operation.
+            </summary>
+            <param name="actionName">Action name</param>
+            <param name="controllerName">Controller Name</param>        
+            <param name="routeValues">Route values</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Destroy(System.Action{Kendo.Mvc.UI.Fluent.CrudOperationBuilder})">
+            <summary>
+            Configures the URL for Destroy operation.
+            </summary> 
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Destroy(System.String,System.String)">
+            <summary>
+            Sets controller and action for Destroy operation.
+            </summary>
+            <param name="actionName">Action name</param>
+            <param name="controllerName">Controller Name</param>                
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Destroy(System.String,System.String,System.Object)">
+            <summary>
+            Sets controller, action and routeValues for Destroy operation.
+            </summary>
+            <param name="actionName">Action name</param>
+            <param name="controllerName">Controller Name</param>        
+            <param name="routeValues">Route values</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Batch(System.Boolean)">
+            <summary>
+            Determines if modifications will be sent to the server in batches or as individually requests.
+            </summary>
+            <param name="enabled">If true changes will be batched, otherwise false.</param>        
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.AutoSync(System.Boolean)">
+            <summary>
+            Determines if data source would automatically sync any changes to its data items. By default changes are not automatically sync-ed.
+            </summary>
+            <param name="enabled">If true changes will be automatically synced, otherwise false.</param>        
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeDataSourceBuilder`1.Model(System.Action{Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory{`0}})">
+            <summary>
+            Configures Model properties
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> Model definition.
+            </summary>
+            <typeparam name="TModel">Type of the model</typeparam>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Width``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the width.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Width(System.String)">
+            <summary>
+            Specify the member used for the width.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Height``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the height.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Height(System.String)">
+            <summary>
+            Specify the member used for the height.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.X``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the x.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.X(System.String)">
+            <summary>
+            Specify the member used for the x.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Y``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the y.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Y(System.String)">
+            <summary>
+            Specify the member used for the y.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Type``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the type.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Type(System.String)">
+            <summary>
+            Specify the member used for the type.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Text``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Specify the member used for the text.
+            </summary>
+            <typeparam name="TValue">Type of the field</typeparam>
+            <param name="expression">Member access expression which describes the member</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramShapeModelDescriptorFactory`1.Text(System.String)">
+            <summary>
+            Specify the member used for the text.
+            </summary>
+            <param name="fieldName">The member name.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.DiagramDataSourceBuilder`1">
+            <summary>
+            Defines the fluent API for configuring the DiagramConnection settings.
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="!:HierarchicalDataSource"/>.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Custom">
+            <summary>
+            Use it to configure Custom binding.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.SignalR">
+            <summary>
+            Use it to configure SignalR binding.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Read(System.Action{Kendo.Mvc.UI.Fluent.CrudOperationBuilder})">
+            <summary>
+            Configures the URL for Read operation.
+            </summary> 
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Read(System.String,System.String,System.Object)">
+            <summary>
+            Sets controller, action and routeValues for Read operation.
+            </summary>
+            <param name="actionName">Action name</param>
+            <param name="controllerName">Controller Name</param>        
+            <param name="routeValues">Route values</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Read(System.String,System.String)">
+            <summary>
+            Sets controller and action for Read operation.
+            </summary>
+            <param name="actionName">Action name</param>
+            <param name="controllerName">Controller Name</param>                
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Events(System.Action{Kendo.Mvc.UI.Fluent.DataSourceEventBuilder})">
+            <summary>
+            Configures the client-side events
+            </summary>  
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Model(System.Action{Kendo.Mvc.UI.Fluent.HierarchicalModelDescriptorBuilder{System.Object}})">
+            <summary>
+            Configures the model
+            </summary>  
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.ServerFiltering">
+            <summary>
+            Specifies if filtering should be handled by the server.
+            </summary>        
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.ServerFiltering(System.Boolean)">
+            <summary>
+            Specifies if filtering should be handled by the server.
+            </summary>        
+        </member>
+        <member name="T:Kendo.Mvc.UI.DependencyType">
+            <summary>
+            Represents the dependency types supported by Kendo UI Gantt for ASP.NET MVC
+            </summary>
+        </member>
+        <member name="F:Kendo.Mvc.UI.DependencyType.FinishFinish">
+            <summary>
+            The task cannot end before its predecessor task ends, although it may end later.
+            </summary>
+        </member>
+        <member name="F:Kendo.Mvc.UI.DependencyType.FinishStart">
+            <summary>
+            The task cannot start before its predecessor task ends, although it may start later.
+            </summary>
+        </member>
+        <member name="F:Kendo.Mvc.UI.DependencyType.StartFinish">
+            <summary>
+            The task cannot end before its predecessor task starts, although it may end later.
+            </summary>
+        </member>
+        <member name="F:Kendo.Mvc.UI.DependencyType.StartStart">
+            <summary>
+            The task cannot start until the predecessor tasks starts, although it may start later.
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.GridColumnBase`1">
+            <summary>
+            The base class for all columns in Kendo Grid for ASP.NET MVC.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Grid">
+            <summary>
+            Gets or sets the grid.
+            </summary>
+            <value>The grid.</value>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Member">
+            <summary>
+            Gets the member of the column.
+            </summary>
+            <value>The member.</value>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Template">
+            <summary>
+            Gets the template of the column.
+            </summary>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.HeaderTemplate">
+            <summary>
+            Gets the header template of the column.
+            </summary>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.FooterTemplate">
+            <summary>
+            Gets the footer template of the column.
+            </summary>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Title">
+            <summary>
+            Gets or sets the title of the column.
+            </summary>
+            <value>The title.</value>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Width">
+            <summary>
+            Gets or sets the width of the column.
+            </summary>
+            <value>The width.</value>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Hidden">
+            <summary>
+            Gets or sets a value indicating whether this column is hidden.
+            </summary>
+            <value><c>true</c> if hidden; otherwise, <c>false</c>.</value>
+            <remarks>
+            Hidden columns are output as HTML but are not visible by the end-user.
+            </remarks>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.HeaderHtmlAttributes">
+            <summary>
+            Gets the header HTML attributes.
+            </summary>
+            <value>The header HTML attributes.</value>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.FooterHtmlAttributes">
+            <summary>
+            Gets the footer HTML attributes.
+            </summary>
+            <value>The footer HTML attributes.</value>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Visible">
+            <summary>
+            Gets or sets a value indicating whether this column is visible.
+            </summary>
+            <value><c>true</c> if visible; otherwise, <c>false</c>. The default value is <c>true</c>.</value>
+            <remarks>
+            Invisible columns are not output in the HTML.
+            </remarks>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.HtmlAttributes">
+            <summary>
+            Gets the HTML attributes of the cell rendered for the column
+            </summary>
+            <value>The HTML attributes.</value>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnGroup`1.Columns">
+            <summary>
+            Gets the columns in the group
+            </summary>
+        </member>
+        <member name="P:Kendo.Mvc.UI.GridColumnGroup`1.VisibleColumns">
+            <summary>
+            Gets the columns in the group
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.#ctor(Kendo.Mvc.UI.IGridColumnGroup,Kendo.Mvc.UI.Grid{`0},System.Web.Mvc.ViewContext,Kendo.Mvc.IUrlGenerator)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1"/> class.
+            </summary>
+            <param name="container">The container.</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.Title(System.String)" -->
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.HeaderHtmlAttributes(System.Object)">
+            <summary>
+            Sets the HTML attributes applied to the header cell of the column.
+            </summary>
+            <param name="attributes">The attributes.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Grid(Model)
+                        .Name("Grid")
+                        .Columns(columns => columns.Bound(o => o.OrderID).HeaderHtmlAttributes(new {@class="order-header"}))
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.HeaderHtmlAttributes(System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Sets the HTML attributes applied to the header cell of the column.
+            </summary>
+            <param name="attributes">The attributes.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Grid(Model)
+                        .Name("Grid")
+                        .Columns(columns => columns.Bound(o => o.OrderID).HeaderHtmlAttributes(new {@class="order-header"}))
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.Visible(System.Boolean)">
+            <summary>
+            Makes the column visible or not. By default all columns are visible. Invisible columns are not rendered in the output HTML.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Grid(Model)
+                        .Name("Grid")
+                        .Columns(columns => columns.Bound(o => o.OrderID).Visible((bool)ViewData["visible"]))
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.Locked">
+            <summary>
+            Makes the column static. By default all columns are not locked.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Grid(Model)
+                        .Name("Grid")
+                        .Columns(columns => columns.Bound(o => o.OrderID).Locked())
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.Locked(System.Boolean)">
+            <summary>
+            Makes the column static or not. By default all columns are not locked.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Grid(Model)
+                        .Name("Grid")
+                        .Columns(columns => columns.Bound(o => o.OrderID).Locked((bool)ViewData["locked"]))
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.Lockable(System.Boolean)">
+            <summary>
+            If set to false the column will remain in the side of the grid into which its own locked configuration placed it.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Grid(Model)
+                        .Name("Grid")
+                        .Columns(columns => columns.Bound(o => o.OrderID).Lockable((bool)ViewData["lockable"]))
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.Hidden(System.Boolean)">
+            <summary>
+            Makes the column hidden or not. By default all columns are not hidden. Hidden columns are rendered in the output HTML but are hidden.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Grid(Model)
+                        .Name("Grid")
+                        .Columns(columns => columns.Bound(o => o.OrderID).Hidden((bool)ViewData["hidden"]))
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.Hidden">
+            <summary>
+            Hides a column. By default all columns are not hidden. Hidden columns are rendered in the output HTML but are hidden.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Grid(Model)
+                        .Name("Grid")
+                        .Columns(columns => columns.Bound(o => o.OrderID).Hidden())
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.HeaderTemplate(System.Action)">
+            <summary>
+            Sets the header template for the column. If sorting is enabled, the template content wrapper must have a k-link CSS class.
+            </summary>
+            <param name="template">The action defining the template.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.HeaderTemplate(System.String)">
+            <summary>
+            Sets the header template for the column.  If sorting is enabled, the template content wrapper must have a k-link CSS class.
+            </summary>
+            <param name="template">The string defining the template.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.HeaderTemplate(System.Func{System.Object,System.Object})">
+            <summary>
+            Sets the header template for the column.  If sorting is enabled, the template content wrapper must have a k-link CSS class.
+            </summary>
+            <param name="template">The action defining the template.</param>
+        </member>
+        <member name="P:Kendo.Mvc.UI.Fluent.GridColumnGroupBuilder`1.Column">
+            <summary>
+            Gets or sets the column.
+            </summary>
+            <value>The column.</value>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.GridPdfBuilder">
+            <summary>
+            The fluent API for configuring the grid Excel export.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.FileName(System.String)">
+            <summary>
+            Sets the file name of the PDF file.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.PaperSize(System.String)">
+            <summary>
+            Specifies a predefiend paper size e.g. "A3", "A4" or "auto" (default).
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.PaperSize(System.Double,System.Double)">
+            <summary>
+            Specifies custom paper size in "pt" units.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.PaperSize(System.String,System.String)">
+            <summary>
+            Specifies custom paper size in custom units ("in", "mm", "pt", "cm")
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.ProxyUrl(System.String)">
+            <summary>
+            Set the url of the server side proxy. The proxy is responsible for returning the excel PDF to the end user. Used in browsers that don't support saving files from JavaScript.
+            </summary>
+            <param name="url"></param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.Margin(System.Double,System.Double,System.Double,System.Double)">
+            <summary>
+            Specifies the margins in "pt" units.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.Margin(System.String,System.String,System.String,System.String)">
+            <summary>
+            Specifies the margins in units ("in", "mm", "pt", "cm")
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.Title(System.String)">
+            <summary>
+            Sets the title of the PDF document.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.Author(System.String)">
+            <summary>
+            Sets the author of the PDF document.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.Subject(System.String)">
+            <summary>
+            Sets the subject of the PDF document.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.Keywords(System.String)">
+            <summary>
+            Sets the keywords of the PDF document.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.Creator(System.String)">
+            <summary>
+            Sets the creator of the PDF document.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridPdfBuilder.Date(System.DateTime)">
+            <summary>
+            Sets the date of the PDF document.
+            </summary>
+        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.GridColumnFilterableCellSettingsBuilder.#ctor(Kendo.Mvc.UI.GridColumnFilterableCellSettings,System.Web.Mvc.ViewContext,Kendo.Mvc.IUrlGenerator)">
             <summary>
             Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.GridColumnFilterableCellSettings"/> class.
@@ -20508,6 +21370,32 @@
             </code>
             </example>
         </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.GridExcelBuilder">
+            <summary>
+            The fluent API for configuring the grid Excel export.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridExcelBuilder.FileName(System.String)">
+            <summary>
+            Sets the file name of the excel file.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridExcelBuilder.AllPages(System.Boolean)">
+            <summary>
+            Specifies whether all pages should be exported
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridExcelBuilder.Filterable(System.Boolean)">
+            <summary>
+            Enables or disables filtering in the output Excel file.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridExcelBuilder.ProxyUrl(System.String)">
+            <summary>
+            Set the url of the server side proxy. The proxy is responsible for returning the excel file to the end user. Used in browsers that don't support saving files from JavaScript.
+            </summary>
+            <param name="url"></param>
+        </member>
         <member name="T:Kendo.Mvc.UI.GridFilterMode">
             <summary>
             Represents the filterable modes supported by Kendo UI Grid for ASP.NET MVC
@@ -20525,6 +21413,113 @@
             </summary>
             <param name="filterable">The filterable</param>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotConfiguratorBuilder.Sortable">
+            <summary>
+            Enables grid column sorting.
+            </summary>
+            <example>
+            <code lang="ASPX">
+            &lt;%:Html.Kendo().PivotConfigurator()
+                .Name(&quot;pivotconfigurator&quot;)
+                .Sortable()
+                .DataSource(dataSource =&gt;
+                    dataSource.Xmla()
+                       .Columns(columns =&gt; columns.Add(&quot;[Date].[Calendar]&quot;).Expand(true))
+                       .Rows(rows =&gt; rows.Add(&quot;[Geography].[City]&quot;))
+                       .Measures(measures =&gt; measures.Values(new string[]{&quot;[Measures].[Internet Sales Amount]&quot;}))
+                       .Transport(transport =&gt; transport
+                           .Connection(connection =&gt; connection
+                               .Catalog(&quot;Adventure Works DW 2008R2&quot;)
+                               .Cube(&quot;Adventure Works&quot;))
+                           .Read(read =&gt; read
+                               .Url(&quot;http://demos.telerik.com/olap/msmdpump.dll&quot;)
+                               .DataType(&quot;text&quot;)
+                               .ContentType(&quot;text/xml&quot;)
+                               .Type(HttpVerbs.Post)
+                           )
+                       )
+                )
+            %&gt;
+            </code>
+            <code lang="Razor">
+            @(Html.Kendo().PivotConfigurator()
+                  .Name(&quot;pivotconfigurator&quot;)
+                  .Sortable()
+                  .DataSource(dataSource =&gt;
+                    dataSource.Xmla()
+                       .Columns(columns =&gt; columns.Add(&quot;[Date].[Calendar]&quot;).Expand(true))
+                       .Rows(rows =&gt; rows.Add(&quot;[Geography].[City]&quot;))
+                       .Measures(measures =&gt; measures.Values(new string[]{&quot;[Measures].[Internet Sales Amount]&quot;}))
+                       .Transport(transport =&gt; transport
+                           .Connection(connection =&gt; connection
+                               .Catalog(&quot;Adventure Works DW 2008R2&quot;)
+                               .Cube(&quot;Adventure Works&quot;))
+                           .Read(read =&gt; read
+                               .Url(&quot;http://demos.telerik.com/olap/msmdpump.dll&quot;)
+                               .DataType(&quot;text&quot;)
+                               .ContentType(&quot;text/xml&quot;)
+                               .Type(HttpVerbs.Post)
+                           )
+                       )
+                  )
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotConfiguratorBuilder.Sortable(System.Action{Kendo.Mvc.UI.Fluent.PivotConfiguratorSortSettingsBuilder})">
+            <summary>
+            Sets the sorting configuration of the pivotgrid.
+            </summary>
+            <param name="configurator">The lambda which configures the sorting</param>
+            <example>
+            <code lang="ASPX">
+            &lt;%:Html.Kendo().PivotConfigurator()
+                .Name(&quot;pivotconfigurator&quot;)
+                .Sortable(sorting =&gt; sorting.AllowUnsort(true))
+                .DataSource(dataSource =&gt;
+                    dataSource.Xmla()
+                       .Columns(columns =&gt; columns.Add(&quot;[Date].[Calendar]&quot;).Expand(true))
+                       .Rows(rows =&gt; rows.Add(&quot;[Geography].[City]&quot;))
+                       .Measures(measures =&gt; measures.Values(new string[]{&quot;[Measures].[Internet Sales Amount]&quot;}))
+                       .Transport(transport =&gt; transport
+                           .Connection(connection =&gt; connection
+                               .Catalog(&quot;Adventure Works DW 2008R2&quot;)
+                               .Cube(&quot;Adventure Works&quot;))
+                           .Read(read =&gt; read
+                               .Url(&quot;http://demos.telerik.com/olap/msmdpump.dll&quot;)
+                               .DataType(&quot;text&quot;)
+                               .ContentType(&quot;text/xml&quot;)
+                               .Type(HttpVerbs.Post)
+                           )
+                       )
+                )
+            %&gt;
+            </code>
+            <code lang="Razor">
+            @(Html.Kendo().PivotConfigurator()
+                  .Name(&quot;pivotconfigurator&quot;)
+                  .Sortable(sorting =&gt; sorting.AllowUnsort(true))
+                  .DataSource(dataSource =&gt;
+                    dataSource.Xmla()
+                       .Columns(columns =&gt; columns.Add(&quot;[Date].[Calendar]&quot;).Expand(true))
+                       .Rows(rows =&gt; rows.Add(&quot;[Geography].[City]&quot;))
+                       .Measures(measures =&gt; measures.Values(new string[]{&quot;[Measures].[Internet Sales Amount]&quot;}))
+                       .Transport(transport =&gt; transport
+                           .Connection(connection =&gt; connection
+                               .Catalog(&quot;Adventure Works DW 2008R2&quot;)
+                               .Cube(&quot;Adventure Works&quot;))
+                           .Read(read =&gt; read
+                               .Url(&quot;http://demos.telerik.com/olap/msmdpump.dll&quot;)
+                               .DataType(&quot;text&quot;)
+                               .ContentType(&quot;text/xml&quot;)
+                               .Type(HttpVerbs.Post)
+                           )
+                       )
+                  )
+            )
+            </code>
+            </example>
+        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.PivotConfiguratorBuilder.Messages(System.Action{Kendo.Mvc.UI.Fluent.PivotConfiguratorMessagesBuilder})">
             <summary>
             Sets the messages of the pivotConfigurator.
@@ -20541,6 +21536,47 @@
             Sets the messages of the pivotFieldMenu.
             </summary>
             <param name="addViewAction">The lambda which configures the pivotFieldMenu messages</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.PivotConfiguratorSortSettingsBuilder">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.PivotGridSortableSettings"/>.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotConfiguratorSortSettingsBuilder.#ctor(Kendo.Mvc.UI.PivotConfiguratorSortableSettings)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.Fluent.PivotGridSortSettingsBuilder"/> class.
+            </summary>
+            <param name="settings">The settings.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotConfiguratorSortSettingsBuilder.Enabled(System.Boolean)">
+            <summary>
+            Enables or disables sorting.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().PivotConfigurator()
+                        .Name("PivotConfigurator")
+                        .Sortable(sorting => sorting.Enabled((bool)ViewData["enableSorting"]))
+            %&gt;
+            </code>
+            </example>
+            <remarks>
+            The Enabled method is useful when you need to enable sorting based on certain conditions.
+            </remarks>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotConfiguratorSortSettingsBuilder.AllowUnsort(System.Boolean)">
+            <summary>
+            Enables or disables unsorted mode.
+            </summary>
+            <param name="value">The value.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().PivotConfigurator()
+                        .Name("PivotConfigurator")
+                        .Sortable(sorting => sorting.AllowUnsort(true))
+            %&gt;
+            </code>
+            </example>
         </member>
         <member name="T:Kendo.Mvc.UI.Fluent.PivotAjaxDataSourceBuilder`1">
             <summary>
@@ -21030,107 +22066,107 @@
             Configures the server-side CRUD methods of the SignalR hub.
             </summary>
         </member>
-        <member name="T:Kendo.Mvc.UI.Fluent.DiagramBuilder">
+        <member name="T:Kendo.Mvc.UI.Fluent.DiagramBuilder`2">
             <summary>
             Defines the fluent API for configuring the Kendo Diagram for ASP.NET MVC.
             </summary>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.#ctor(Kendo.Mvc.UI.Diagram)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.#ctor(Kendo.Mvc.UI.Diagram{`0,`1})">
             <summary>
-            Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.Diagram"/> class.
+            Initializes a new instance of the <see cref="!:Diagram"/> class.
             </summary>
             <param name="component">The component.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.AutoBind(System.Boolean)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.AutoBind(System.Boolean)">
             <summary>
             If set to false the widget will not bind to the data source during initialization. In this case data binding will occur when the change event of the
             data source is fired. By default the widget will bind to the data source specified in the configuration.
             </summary>
             <param name="value">The value that configures the autobind.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.ZoomRate(System.Double)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.ZoomRate(System.Double)">
             <summary>
             The zoom step when using the mouse-wheel to zoom in or out.
             </summary>
             <param name="value">The value that configures the zoomrate.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Zoom(System.Double)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Zoom(System.Double)">
             <summary>
             The zoom level in percentages.
             </summary>
             <param name="value">The value that configures the zoom.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.ZoomMin(System.Double)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.ZoomMin(System.Double)">
             <summary>
             The zoom min level in percentages.
             </summary>
             <param name="value">The value that configures the zoommin.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.ZoomMax(System.Double)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.ZoomMax(System.Double)">
             <summary>
             The zoom max level in percentages.
             </summary>
             <param name="value">The value that configures the zoommax.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Editable(System.Action{Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Editable(System.Action{Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder{`0,`1}})">
             <summary>
             Specifies the shape editable.
             </summary>
             <param name="configurator">The action that configures the editable.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Layout(System.Action{Kendo.Mvc.UI.Fluent.DiagramLayoutSettingsBuilder})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Layout(System.Action{Kendo.Mvc.UI.Fluent.DiagramLayoutSettingsBuilder})">
             <summary>
             The layout of a diagram consists in arranging the shapes (sometimes also the connections) in some fashion in order to achieve an aesthetically pleasing experience to the user. It aims at giving a more direct insight in the information contained within the diagram and its relational structure.On a technical level, layout consists of a multitude of algorithms and optimizations:and various ad-hoc calculations which depend on the type of layout. The criteria on which an algorithm is based vary but the common denominator is:Kendo diagram includes three of the most used layout algorithms which should cover most of your layout needs - tree layout, force-directed layout and layered layout. Please, check the type property for more details regarding each type.The generic way to apply a layout is by calling the layout() method on the diagram. The method has a single parameter options. It is an object, which can contain parameters which are specific to the layout as well as parameters customizing the global grid layout. Parameters which apply to other layout algorithms can be included but are overlooked if not applicable to the chose layout type. This means that you can define a set of parameters which cover all possible layout types and simply pass it in the method whatever the layout define in the first parameter.
             </summary>
             <param name="configurator">The action that configures the layout.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Template(System.String)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Template(System.String)">
             <summary>
             The template which renders the content of the shape when bound to a dataSource. The names you can use in the template correspond to the properties used in the dataSource. See the dataSource topic below for a concrete example.
             </summary>
             <param name="value">The value that configures the template.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.TemplateId(System.String)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.TemplateId(System.String)">
             <summary>
             The template which renders the content of the shape when bound to a dataSource. The names you can use in the template correspond to the properties used in the dataSource. See the dataSource topic below for a concrete example.
             </summary>
             <param name="value">The value that configures the template.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.ConnectionDefaults(System.Action{Kendo.Mvc.UI.Fluent.DiagramConnectionDefaultsSettingsBuilder})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.ConnectionDefaults(System.Action{Kendo.Mvc.UI.Fluent.DiagramConnectionDefaultsSettingsBuilder})">
             <summary>
             Defines the connections configuration.
             </summary>
             <param name="configurator">The action that configures the connectiondefaults.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Connections(System.Action{Kendo.Mvc.UI.Fluent.DiagramConnectionFactory})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Connections(System.Action{Kendo.Mvc.UI.Fluent.DiagramConnectionFactory})">
             <summary>
             Defines the connections configuration.
             </summary>
             <param name="configurator">The action that configures the connections.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Selectable(System.Action{Kendo.Mvc.UI.Fluent.DiagramSelectableSettingsBuilder})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Selectable(System.Action{Kendo.Mvc.UI.Fluent.DiagramSelectableSettingsBuilder})">
             <summary>
             Defines the selectable options.
             </summary>
             <param name="configurator">The action that configures the selectable.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.ShapeDefaults(System.Action{Kendo.Mvc.UI.Fluent.DiagramShapeDefaultsSettingsBuilder})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.ShapeDefaults(System.Action{Kendo.Mvc.UI.Fluent.DiagramShapeDefaultsSettingsBuilder})">
             <summary>
             Defines the shape options.
             </summary>
             <param name="configurator">The action that configures the shapedefaults.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Shapes(System.Action{Kendo.Mvc.UI.Fluent.DiagramShapeFactory})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Shapes(System.Action{Kendo.Mvc.UI.Fluent.DiagramShapeFactory})">
             <summary>
             Defines the shape options.
             </summary>
             <param name="configurator">The action that configures the shapes.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.DataSource(System.Action{Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder{System.Object}})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.DataSource(System.Action{Kendo.Mvc.UI.Fluent.DiagramDataSourceBuilder{`0}})">
             <summary>
-            Configure the DataSource of the component
+            Configure the HierarchicalDataSource of the component
             </summary>
-            <param name="configurator">The action that configures the <see cref="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.DataSource(System.Action{Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder{System.Object}})"/>.</param>
+            <param name="configurator">The action that configures the <see cref="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.DataSource(System.Action{Kendo.Mvc.UI.Fluent.DiagramDataSourceBuilder{`0}})"/>.</param>
             <example>
             <code lang="CS">
              &lt;%= Html.Kendo().Diagram()
@@ -21144,7 +22180,25 @@
             </code>
             </example>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Events(System.Action{Kendo.Mvc.UI.Fluent.DiagramEventBuilder})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.ConnectionsDataSource(System.Action{Kendo.Mvc.UI.Fluent.DiagramConnectionDataSourceBuilder{`1}})">
+            <summary>
+            Configure the DataSource of the component
+            </summary>
+            <param name="configurator">The action that configures the <see cref="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.ConnectionsDataSource(System.Action{Kendo.Mvc.UI.Fluent.DiagramConnectionDataSourceBuilder{`1}})"/>.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Diagram()
+                .Name("diagram")
+                .DataSource(dataSource =&gt; dataSource
+                    .Read(read =&gt; read
+                        .Action("_OrgChart", "Diagram")
+                    )
+                )
+             %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Events(System.Action{Kendo.Mvc.UI.Fluent.DiagramEventBuilder})">
             <summary>
             Configures the client-side events.
             </summary>
@@ -21160,7 +22214,7 @@
             </code>
             </example>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder.Editable(System.Boolean)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramBuilder`2.Editable(System.Boolean)">
             <summary>
             Specifies the shape editable.
             </summary>
@@ -21170,6 +22224,42 @@
             <summary>
             Defines the fluent API for configuring the Kendo Diagram for ASP.NET MVC events.
             </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEventBuilder.DataBound(System.String)">
+            <summary>
+            Fired when the widget is bound to data from dataDource and connectionsDataSource.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the dataBound event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEventBuilder.Add(System.String)">
+            <summary>
+            Fired when the user add new shape or connection.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the Add event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEventBuilder.Edit(System.String)">
+            <summary>
+            Fired when the user edits a shape or connection.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the Edit event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEventBuilder.Save(System.String)">
+            <summary>
+            Fired when the user a shape or connection da is saved.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the Save event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEventBuilder.Cancel(System.String)">
+            <summary>
+            Fired when the user clicks the "cancel" button in the popup window.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the cancel event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEventBuilder.Remove(System.String)">
+            <summary>
+            Fired when the user delete a shape or connection.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the remove event.</param>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.DiagramEventBuilder.Change(System.String)">
             <summary>
@@ -21219,13 +22309,13 @@
             </summary>
             <param name="handler">The name of the JavaScript function that will handle the click event.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.DiagramHtmlBuilder.#ctor(Kendo.Mvc.UI.Diagram)">
+        <member name="M:Kendo.Mvc.UI.DiagramHtmlBuilder`2.#ctor(Kendo.Mvc.UI.Diagram{`0,`1})">
             <summary>
-            Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.DiagramHtmlBuilder"/> class.
+            Initializes a new instance of the <see cref="!:DiagramHtmlBuilder"/> class.
             </summary>
             <param name="component">The Diagram component.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.DiagramHtmlBuilder.Build">
+        <member name="M:Kendo.Mvc.UI.DiagramHtmlBuilder`2.Build">
             <summary>
             Builds the Diagram markup.
             </summary>
@@ -21395,58 +22485,6 @@
             Defines the fluent interface for configuring the dependencies <see cref="T:Kendo.Mvc.UI.DataSource"/> Model definition.
             </summary>
             <typeparam name="TModel">Type of the model</typeparam>
-        </member>
-        <member name="T:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1">
-            <summary>
-            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> Model definition.
-            </summary>
-            <typeparam name="TModel">Type of the model</typeparam>
-        </member>
-        <member name="T:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactoryBase`1">
-            <summary>
-            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> Model definition.
-            </summary>
-            <typeparam name="TModel">Type of the model</typeparam>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactoryBase`1.Id(System.String)">
-            <summary>
-            Specify the member used to identify an unique Model instance.
-            </summary>
-            <param name="fieldName">The member name.</param>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Id(System.String)">
-            <summary>
-            Specify the member used to identify an unique Model instance.
-            </summary>
-            <param name="fieldName">The member name.</param>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Id``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
-            <summary>
-            Specify the member used to identify an unique Model instance.
-            </summary>
-            <typeparam name="TValue">Type of the field</typeparam>
-            <param name="expression">Member access expression which describes the member</param>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Field``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
-            <summary>
-            Describes a Model field
-            </summary>
-            <typeparam name="TValue">Field type</typeparam>
-            <param name="expression">Member access expression which describes the field</param>        
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Field(System.String,System.Type)">
-            <summary>
-            Describes a Model field
-            </summary>
-            <param name="memberName">Field name</param>
-            <param name="memberType">Field type</param>        
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DataSourceModelDescriptorFactory`1.Field``1(System.String)">
-            <summary>
-            Describes a Model field
-            </summary>
-            <typeparam name="TValue">Field type</typeparam>
-            <param name="memberName">Member name</param>        
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.GanttDependenciesModelDescriptorFactory`1.PredecessorId``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
             <summary>
@@ -22513,83 +23551,6 @@
             %&gt;
             </code>
             </example>
-        </member>
-        <member name="T:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1">
-            <summary>
-            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.DataSource"/> AJAX create/update/destroy operation bindings.
-            </summary>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Update(System.Action{Kendo.Mvc.UI.Fluent.CrudOperationBuilder})">
-            <summary>
-            Configures the URL for Update operation.
-            </summary>        
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Update(System.String,System.String)">
-            <summary>
-            Sets controller and action for Update operation.
-            </summary>
-            <param name="actionName">Action name</param>
-            <param name="controllerName">Controller Name</param>        
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Update(System.String,System.String,System.Object)">
-            <summary>
-            Sets controller, action and routeValues for Update operation.
-            </summary>
-            <param name="actionName">Action name</param>
-            <param name="controllerName">Controller Name</param>        
-            <param name="routeValues">Route values</param>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Create(System.Action{Kendo.Mvc.UI.Fluent.CrudOperationBuilder})">
-            <summary>
-            Configures the URL for Create operation.
-            </summary> 
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Create(System.String,System.String)">
-            <summary>
-            Sets controller and action for Create operation.
-            </summary>
-            <param name="actionName">Action name</param>
-            <param name="controllerName">Controller Name</param>                
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Create(System.String,System.String,System.Object)">
-            <summary>
-            Sets controller, action and routeValues for Create operation.
-            </summary>
-            <param name="actionName">Action name</param>
-            <param name="controllerName">Controller Name</param>        
-            <param name="routeValues">Route values</param>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Destroy(System.Action{Kendo.Mvc.UI.Fluent.CrudOperationBuilder})">
-            <summary>
-            Configures the URL for Destroy operation.
-            </summary> 
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Destroy(System.String,System.String)">
-            <summary>
-            Sets controller and action for Destroy operation.
-            </summary>
-            <param name="actionName">Action name</param>
-            <param name="controllerName">Controller Name</param>                
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Destroy(System.String,System.String,System.Object)">
-            <summary>
-            Sets controller, action and routeValues for Destroy operation.
-            </summary>
-            <param name="actionName">Action name</param>
-            <param name="controllerName">Controller Name</param>        
-            <param name="routeValues">Route values</param>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.Batch(System.Boolean)">
-            <summary>
-            Determines if modifications will be sent to the server in batches or as individually requests.
-            </summary>
-            <param name="enabled">If true changes will be batched, otherwise false.</param>        
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.AjaxDataSourceBuilder`1.AutoSync(System.Boolean)">
-            <summary>
-            Determines if data source would automatically sync any changes to its data items. By default changes are not automatically sync-ed.
-            </summary>
-            <param name="enabled">If true changes will be automatically synced, otherwise false.</param>        
         </member>
         <member name="T:Kendo.Mvc.UI.Fluent.CrudOperationBuilderBase`1">
             <summary>
@@ -23811,6 +24772,40 @@
             </code>
             </example>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DropDownListEventBuilder.Filtering(System.Func{System.Object,System.Object})">
+            <summary>
+            Defines the inline handler of the Filtering client-side event
+            </summary>
+            <param name="handler">The handler code wrapped in a text tag (Razor syntax).</param>
+            <example>
+            <code lang="CS">
+             @(Html.Kendo().DropDownList()
+                       .Name("DropDownList")
+                       .Events(events => events.Filtering(
+                            @&lt;text&gt;
+                            function(e) {
+                                //event handling code
+                            }
+                            &lt;/text&gt;
+                       ))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DropDownListEventBuilder.Filtering(System.String)">
+            <summary>
+            Defines the name of the JavaScript function that will handle the the Filtering client-side event.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the event.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().DropDownList()
+                        .Name("DropDownList")
+                        .Events(events => events.Filtering("filtering"))
+            %&gt;
+            </code>
+            </example>
+        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.DropDownListEventBuilder.Open(System.String)">
             <summary>
              Defines the name of the JavaScript function that will handle the the Open client-side event.
@@ -23912,11 +24907,6 @@
             )
             </code>
             </example>
-        </member>
-        <member name="T:Kendo.Mvc.UI.Fluent.EditorSerializationOptionsBuilder">
-            <summary>
-            Defines the fluent interface for configuring the Editor serialization options
-            </summary>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.EditorImageBrowserOperationBuilder.Route(System.Web.Routing.RouteValueDictionary)">
             <summary>
@@ -25784,20 +26774,6 @@
             %&gt;
             </code>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.EditorBuilder.Serialization(System.Action{Kendo.Mvc.UI.Fluent.EditorSerializationOptionsBuilder})">
-            <summary>
-            Configure the serialization options.
-            </summary>
-            <param name="configurator">An action that configures the serialization options.</param>
-            <code lang="CS">
-             &lt;%= Html.Kendo().Editor()
-                        .Name("Editor")
-                        .Serialization(serialization => serialization
-                            .Entities(false)
-                        )
-            %&gt;
-            </code>
-        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.EditorBuilder.Tools(System.Action{Kendo.Mvc.UI.Fluent.EditorToolFactory})">
             <summary>
             Configure the available tools in the toolbar.
@@ -25887,6 +26863,21 @@
                         )
             %&gt;
             </code>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.EditorBuilder.Domain(System.String)">
+            <summary>
+            Relaxes the same-origin policy when using the iframe-based editor.
+            This is done automatically for all cases except when the policy is relaxed by document.domain = document.domain.
+            In that case, this property must be used to allow the editor to function properly across browsers.
+            This property has been introduced in internal builds after 2014.1.319.
+            </summary>
+            <param name="value">The value that configures the domain.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.EditorBuilder.Serialization(System.Action{Kendo.Mvc.UI.Fluent.EditorSerializationSettingsBuilder})">
+            <summary>
+            Allows setting of serialization options.
+            </summary>
+            <param name="configurator">The action that configures the serialization.</param>
         </member>
         <member name="T:Kendo.Mvc.UI.GaugeLinearPointerShape">
             <summary>
@@ -26934,87 +27925,6 @@
             Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.GaugeScaleRanges"/> class.
             </summary>
         </member>
-        <member name="T:Kendo.Mvc.UI.GridColumnBase`1">
-            <summary>
-            The base class for all columns in Kendo Grid for ASP.NET MVC.
-            </summary>
-            <typeparam name="T"></typeparam>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Grid">
-            <summary>
-            Gets or sets the grid.
-            </summary>
-            <value>The grid.</value>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Member">
-            <summary>
-            Gets the member of the column.
-            </summary>
-            <value>The member.</value>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Template">
-            <summary>
-            Gets the template of the column.
-            </summary>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.HeaderTemplate">
-            <summary>
-            Gets the header template of the column.
-            </summary>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.FooterTemplate">
-            <summary>
-            Gets the footer template of the column.
-            </summary>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Title">
-            <summary>
-            Gets or sets the title of the column.
-            </summary>
-            <value>The title.</value>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Width">
-            <summary>
-            Gets or sets the width of the column.
-            </summary>
-            <value>The width.</value>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Hidden">
-            <summary>
-            Gets or sets a value indicating whether this column is hidden.
-            </summary>
-            <value><c>true</c> if hidden; otherwise, <c>false</c>.</value>
-            <remarks>
-            Hidden columns are output as HTML but are not visible by the end-user.
-            </remarks>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.HeaderHtmlAttributes">
-            <summary>
-            Gets the header HTML attributes.
-            </summary>
-            <value>The header HTML attributes.</value>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.FooterHtmlAttributes">
-            <summary>
-            Gets the footer HTML attributes.
-            </summary>
-            <value>The footer HTML attributes.</value>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.Visible">
-            <summary>
-            Gets or sets a value indicating whether this column is visible.
-            </summary>
-            <value><c>true</c> if visible; otherwise, <c>false</c>. The default value is <c>true</c>.</value>
-            <remarks>
-            Invisible columns are not output in the HTML.
-            </remarks>
-        </member>
-        <member name="P:Kendo.Mvc.UI.GridColumnBase`1.HtmlAttributes">
-            <summary>
-            Gets the HTML attributes of the cell rendered for the column
-            </summary>
-            <value>The HTML attributes.</value>
-        </member>
         <member name="M:Kendo.Mvc.UI.GridBoundColumn`2.#ctor(Kendo.Mvc.UI.Grid{`0},System.Linq.Expressions.Expression{System.Func{`0,`1}})">
             <summary>
             Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.GridBoundColumn`2"/> class.
@@ -27718,61 +28628,6 @@
             Represents the selection types supported by Kendo UI Grid for ASP.NET MVC
             </summary>
         </member>
-        <member name="T:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1">
-            <summary>
-            Defines the fluent interface for configuring the <see cref="!:HierarchicalDataSource"/>.
-            </summary>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Custom">
-            <summary>
-            Use it to configure Custom binding.
-            </summary>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.SignalR">
-            <summary>
-            Use it to configure SignalR binding.
-            </summary>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Read(System.Action{Kendo.Mvc.UI.Fluent.CrudOperationBuilder})">
-            <summary>
-            Configures the URL for Read operation.
-            </summary> 
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Read(System.String,System.String,System.Object)">
-            <summary>
-            Sets controller, action and routeValues for Read operation.
-            </summary>
-            <param name="actionName">Action name</param>
-            <param name="controllerName">Controller Name</param>        
-            <param name="routeValues">Route values</param>
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Read(System.String,System.String)">
-            <summary>
-            Sets controller and action for Read operation.
-            </summary>
-            <param name="actionName">Action name</param>
-            <param name="controllerName">Controller Name</param>                
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Events(System.Action{Kendo.Mvc.UI.Fluent.DataSourceEventBuilder})">
-            <summary>
-            Configures the client-side events
-            </summary>  
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.Model(System.Action{Kendo.Mvc.UI.Fluent.HierarchicalModelDescriptorBuilder{System.Object}})">
-            <summary>
-            Configures the model
-            </summary>  
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.ServerFiltering">
-            <summary>
-            Specifies if filtering should be handled by the server.
-            </summary>        
-        </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.HierarchicalDataSourceBuilder`1.ServerFiltering(System.Boolean)">
-            <summary>
-            Specifies if filtering should be handled by the server.
-            </summary>        
-        </member>
         <member name="T:Kendo.Mvc.UI.Fluent.HierarchicalModelDescriptorBuilder`1">
             <summary>
             Defines the fluent interface for configuring the <see cref="!:HierarchicalModelDescriptor"/>.
@@ -28436,6 +29291,40 @@
              &lt;%= Html.Kendo().MultiSelect()
                         .Name("MultiSelect")
                         .Events(events => events.DataBound("dataBound"))
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.MultiSelectEventBuilder.Filtering(System.Func{System.Object,System.Object})">
+            <summary>
+            Defines the inline handler of the Filtering client-side event
+            </summary>
+            <param name="handler">The handler code wrapped in a text tag (Razor syntax).</param>
+            <example>
+            <code lang="CS">
+             @(Html.Kendo().MultiSelect()
+                       .Name("MultiSelect")
+                       .Events(events => events.Filtering(
+                            @&lt;text&gt;
+                            function(e) {
+                                //event handling code
+                            }
+                            &lt;/text&gt;
+                       ))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.MultiSelectEventBuilder.Filtering(System.String)">
+            <summary>
+            Defines the name of the JavaScript function that will handle the the Filtering client-side event.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the event.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().MultiSelect()
+                        .Name("MultiSelect")
+                        .Events(events => events.Filtering("filtering"))
             %&gt;
             </code>
             </example>
@@ -29415,13 +30304,25 @@
         </member>
         <member name="T:Kendo.Mvc.UI.Fluent.GridToolBarCommandFactory`1">
             <summary>
-            Defines the fluent interface for configuring toolbar command.
+            Defines the fluent interface for configuring toolbar commands.
             </summary>
             <typeparam name="T">The type of the model</typeparam>    
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.GridToolBarCommandFactory`1.Create">
             <summary>
             Defines a create command.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridToolBarCommandFactory`1.Excel">
+            <summary>
+            Represents a command which exports the current grid data to Excel.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridToolBarCommandFactory`1.Pdf">
+            <summary>
+            Represents a command which exports the current grid data to PDF.
             </summary>
             <returns></returns>
         </member>
@@ -30395,6 +31296,53 @@
             The server side wrapper for Kendo UI PivotConfigurator
             </summary>
         </member>
+        <member name="P:Kendo.Mvc.UI.PivotConfigurator.Sortable">
+            <summary>
+            Gets the sorting configuration.
+            </summary>
+            <value>The sorting.</value>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.PivotGridSortSettingsBuilder">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.PivotGridSortableSettings"/>.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotGridSortSettingsBuilder.#ctor(Kendo.Mvc.UI.PivotGridSortableSettings)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.Fluent.PivotGridSortSettingsBuilder"/> class.
+            </summary>
+            <param name="settings">The settings.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotGridSortSettingsBuilder.Enabled(System.Boolean)">
+            <summary>
+            Enables or disables sorting.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().PivotGrid()
+                        .Name("PivotGrid")
+                        .Sortable(sorting => sorting.Enabled((bool)ViewData["enableSorting"]))
+            %&gt;
+            </code>
+            </example>
+            <remarks>
+            The Enabled method is useful when you need to enable sorting based on certain conditions.
+            </remarks>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotGridSortSettingsBuilder.AllowUnsort(System.Boolean)">
+            <summary>
+            Enables or disables unsorted mode.
+            </summary>
+            <param name="value">The value.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().PivotGrid()
+                        .Name("PivotGrid")
+                        .Sortable(sorting => sorting.AllowUnsort(true))
+            %&gt;
+            </code>
+            </example>
+        </member>
         <member name="T:Kendo.Mvc.UI.Fluent.PivotFieldMenuMessagesBuilder">
             <summary>
             Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.PivotFieldMenuMessages"/>.
@@ -30447,6 +31395,113 @@
             If set to true the user will be able to filter by using the field menu.
             </summary>
             <param name="filterable">The filterable</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotGridBuilder`1.Sortable">
+            <summary>
+            Enables grid column sorting.
+            </summary>
+            <example>
+            <code lang="ASPX">
+            &lt;%:Html.Kendo().PivotGrid()
+                .Name(&quot;pivotgrid&quot;)
+                .Sortable()
+                .DataSource(dataSource =&gt;
+                    dataSource.Xmla()
+                       .Columns(columns =&gt; columns.Add(&quot;[Date].[Calendar]&quot;).Expand(true))
+                       .Rows(rows =&gt; rows.Add(&quot;[Geography].[City]&quot;))
+                       .Measures(measures =&gt; measures.Values(new string[]{&quot;[Measures].[Internet Sales Amount]&quot;}))
+                       .Transport(transport =&gt; transport
+                           .Connection(connection =&gt; connection
+                               .Catalog(&quot;Adventure Works DW 2008R2&quot;)
+                               .Cube(&quot;Adventure Works&quot;))
+                           .Read(read =&gt; read
+                               .Url(&quot;http://demos.telerik.com/olap/msmdpump.dll&quot;)
+                               .DataType(&quot;text&quot;)
+                               .ContentType(&quot;text/xml&quot;)
+                               .Type(HttpVerbs.Post)
+                           )
+                       )
+                )
+            %&gt;
+            </code>
+            <code lang="Razor">
+            @(Html.Kendo().PivotGrid()
+                  .Name(&quot;pivotgrid&quot;)
+                  .Sortable()
+                  .DataSource(dataSource =&gt;
+                    dataSource.Xmla()
+                       .Columns(columns =&gt; columns.Add(&quot;[Date].[Calendar]&quot;).Expand(true))
+                       .Rows(rows =&gt; rows.Add(&quot;[Geography].[City]&quot;))
+                       .Measures(measures =&gt; measures.Values(new string[]{&quot;[Measures].[Internet Sales Amount]&quot;}))
+                       .Transport(transport =&gt; transport
+                           .Connection(connection =&gt; connection
+                               .Catalog(&quot;Adventure Works DW 2008R2&quot;)
+                               .Cube(&quot;Adventure Works&quot;))
+                           .Read(read =&gt; read
+                               .Url(&quot;http://demos.telerik.com/olap/msmdpump.dll&quot;)
+                               .DataType(&quot;text&quot;)
+                               .ContentType(&quot;text/xml&quot;)
+                               .Type(HttpVerbs.Post)
+                           )
+                       )
+                  )
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.PivotGridBuilder`1.Sortable(System.Action{Kendo.Mvc.UI.Fluent.PivotGridSortSettingsBuilder})">
+            <summary>
+            Sets the sorting configuration of the pivotgrid.
+            </summary>
+            <param name="configurator">The lambda which configures the sorting</param>
+            <example>
+            <code lang="ASPX">
+            &lt;%:Html.Kendo().PivotGrid()
+                .Name(&quot;pivotgrid&quot;)
+                .Sortable(sorting =&gt; sorting.AllowUnsort(true))
+                .DataSource(dataSource =&gt;
+                    dataSource.Xmla()
+                       .Columns(columns =&gt; columns.Add(&quot;[Date].[Calendar]&quot;).Expand(true))
+                       .Rows(rows =&gt; rows.Add(&quot;[Geography].[City]&quot;))
+                       .Measures(measures =&gt; measures.Values(new string[]{&quot;[Measures].[Internet Sales Amount]&quot;}))
+                       .Transport(transport =&gt; transport
+                           .Connection(connection =&gt; connection
+                               .Catalog(&quot;Adventure Works DW 2008R2&quot;)
+                               .Cube(&quot;Adventure Works&quot;))
+                           .Read(read =&gt; read
+                               .Url(&quot;http://demos.telerik.com/olap/msmdpump.dll&quot;)
+                               .DataType(&quot;text&quot;)
+                               .ContentType(&quot;text/xml&quot;)
+                               .Type(HttpVerbs.Post)
+                           )
+                       )
+                )
+            %&gt;
+            </code>
+            <code lang="Razor">
+            @(Html.Kendo().PivotGrid()
+                  .Name(&quot;pivotgrid&quot;)
+                  .Sortable(sorting =&gt; sorting.AllowUnsort(true))
+                  .DataSource(dataSource =&gt;
+                    dataSource.Xmla()
+                       .Columns(columns =&gt; columns.Add(&quot;[Date].[Calendar]&quot;).Expand(true))
+                       .Rows(rows =&gt; rows.Add(&quot;[Geography].[City]&quot;))
+                       .Measures(measures =&gt; measures.Values(new string[]{&quot;[Measures].[Internet Sales Amount]&quot;}))
+                       .Transport(transport =&gt; transport
+                           .Connection(connection =&gt; connection
+                               .Catalog(&quot;Adventure Works DW 2008R2&quot;)
+                               .Cube(&quot;Adventure Works&quot;))
+                           .Read(read =&gt; read
+                               .Url(&quot;http://demos.telerik.com/olap/msmdpump.dll&quot;)
+                               .DataType(&quot;text&quot;)
+                               .ContentType(&quot;text/xml&quot;)
+                               .Type(HttpVerbs.Post)
+                           )
+                       )
+                  )
+            )
+            </code>
+            </example>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.PivotGridBuilder`1.Events(System.Action{Kendo.Mvc.UI.Fluent.PivotGridEventBuilder})">
             <summary>
@@ -30967,6 +32022,12 @@
             <summary>
             The server side wrapper for Kendo UI PivotGrid
             </summary>
+        </member>
+        <member name="P:Kendo.Mvc.UI.PivotGrid`1.Sortable">
+            <summary>
+            Gets the sorting configuration.
+            </summary>
+            <value>The sorting.</value>
         </member>
         <member name="T:Kendo.Mvc.UI.Fluent.ProgressBarAnimationBuilder">
             <summary>
@@ -32743,6 +33804,38 @@
             </summary>
             <param name="enable">The confirmation</param>
         </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.SchedulerTimelineViewBuilder`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.SchedulerTimelineView"/>.
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.SchedulerTimelineViewBuilderBase`2">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.SchedulerTimelineViewBase"/>.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerTimelineViewBuilderBase`2.EventHeight(System.Int32)">
+            <summary>
+            The height of the scheduler event rendered in timeline view.
+            </summary>
+            <param name="eventHeight">The eventHeight</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerTimelineViewBuilderBase`2.ColumnWidth(System.Int32)">
+            <summary>
+            The width of the scheduler timeline view column.
+            </summary>
+            <param name="columnWidth">The columnWidth</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.SchedulerTimelineWeekViewBuilder`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.SchedulerTimelineWeekView"/>.
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.SchedulerTimelineWorkWeekViewBuilder`1">
+            <summary>
+            Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.SchedulerTimelineWorkWeekView"/>.
+            </summary>
+        </member>
         <member name="T:Kendo.Mvc.UI.Fluent.SchedulerViewMessagesBuilder">
             <summary>
             Defines the fluent interface for configuring the <see cref="T:Kendo.Mvc.UI.SchedulerViewMessages"/>.
@@ -34502,6 +35595,42 @@
         <member name="M:Kendo.Mvc.UI.Fluent.SchedulerViewFactory`1.AgendaView(System.Action{Kendo.Mvc.UI.Fluent.SchedulerAgendaViewBuilder{Kendo.Mvc.UI.SchedulerAgendaView}})">
             <summary>
             Defines a Scheduler agenda view.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerViewFactory`1.TimelineView">
+            <summary>
+            Enables a Scheduler timeline view.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerViewFactory`1.TimelineView(System.Action{Kendo.Mvc.UI.Fluent.SchedulerTimelineViewBuilder{Kendo.Mvc.UI.SchedulerTimelineView}})">
+            <summary>
+            Defines a Scheduler timeline view.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerViewFactory`1.TimelineWeekView">
+            <summary>
+            Enables a Scheduler timeline week view.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerViewFactory`1.TimelineWeekView(System.Action{Kendo.Mvc.UI.Fluent.SchedulerTimelineWeekViewBuilder{Kendo.Mvc.UI.SchedulerTimelineWeekView}})">
+            <summary>
+            Defines a Scheduler timelineWeek view.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerViewFactory`1.TimelineWorkWeekView">
+            <summary>
+            Enables a Scheduler timeline work week view.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerViewFactory`1.TimelineWorkWeekView(System.Action{Kendo.Mvc.UI.Fluent.SchedulerTimelineWorkWeekViewBuilder{Kendo.Mvc.UI.SchedulerTimelineWorkWeekView}})">
+            <summary>
+            Defines a Scheduler timelineWorkWeek view.
             </summary>
             <returns></returns>
         </member>
@@ -39064,6 +40193,11 @@
              Center position
             </summary>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListAjaxDataSourceBuilder`1.Model(System.Action{Kendo.Mvc.UI.Fluent.DataSourceTreeListModelDescriptorFactory{`0}})">
+            <summary>
+            Configures Model properties
+            </summary>
+        </member>
         <member name="T:Kendo.Mvc.UI.Fluent.TreeMapColorRangeFactory">
             <summary>
             Creates plot bands for the <see cref="T:Kendo.Mvc.UI.Fluent.TreeMapColorRangeFactory"/>.
@@ -39735,7 +40869,7 @@
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeViewBuilder.DataImageUrlField(System.String)">
             <summary>
-            Sets the field of the data item that provides the image URL of the treeview nodes.
+            Sets the field of the data item that provides the image URL of the TreeView nodes.
             </summary>
             <param name="value">The value that configures the dataimageurlfield.</param>
         </member>
@@ -42113,6 +43247,8 @@
             </code>
             </example>
         </member>
+        <!-- Badly formed XML comment ignored for member "M:Kendo.Mvc.UI.Fluent.GridBuilder`1.Excel(System.Action{Kendo.Mvc.UI.Fluent.GridExcelBuilder})" -->
+        <!-- Badly formed XML comment ignored for member "M:Kendo.Mvc.UI.Fluent.GridBuilder`1.Pdf(System.Action{Kendo.Mvc.UI.Fluent.GridPdfBuilder})" -->
         <member name="M:Kendo.Mvc.UI.Fluent.GridBuilder`1.DetailTemplate(System.Action{`0})">
             <summary>
             Sets the server-side detail template of the grid in ASPX views.
@@ -43414,7 +44550,7 @@
             </summary>
             <typeparam name="TModel">The type of the data item to which the grid is bound to</typeparam>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnFactory`1.#ctor(Kendo.Mvc.UI.Grid{`0},System.Web.Mvc.ViewContext,Kendo.Mvc.IUrlGenerator)">
+        <member name="M:Kendo.Mvc.UI.Fluent.GridColumnFactory`1.#ctor(Kendo.Mvc.UI.Grid{`0},System.Web.Mvc.ViewContext,Kendo.Mvc.IUrlGenerator,Kendo.Mvc.UI.IGridColumnContainer{`0})">
             <summary>
             Initializes a new instance of the <see cref="T:Kendo.Mvc.UI.Fluent.GridColumnFactory`1"/> class.
             </summary>
@@ -46761,18 +47897,6 @@
             </code>
             </example>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Editor">
-            <summary>
-            Creates a <see cref="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Editor"/>
-            </summary>
-            <example>
-            <code lang="CS">
-             &lt;%= Html.Kendo().Editor()
-                        .Name("Editor");
-            %&gt;
-            </code>
-            </example>
-        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Grid``1">
             <summary>
             Creates a new <see cref="T:Kendo.Mvc.UI.Grid`1"/> bound to the specified data item type.
@@ -47225,6 +48349,30 @@
             <code lang="CS">
              &lt;%= Html.Kendo().MaskedTextBox()
                         .Name("MaskedTextBox")
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.CheckBox">
+            <summary>
+            Creates a new <see cref="M:Kendo.Mvc.UI.Fluent.WidgetFactory.CheckBox"/>.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().CheckBox()
+                        .Name("CheckBox")
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.RadioButton">
+            <summary>
+            Creates a new <see cref="M:Kendo.Mvc.UI.Fluent.WidgetFactory.RadioButton"/>.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().RadioButton()
+                        .Name("RadioButton")
             %&gt;
             </code>
             </example>
@@ -47687,6 +48835,30 @@
             </code>
             </example>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Diagram``2">
+            <summary>
+            Creates a <see cref="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Diagram"/>
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Diagram()
+                        .Name("Diagram")
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Editor">
+            <summary>
+            Creates a <see cref="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Editor"/>
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Editor()
+                        .Name("Editor")
+            %&gt;
+            </code>
+            </example>
+        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Gantt``2">
             <summary>
             Creates a <see cref="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Gantt``2"/>
@@ -47723,6 +48895,18 @@
             </code>
             </example>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.TreeList``1">
+            <summary>
+            Creates a <see cref="M:Kendo.Mvc.UI.Fluent.WidgetFactory.TreeList``1"/>
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().TreeList()
+                        .Name("TreeList")
+            %&gt;
+            </code>
+            </example>
+        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.TreeMap">
             <summary>
             Creates a <see cref="M:Kendo.Mvc.UI.Fluent.WidgetFactory.TreeMap"/>
@@ -47743,6 +48927,34 @@
             <code lang="CS">
              &lt;%= Html.Kendo().TreeView()
                         .Name("TreeView")
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Gantt``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``1})">
+            <summary>
+            Creates a new <see cref="!:Kendo.Mvc.UI.Gantt&lt;T&gt;"/> bound to the specified data source.
+            </summary>
+            <typeparam name="T">The type of the data item</typeparam>
+            <param name="dataSource">The data source.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Gantt(ViewBag.Tasks)
+                        .Name("Gantt")
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory.Gantt``2(System.String,System.String)">
+            <summary>
+            Creates a new <see cref="!:Kendo.Mvc.UI.Gantt&lt;T&gt;"/> bound an item in ViewData.
+            </summary>
+            <typeparam name="T">Type of the data item</typeparam>
+            <param name="dataSourceViewDataKey">The data source view data key.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().Gantt("tasks")
+                        .Name("Gantt")
             %&gt;
             </code>
             </example>
@@ -48051,6 +49263,26 @@
             <example>
             <code lang="CS">
              &lt;%= Html.Kendo().MaskedTextBoxFor(m=&gt;m.Property) %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory`1.CheckBoxFor``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Creates a new <see cref="T:Kendo.Mvc.UI.CheckBox"/>.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().CheckBoxFor(m=&gt;m.Property) %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.WidgetFactory`1.RadioButtonFor``1(System.Linq.Expressions.Expression{System.Func{`0,``0}})">
+            <summary>
+            Creates a new <see cref="T:Kendo.Mvc.UI.RadioButton"/>.
+            </summary>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().RadioButtonFor(m=&gt;m.Property) %&gt;
             </code>
             </example>
         </member>
@@ -49281,6 +50513,11 @@
         <member name="P:Kendo.Mvc.Resources.Exceptions.EditCommandRequiresUpdate">
             <summary>
               Looks up a localized string similar to The Update data binding setting is required by the edit command. Please specify the Update action or url in the DataBinding configuration..
+            </summary>
+        </member>
+        <member name="P:Kendo.Mvc.Resources.Exceptions.ExcelExportNotSupportedInServerBinding">
+            <summary>
+              Looks up a localized string similar to Excel export is not supported in server binding mode..
             </summary>
         </member>
         <member name="P:Kendo.Mvc.Resources.Exceptions.FirstPropertyShouldNotBeBiggerThenSecondProperty">
@@ -53867,34 +55104,46 @@
             </summary>
             <param name="value">The value that configures the color.</param>
         </member>
-        <member name="T:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder">
+        <member name="T:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder`2">
             <summary>
             Defines the fluent API for configuring the DiagramEditableSettings settings.
             </summary>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder.Resize(System.Action{Kendo.Mvc.UI.Fluent.DiagramEditableResizeSettingsBuilder})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder`2.Resize(System.Action{Kendo.Mvc.UI.Fluent.DiagramEditableResizeSettingsBuilder})">
             <summary>
             Specifies the shape resizing.
             </summary>
             <param name="configurator">The action that configures the resize.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder.Rotate(System.Action{Kendo.Mvc.UI.Fluent.DiagramEditableRotateSettingsBuilder})">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder`2.Rotate(System.Action{Kendo.Mvc.UI.Fluent.DiagramEditableRotateSettingsBuilder})">
             <summary>
             Specifyes the rotate style.
             </summary>
             <param name="configurator">The action that configures the rotate.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder.Resize(System.Boolean)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder`2.Resize(System.Boolean)">
             <summary>
             Specifies the shape resizing.
             </summary>
             <param name="visible">A value indicating if the resizing will be available.</param>
         </member>
-        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder.Rotate(System.Boolean)">
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder`2.Rotate(System.Boolean)">
             <summary>
             Specifyes the rotate style.
             </summary>
             <param name="visible">A value indicating if the rotation will be available.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder`2.ShapeTemplateName(System.String)">
+            <summary>
+            Specifies the shape editor template.
+            </summary>
+            <param name="value">The value that configures the shapetemplate.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.DiagramEditableSettingsBuilder`2.ConnectionTemplateName(System.String)">
+            <summary>
+            Specifies the connection editor template.
+            </summary>
+            <param name="value">The value that configures the connectiontemplate.</param>
         </member>
         <member name="T:Kendo.Mvc.UI.Fluent.DiagramEditableResizeSettingsBuilder">
             <summary>
@@ -54122,17 +55371,17 @@
             </summary>
             <param name="configurator">The DataSource configurator action.</param>
             <example>
-            <code lang="ASPX">
-             &lt;%= Html.Kendo().Gantt&lt;Task&gt;()
-                        .Name("Gantt")
-                        .DataSource(source =&gt;
-                        {
-                            source.Read(read =&gt;
-                            {
-                                read.Action("Read", "Gantt");
-                            });
-                        })
-            %&gt;
+            <code lang="Razor">
+             @(Html.Kendo().Gantt&lt;TaskViewModel, DependencyViewModel&gt;()
+                .Name("Gantt")
+                .DataSource(source =&gt;
+                {
+                    source.Read(read =&gt;
+                    {
+                        read.Action("Read", "Gantt");
+                    });
+                })
+            )
             </code>
             </example>
         </member>
@@ -54142,17 +55391,17 @@
             </summary>
             <param name="configurator">The DataSource configurator action.</param>
             <example>
-            <code lang="ASPX">
-             &lt;%= Html.Kendo().Gantt&lt;Task&gt;()
-                        .Name("Gantt")
-                        .DependenciesDataSource(source =&gt;
-                        {
-                            source.Read(read =&gt;
-                            {
-                                read.Action("Read", "Gantt");
-                            });
-                        })
-            %&gt;
+            <code lang="Razor">
+            @(Html.Kendo().Gantt&lt;TaskViewModel, DependencyViewModel&gt;()
+                .Name("Gantt")
+                .DependenciesDataSource(source =&gt;
+                {
+                    source.Read(read =&gt;
+                    {
+                        read.Action("Read", "Gantt");
+                    });
+                })
+             )
             </code>
             </example>
         </member>
@@ -54174,7 +55423,56 @@
             <summary>
             If set to false the user won't be able to create, modify or delete tasks and dependencies.
             </summary>
-            <param name="value">The value that configures the editable.</param>
+            <param name="isEditable">The isEditable</param>
+            <example>
+            <code lang="Razor">
+            @(Html.Kendo().Gantt&lt;TaskViewModel, DependencyViewModel&gt;()
+                .Name("gantt")
+                .Editable(false)
+                .DataSource(d =&gt; d
+                   .Model(m =&gt;
+                   {
+                       m.Id(f =&gt; f.TaskID);
+                       m.ParentId(f =&gt; f.ParentID);
+                       m.OrderId(f =&gt; f.OrderId);
+                       m.Field(f =&gt; f.Expanded).DefaultValue(true);
+                   })
+                   .Read(&quot;ReadTasks&quot;, &quot;Gantt&quot;)
+               )
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GanttBuilder`2.Editable(System.Action{Kendo.Mvc.UI.Fluent.GanttEditableSettingsBuilder})">
+             <summary>
+             Sets the editing configuration of the gantt.
+             </summary>
+             <param name="configurator">The lambda which configures the editing</param>
+             <example>
+             <code lang="Razor">
+            @(Html.Kendo().Gantt&lt;TaskViewModel, DependencyViewModel&gt;()
+                .Name("gantt")
+                .Editable(editable =&gt;
+                {
+                    editable.Confirmation(false);
+                    editable.TemplateId(&quot;customEditTemplate&quot;);
+                })
+                .DataSource(d =&gt; d
+                    .Model(m =&gt;
+                    {
+                        m.Id(f =&gt; f.TaskID);
+                        m.ParentId(f =&gt; f.ParentID);
+                        m.OrderId(f =&gt; f.OrderId);
+                        m.Field(f =&gt; f.Expanded).DefaultValue(true);
+                    })
+                    .Read(&quot;ReadTasks&quot;, &quot;Gantt&quot;)
+                    .Create(&quot;CreateTask&quot;, &quot;Gantt&quot;)
+                    .Destroy(&quot;DestroyTask&quot;, &quot;Gantt&quot;)
+                    .Update(&quot;UpdateTask&quot;, &quot;Gantt&quot;)
+                )
+            )
+             </code>
+             </example>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.GanttBuilder`2.Navigatable(System.Boolean)">
             <summary>
@@ -54267,13 +55565,13 @@
             </summary>
             <param name="configurator">The client events action.</param>
             <example>
-            <code lang="CS">
-             &lt;%= Html.Kendo().Gantt()
-                        .Name("Gantt")
-                        .Events(events => events
-                            .DataBinding("onDataBinding")
-                        )
-            %&gt;
+            <code lang="Razor">
+            @(Html.Kendo().Gantt()
+                .Name("Gantt")
+                .Events(events => events
+                    .DataBinding("onDataBinding")
+                )
+            )
             </code>
             </example>
         </member>
@@ -54574,7 +55872,7 @@
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.GanttViewBuilder.Selected(System.Boolean)">
             <summary>
-            If set to true the view will be initially selected by the gantt widget. The default selected view is "day".
+            If set to true the view will be initially selected by the Gantt widget. The default selected view is "day".
             </summary>
             <param name="value">The value that configures the selected.</param>
         </member>
@@ -54622,15 +55920,27 @@
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.GanttViewBuilder.MonthHeaderTemplate(System.String)">
             <summary>
-            The template used to render the month slots in "month" views.
+            The template used to render the month slots in "month" and "year" views.
             </summary>
             <param name="value">The value that configures the monthheadertemplate.</param>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.GanttViewBuilder.MonthHeaderTemplateId(System.String)">
             <summary>
-            The template used to render the month slots in "month" views.
+            The template used to render the month slots in "month" and "year" views.
             </summary>
             <param name="value">The value that configures the monthheadertemplate.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GanttViewBuilder.YearHeaderTemplate(System.String)">
+            <summary>
+            The template used to render the year slots in "year" view.
+            </summary>
+            <param name="value">The value that configures the yearheadertemplate.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GanttViewBuilder.YearHeaderTemplateId(System.String)">
+            <summary>
+            The template used to render the year slots in "year" view.
+            </summary>
+            <param name="value">The value that configures the yearheadertemplate.</param>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.GanttViewBuilder.Type(Kendo.Mvc.UI.GanttViewType)">
             <summary>
@@ -56083,6 +57393,475 @@
             Allows customization of the "Cancel" button text.
             </summary>
             <param name="value">The value that configures the cancel.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.GanttEditableSettingsBuilder">
+            <summary>
+            Defines the fluent API for configuring the GanttEditableSettings settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GanttEditableSettingsBuilder.Confirmation(System.Boolean)">
+            <summary>
+            If set to true the gantt will display a confirmation dialog when the user deletes a task or a dependency.
+            </summary>
+            <param name="value">The value that configures the confirmation.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GanttEditableSettingsBuilder.Template(System.String)">
+            <summary>
+            The template which renders the editor.The template should contain elements whose name HTML attributes are set as the editable fields. This is how the Gantt will know
+            which field to update. The other option is to use MVVM bindings in order to bind HTML elements to data item fields.
+            </summary>
+            <param name="value">The value that configures the template.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GanttEditableSettingsBuilder.TemplateId(System.String)">
+            <summary>
+            The template which renders the editor.The template should contain elements whose name HTML attributes are set as the editable fields. This is how the Gantt will know
+            which field to update. The other option is to use MVVM bindings in order to bind HTML elements to data item fields.
+            </summary>
+            <param name="value">The value that configures the template.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.EditorSerializationSettingsBuilder">
+            <summary>
+            Defines the fluent API for configuring the EditorSerializationSettings settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.EditorSerializationSettingsBuilder.Entities(System.Boolean)">
+            <summary>
+            Indicates whether the characters outside the ASCII range will be encoded as HTML entities. By default, they are encoded.
+            </summary>
+            <param name="value">The value that configures the entities.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.EditorSerializationSettingsBuilder.Scripts(System.Boolean)">
+            <summary>
+            Indicates whether inline scripts will be serialized and posted to the server.
+            </summary>
+            <param name="value">The value that configures the scripts.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListBuilder`1">
+            <summary>
+            Defines the fluent API for configuring the Kendo TreeList for ASP.NET MVC.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.#ctor(Kendo.Mvc.UI.TreeList{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="!:TreeList"/> class.
+            </summary>
+            <param name="component">The component.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Columns(System.Action{Kendo.Mvc.UI.Fluent.TreeListColumnFactory})">
+            <summary>
+            The configuration of the treelist columns. An array of JavaScript objects or strings. A JavaScript objects are interpreted as column configurations. Strings are interpreted as the
+            field to which the column is bound. The treelist will create a column for every item of the array.
+            </summary>
+            <param name="configurator">The action that configures the columns.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.AutoBind(System.Boolean)">
+            <summary>
+            If set to false the widget will not bind to the data source during initialization. In this case data binding will occur when the change event of the
+            data source is fired. By default the widget will bind to the data source specified in the configuration.
+            </summary>
+            <param name="value">The value that configures the autobind.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Scrollable(System.Boolean)">
+            <summary>
+            If set to true the grid will display a scrollbar when the total row height (or width) exceeds the grid height (or width). By default scrolling is enabled.Can be set to a JavaScript object which represents the scrolling configuration.
+            </summary>
+            <param name="value">The value that configures the scrollable.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Selectable(System.Boolean)">
+            <summary>
+            If set to true the user would be able to select treelist rows. By default selection is disabled.Can also be set to the following string values:
+            </summary>
+            <param name="value">The value that configures the selectable.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Sortable(System.Boolean)">
+            <summary>
+            If set to true the user could sort the treelist by clicking the column header cells. By default sorting is disabled.Can be set to a JavaScript object which represents the sorting configuration.
+            </summary>
+            <param name="enabled">Enables or disables the sortable option.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Sortable(System.Action{Kendo.Mvc.UI.Fluent.TreeListSortableSettingsBuilder})">
+            <summary>
+            If set to true the user could sort the treelist by clicking the column header cells. By default sorting is disabled.Can be set to a JavaScript object which represents the sorting configuration.
+            </summary>
+            <param name="configurator">The action that configures the sortable.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Toolbar(System.Action{Kendo.Mvc.UI.Fluent.TreeListToolbaFactory})">
+            <summary>
+            If a String value is assigned to the toolbar configuration option, it will be treated as a single string template for the whole treelist Toolbar,
+            and the string value will be passed as an argument to a kendo.template() function.If a Function value is assigned (it may be a kendo.template() function call or a generic function reference), then the return value of the function will be used to render the treelist Toolbar contents.If an Array value is assigned, it will be treated as the list of commands displayed in the treelist Toolbar. Commands can be custom or built-in ("cancel", "create", "save", "excel").The "create" command adds an empty data item to the treelist.The "excel" command exports the treelist data in MS Excel format.
+            </summary>
+            <param name="configurator">The action that configures the toolbar.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Height(System.Double)">
+            <summary>
+            The height of the treelist. Numeric values are treated as pixels.
+            </summary>
+            <param name="value">The value that configures the height.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Filterable(System.Boolean)">
+            <summary>
+            If set to true the user can filter the data source using the grid filter menu. Filtering is disabled by default.Can be set to a JavaScript object which represents the filter menu configuration.
+            </summary>
+            <param name="enabled">Enables or disables the filterable option.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Filterable(System.Action{Kendo.Mvc.UI.Fluent.TreeListFilterableSettingsBuilder})">
+            <summary>
+            If set to true the user can filter the data source using the grid filter menu. Filtering is disabled by default.Can be set to a JavaScript object which represents the filter menu configuration.
+            </summary>
+            <param name="configurator">The action that configures the filterable.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Editable(System.Boolean)">
+            <summary>
+            If set to true the user would be able to edit the data to which the treelist is bound to. By default editing is disabled.Can be set to a string ("inline" or "popup") to specify the editing mode. The default editing mode is "inline".Can be set to a JavaScript object which represents the editing configuration.
+            </summary>
+            <param name="enabled">Enables or disables the editable option.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Editable(System.Action{Kendo.Mvc.UI.Fluent.TreeListEditableSettingsBuilder})">
+            <summary>
+            If set to true the user would be able to edit the data to which the treelist is bound to. By default editing is disabled.Can be set to a string ("inline" or "popup") to specify the editing mode. The default editing mode is "inline".Can be set to a JavaScript object which represents the editing configuration.
+            </summary>
+            <param name="configurator">The action that configures the editable.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.DataSource(System.Action{Kendo.Mvc.UI.Fluent.TreeListAjaxDataSourceBuilder{`0}})">
+            <summary>
+            Configure the DataSource of the component
+            </summary>
+            <param name="configurator">The action that configures the <see cref="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.DataSource(System.Action{Kendo.Mvc.UI.Fluent.TreeListAjaxDataSourceBuilder{`0}})"/>.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().TreeMap()
+                .Name("treeMap")
+                .DataSource(dataSource =&gt; dataSource
+                    .Read(read =&gt; read
+                        .Action("_PopulationUS", "TreeMap")
+                    )
+                )
+             %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Events(System.Action{Kendo.Mvc.UI.Fluent.TreeListEventBuilder})">
+            <summary>
+            Configures the client-side events.
+            </summary>
+            <param name="configurator">The client events action.</param>
+            <example>
+            <code lang="CS">
+             &lt;%= Html.Kendo().TreeList()
+                        .Name("TreeList")
+                        .Events(events => events
+                            .DataBinding("onDataBinding")
+                        )
+            %&gt;
+            </code>
+            </example>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListEditableSettingsBuilder">
+            <summary>
+            Defines the fluent API for configuring the TreeListEditableSettings settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEditableSettingsBuilder.Mode(System.String)">
+            <summary>
+            The editing mode to use. The supported editing modes are "inline" and "popup".
+            </summary>
+            <param name="value">The value that configures the mode.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEditableSettingsBuilder.Template(System.String)">
+            <summary>
+            The template which renders popup editor.The template should contain elements whose name HTML attributes are set as the editable fields. This is how the grid will know
+            which field to update. The other option is to use MVVM bindings in order to bind HTML elements to data item fields.
+            </summary>
+            <param name="value">The value that configures the template.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEditableSettingsBuilder.TemplateId(System.String)">
+            <summary>
+            The template which renders popup editor.The template should contain elements whose name HTML attributes are set as the editable fields. This is how the grid will know
+            which field to update. The other option is to use MVVM bindings in order to bind HTML elements to data item fields.
+            </summary>
+            <param name="value">The value that configures the template.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListFilterableSettingsBuilder">
+            <summary>
+            Defines the fluent API for configuring the TreeListFilterableSettings settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListFilterableSettingsBuilder.Extra(System.Boolean)">
+            <summary>
+            If set to true the filter menu allows the user to input a second criteria.
+            </summary>
+            <param name="value">The value that configures the extra.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListSortableSettingsBuilder">
+            <summary>
+            Defines the fluent API for configuring the TreeListSortableSettings settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListSortableSettingsBuilder.AllowUnsort(System.Boolean)">
+            <summary>
+            If set to true the user can get the treelist in unsorted state by clicking the sorted column header.
+            </summary>
+            <param name="value">The value that configures the allowunsort.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListSortableSettingsBuilder.Mode(System.String)">
+            <summary>
+            The sorting mode. If set to "single" the user can sort by one column. If set to "multiple" the user can sort by one column.
+            </summary>
+            <param name="value">The value that configures the mode.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListToolbaFactory">
+            <summary>
+            Defines the fluent API for adding items to Kendo TreeList for ASP.NET MVC
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListToolbaBuilder">
+            <summary>
+            Defines the fluent API for configuring the TreeListToolba settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListToolbaBuilder.Name(System.String)">
+            <summary>
+            The name of the toolbar command. Either a built-in ("create" and "excel") or custom. The name is reflected in one of the CSS classes, which is applied to the button - k-grid-name.
+            This class can be used to obtain reference to the button after TreeList initialization and attach click handlers.
+            </summary>
+            <param name="value">The value that configures the name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListToolbaBuilder.Text(System.String)">
+            <summary>
+            The text displayed by the command button. If not set the name` option would be used as the button text instead.
+            </summary>
+            <param name="value">The value that configures the text.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListEventBuilder">
+            <summary>
+            Defines the fluent API for configuring the Kendo TreeList for ASP.NET MVC events.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.DataBinding(System.String)">
+            <summary>
+            Fired before the widget binds to its data source.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the dataBinding event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.DataBound(System.String)">
+            <summary>
+            Fired when the widget is bound to data from its data source.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the dataBound event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.Remove(System.String)">
+            <summary>
+            Fired when the user clicks the "destroy" command button.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the remove event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.Edit(System.String)">
+            <summary>
+            Fired when the user edits or creates a data item.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the edit event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.Save(System.String)">
+            <summary>
+            Fired when a data item is saved.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the save event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.Cancel(System.String)">
+            <summary>
+            Fired when the user clicks the "cancel" button (in inline or popup editing mode) or closes the popup window.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the cancel event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.Change(System.String)">
+            <summary>
+            Fired when the user selects a table row or cell in the treelist.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the change event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.FilterMenuInit(System.String)">
+            <summary>
+            Fired when the treelist filter menu is initialized.The event handler function context (available via the this keyword) will be set to the widget instance.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the filterMenuInit event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.TreeListHtmlBuilder`1.#ctor(Kendo.Mvc.UI.TreeList{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="!:TreeListHtmlBuilder"/> class.
+            </summary>
+            <param name="component">The TreeList component.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.TreeListHtmlBuilder`1.Build">
+            <summary>
+            Builds the TreeList markup.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListColumnFactory">
+            <summary>
+            Defines the fluent API for adding items to Kendo TreeList for ASP.NET MVC
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder">
+            <summary>
+            Defines the fluent API for configuring the TreeListColumn settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Command(System.Action{Kendo.Mvc.UI.Fluent.TreeListColumnCommanFactory})">
+            <summary>
+            The configuration of the column command(s). If set the column would display a button for every command. Commands can be custom or built-in ("edit", "destroy" or "createchild").The "edit" built-in command switches the current table row in edit mode.The "createchild" built-in command adds new child item to the current table row and switches in edit mode.The "destroy" built-in command removes the data item to which the current table row is bound.Custom commands are supported by specifying the click option.
+            </summary>
+            <param name="configurator">The action that configures the command.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Editor(System.String)">
+            <summary>
+            Provides a way to specify a custom editing UI for the column. Use the container parameter to create the editing UI.
+            </summary>
+            <param name="value">The value that configures the editor.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Encoded(System.Boolean)">
+            <summary>
+            If set to true the column value will be HTML-encoded before it is displayed. If set to false the column value will be displayed as is. By default the column value is HTML-encoded.
+            </summary>
+            <param name="value">The value that configures the encoded.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Field(System.String)">
+            <summary>
+            The field to which the column is bound. The value of this field is displayed by the column during data binding.
+            The field name should be a valid Javascript identifier and should contain no spaces, no special characters, and the first character should be a letter.
+            </summary>
+            <param name="value">The value that configures the field.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Format(System.String)">
+            <summary>
+            The format that is applied to the value before it is displayed. Takes the form "{0:format}" where "format" is a standard number format,
+            custom number format, standard date format or a custom date format.
+            </summary>
+            <param name="value">The value that configures the format.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.HeaderTemplate(System.String)">
+            <summary>
+            The template which renders the column header content. By default the value of the title column option
+            is displayed in the column header cell.
+            </summary>
+            <param name="value">The value that configures the headertemplate.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.HeaderTemplateId(System.String)">
+            <summary>
+            The template which renders the column header content. By default the value of the title column option
+            is displayed in the column header cell.
+            </summary>
+            <param name="value">The value that configures the headertemplate.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Sortable(System.Boolean)">
+            <summary>
+            If set to true the user can click the column header and sort the grid by the column field when sorting is enabled. If set to false sorting will
+            be disabled for this column. By default all columns are sortable if sorting is enabled via the sortable option.
+            </summary>
+            <param name="enabled">Enables or disables the sortable option.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Sortable(System.Action{Kendo.Mvc.UI.Fluent.TreeListColumnSortableSettingsBuilder})">
+            <summary>
+            If set to true the user can click the column header and sort the grid by the column field when sorting is enabled. If set to false sorting will
+            be disabled for this column. By default all columns are sortable if sorting is enabled via the sortable option.
+            </summary>
+            <param name="configurator">The action that configures the sortable.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Template(System.String)">
+            <summary>
+            The template which renders the column content. The treelist renders table rows (&lt;tr&gt;) which represent the data source items.
+            Each table row consists of table cells (&lt;td&gt;) which represent the treelist columns. By default the HTML-encoded value of the field is displayed in the column.
+            </summary>
+            <param name="value">The value that configures the template.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.TemplateId(System.String)">
+            <summary>
+            The template which renders the column content. The treelist renders table rows (&lt;tr&gt;) which represent the data source items.
+            Each table row consists of table cells (&lt;td&gt;) which represent the treelist columns. By default the HTML-encoded value of the field is displayed in the column.
+            </summary>
+            <param name="value">The value that configures the template.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Title(System.String)">
+            <summary>
+            The text that is displayed in the column header cell. If not set the field is used.
+            </summary>
+            <param name="value">The value that configures the title.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Width(System.String)">
+            <summary>
+            The width of the column. Numeric values are treated as pixels. For more important information, please refer to Column Widths.
+            </summary>
+            <param name="value">The value that configures the width.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Filterable(System.Boolean)">
+            <summary>
+            If set to true a filter menu will be displayed for this column when filtering is enabled. If set to false the filter menu will not be displayed. By default a filter menu is displayed
+            for all columns when filtering is enabled via the filterable option.Can be set to a JavaScript object which represents the filter menu configuration.
+            </summary>
+            <param name="enabled">Enables or disables the filterable option.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder.Filterable(System.Action{Kendo.Mvc.UI.Fluent.TreeListColumnFilterableSettingsBuilder})">
+            <summary>
+            If set to true a filter menu will be displayed for this column when filtering is enabled. If set to false the filter menu will not be displayed. By default a filter menu is displayed
+            for all columns when filtering is enabled via the filterable option.Can be set to a JavaScript object which represents the filter menu configuration.
+            </summary>
+            <param name="configurator">The action that configures the filterable.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListColumnCommanFactory">
+            <summary>
+            Defines the fluent API for adding items to Kendo Column for ASP.NET MVC
+            </summary>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListColumnCommanBuilder">
+            <summary>
+            Defines the fluent API for configuring the TreeListColumnComman settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnCommanBuilder.Name(System.String)">
+            <summary>
+            The name of the command. The built-in commands are "edit", "createchild" and "destroy". Can be set to a custom value.
+            </summary>
+            <param name="value">The value that configures the name.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnCommanBuilder.Text(System.String)">
+            <summary>
+            The text displayed by the command button. If not set the name option is used as the button text.
+            </summary>
+            <param name="value">The value that configures the text.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnCommanBuilder.ClassName(System.String)">
+            <summary>
+            The CSS class applied to the command button.
+            </summary>
+            <param name="value">The value that configures the classname.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnCommanBuilder.Click(System.String)">
+            <summary>
+            The JavaScript function executed when the user clicks the command button. The function receives a jQuery Event as an argument.The function context (available via the this keyword) will be set to the grid instance.
+            </summary>
+            <param name="value">The value that configures the click.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListColumnFilterableSettingsBuilder">
+            <summary>
+            Defines the fluent API for configuring the TreeListColumnFilterableSettings settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnFilterableSettingsBuilder.Ui(System.String)">
+            <summary>
+            The role data attribute of the widget used in the filter menu or a JavaScript function which initializes that widget.
+            </summary>
+            <param name="value">The value that configures the ui.</param>
+        </member>
+        <member name="T:Kendo.Mvc.UI.Fluent.TreeListColumnSortableSettingsBuilder">
+            <summary>
+            Defines the fluent API for configuring the TreeListColumnSortableSettings settings.
+            </summary>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnSortableSettingsBuilder.Compare(System.String)">
+            <summary>
+            A JavaScript function which is used to compare the values - should return -1 if first argument is less than second one, 0 if both are the same or +1 if the first one is greater than second one.
+            </summary>
+            <param name="value">The value that configures the compare.</param>
         </member>
     </members>
 </doc>

@@ -531,6 +531,12 @@
     <Content Include="Scripts\JQuery\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\JsBundle.js" />
     <Content Include="Scripts\JsBundle.min.js" />
+    <Content Include="Scripts\KendoBETA\jszip.min.js" />
+    <Content Include="Scripts\KendoBETA\kendo.all.min.js" />
+    <Content Include="Scripts\KendoBETA\kendo.aspnetmvc.min.js" />
+    <Content Include="Scripts\KendoBETA\kendo.culture.bg-BG.min.js" />
+    <Content Include="Scripts\KendoBETA\kendo.culture.bg.min.js" />
+    <Content Include="Scripts\KendoBETA\kendo.messages.bg-BG.min.js" />
     <Content Include="Scripts\KendoConsole.js" />
     <Content Include="Scripts\Kendo\cultures\kendo.culture.af-ZA.js" />
     <Content Include="Scripts\Kendo\cultures\kendo.culture.af.js" />

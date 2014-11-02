@@ -13,11 +13,17 @@
     <file>/Scripts/JQuery/jquery-1.8.2.js</file>
   
 
-    <file>/Scripts/Kendo/kendo.all.js</file>
+    <!--<file>/Scripts/Kendo/kendo.all.js</file>
     <file>/Scripts/Kendo/kendo.angular.js</file>
     <file>/Scripts/Kendo/kendo.aspnetmvc.js</file>
     <file>/Scripts/Kendo/cultures/kendo.culture.bg-BG.js</file>
-    <file>/Scripts/Kendo/messages/kendo.messages.bg-BG.js</file>
+    <file>/Scripts/Kendo/messages/kendo.messages.bg-BG.js</file>-->
+
+    <file>/Scripts/KendoBETA/kendo.all.min.js</file>jszip.min
+    <file>/Scripts/KendoBETA/jszip.min.js</file>
+    <file>/Scripts/KendoBETA/kendo.aspnetmvc.min.js</file>
+    <file>/Scripts/KendoBETA/kendo.culture.bg-BG.min.js</file>
+    <file>/Scripts/KendoBETA/kendo.messages.bg-BG.min.js</file>
     <file>/Scripts/MyJavaScript.js</file>
     <file>/Scripts/KendoConsole.js</file>
     <file>/Scripts/jQueryAjaxEvents.js</file>  

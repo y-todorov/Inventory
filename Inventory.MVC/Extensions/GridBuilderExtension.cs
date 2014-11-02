@@ -39,6 +39,11 @@ namespace Inventory.MVC.Extensions
                             .Input(true)
                             .ButtonCount(10)
                 )
+                // DateTime.Now.Ticks този код няма да сработи. Страницата просто се зарежда веднъж и повече не минава от тук колкото и да цъкаме експорт
+                .Excel(excel => excel.AllPages(true).FileName("InventoryReport.xlsx").Filterable(true))
+                // Не се превежда хубаво
+                //.Pdf(pdf => pdf.FileName("InventoryReport.pdf").Date(DateTime.Now)
+                //    .Author("InventoryAuthor").Subject("Inventory Subject Report").Title("Inventory Title").PaperSize("A3").Margin(0,0,0,0).Keywords("MVC REPORT INVENTORY"))
                 .Sortable(ssb => ssb.AllowUnsort(true).Enabled(true).SortMode(GridSortMode.SingleColumn))
                 .Filterable() // this is if And/Or is visible
                 .Reorderable(r => r.Columns(true))
@@ -47,14 +52,14 @@ namespace Inventory.MVC.Extensions
                     .SignalR()
                     .AutoSync(false)
                     .PageSize(5) // Това е важно! оправя Na / Na от 11 записа
-                    //.Events(events => events.Error("errorHandler")
-//                        .Push(@"<text>
-//                                   function(e) {
-//                                   var notification = $(""#notification"").data(""kendoNotification"");
-//                                   notification.success(e.type);
-//                                   }
-//                               </text>")
-                    //                   )
+                    .Events(events => events.Error("errorHandler")
+                        .Push(@"
+                                   function(e) {
+                                   var notification = $(""#notification"").data(""kendoNotification"");
+                                   notification.success(e.type);
+                                   }
+                               ")
+                                       )
                     .Batch(false)
                     .Transport(tr => tr
                         .Promise("hubStart")
@@ -120,7 +125,7 @@ namespace Inventory.MVC.Extensions
                         }
                         //else
                         {
-                            columns.Bound(propertyInfo.Name); //.Title(transaltedName);
+                            columns.Bound(propertyInfo.Name).Width("200px"); //.Title(transaltedName);
                         }
 
                     }
@@ -130,6 +135,8 @@ namespace Inventory.MVC.Extensions
             builder.ToolBar(t =>
             {
                 t.Create();
+                t.Excel();
+                //t.Pdf();
                 //t.Save();
             }); // това е бъг, трябва да си е преведено
 
