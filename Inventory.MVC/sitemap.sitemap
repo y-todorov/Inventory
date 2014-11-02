@@ -2,9 +2,9 @@
 
 <siteMap>
   <siteMapNode title="Home" controller="home" action="index">
-    <siteMapNode title="Dashboard" controller="home" action="index">
-    </siteMapNode>
-    <siteMapNode title="Production">
+    <!--<siteMapNode title="Dashboard" controller="home" action="index">
+    </siteMapNode>-->
+    <siteMapNode title="Производство">
       <siteMapNode controller="product" action="index" title="Продукти" />
       <siteMapNode controller="category" action="index" title="Категории" />
       <siteMapNode controller="unitmeasure" action="index" title="Мерни единици" />

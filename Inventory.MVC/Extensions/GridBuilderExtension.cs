@@ -26,7 +26,7 @@ namespace Inventory.MVC.Extensions
             string entityTypeName = viewModelEntityType.Name.Substring(0, viewModelEntityType.Name.IndexOf("ViewModel"));
             builder
                 .Editable(e => e.DisplayDeleteConfirmation(true).Mode(GridEditMode.PopUp).Window(w => w.Title("Редакция")))
-                .ColumnMenu(c => c.Enabled(true))
+                .ColumnMenu(c => c.Enabled(false))
                 .Groupable(
                     gsb =>
                         gsb.Enabled(true))
@@ -43,19 +43,33 @@ namespace Inventory.MVC.Extensions
                 .Filterable() // this is if And/Or is visible
                 .Reorderable(r => r.Columns(true))
                 .Resizable(resize => resize.Columns(true))
-
-
-
-
                 .DataSource(dataSource => dataSource
-                    .Ajax()
+                    .SignalR()
+                    .AutoSync(false)
+                    .PageSize(5) // Това е важно! оправя Na / Na от 11 записа
+                    //.Events(events => events.Error("errorHandler")
+//                        .Push(@"<text>
+//                                   function(e) {
+//                                   var notification = $(""#notification"").data(""kendoNotification"");
+//                                   notification.success(e.type);
+//                                   }
+//                               </text>")
+                    //                   )
                     .Batch(false)
-                    .Create(ControllerConstants.CreateCommandName, entityTypeName)
-                    .Read(ControllerConstants.ReadCommandName, entityTypeName)
-                    .Update(ControllerConstants.UpdateCommandName, entityTypeName)
-                    .Destroy(ControllerConstants.DestroyCommandName, entityTypeName)
-                    .PageSize(5)
-                    .ServerOperation(false)
+                    .Transport(tr => tr
+                        .Promise("hubStart")
+                            .Hub("crudHub")
+                        .Client(c => c
+                            .Read("read" + entityTypeName)
+                            .Create("create" + entityTypeName)
+                            .Update("update" + entityTypeName)
+                            .Destroy("destroy" + entityTypeName))
+                        .Server(s => s
+                            .Read("read" + entityTypeName)
+                            .Create("create" + entityTypeName)
+                            .Update("update" + entityTypeName)
+                            .Destroy("destroy" + entityTypeName)))
+                            .Schema(schema => schema
                     .Model(m =>
                     {
                         m.Id("Id");
@@ -64,7 +78,7 @@ namespace Inventory.MVC.Extensions
                         m.Field("CreatedOn", typeof(DateTime?)).Editable(false).DefaultValue(null);
 
                     }
-                    ));
+                    )));
 
 
             PropertyInfo[] modelEntityProperties = viewModelEntityType.GetProperties();

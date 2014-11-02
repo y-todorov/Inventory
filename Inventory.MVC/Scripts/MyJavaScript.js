@@ -10,6 +10,7 @@ $(document).ready(function () {
     $("input[type=submit]").addClass("k-button");
 });
 
+$(document).ready(function () {
 function errorHandler(e) {
     if (e.errors) {
         var message = "Errors:\n";
@@ -23,6 +24,7 @@ function errorHandler(e) {
         alert(message);
     }
 }
+});
 
 $(document).ready(function () {
 
