@@ -14,7 +14,7 @@ namespace Inventory.Tests.Database
         [Fact]
         public void Transer()
         {
-            //return;
+            return;
             string source = ConfigurationManager.ConnectionStrings["source"].ConnectionString;
             string destination = ConfigurationManager.ConnectionStrings["destination"].ConnectionString;
 
