@@ -129,6 +129,9 @@
   <data name="DateTimeFormatStringEmptyMessage" xml:space="preserve">
     <value>Изберете дата и час</value>
   </data>
+  <data name="ElementViewModel_Name_Name" xml:space="preserve">
+    <value>Име</value>
+  </data>
   <data name="PlaceHolderTextDate" xml:space="preserve">
     <value>Изберете дата</value>
   </data>

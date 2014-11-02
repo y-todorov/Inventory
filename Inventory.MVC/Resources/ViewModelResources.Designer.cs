@@ -97,6 +97,15 @@ namespace Inventory.MVC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Име.
+        /// </summary>
+        public static string ElementViewModel_Name_Name {
+            get {
+                return ResourceManager.GetString("ElementViewModel_Name_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Изберете дата.
         /// </summary>
         public static string PlaceHolderTextDate {

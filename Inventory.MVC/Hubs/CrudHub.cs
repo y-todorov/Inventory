@@ -37,7 +37,7 @@ namespace SignalRLocalHub.Hubs
 
         public void DestroyProduct(ProductViewModel product)
         {
-            var deletedProductViewModel = Utils.UpdateBase<Product, ProductViewModel>(product);
+            var deletedProductViewModel = Utils.DeleteBase<Product, ProductViewModel>(product);
             Clients.Others.destroyProduct(deletedProductViewModel);
         }
 
@@ -62,8 +62,58 @@ namespace SignalRLocalHub.Hubs
 
         public void DestroyProductCategory(ProductCategoryViewModel productCategory)
         {
-            var deletedProductCategoryViewModel = Utils.UpdateBase<ProductCategory, ProductCategoryViewModel>(productCategory);
-            Clients.Others.destroyProduct(deletedProductCategoryViewModel);
+            var deletedProductCategoryViewModel = Utils.DeleteBase<ProductCategory, ProductCategoryViewModel>(productCategory);
+            Clients.Others.destroyProductCategory(deletedProductCategoryViewModel);
+        }
+
+        public ProductUnitMeasureViewModel CreateProductUnitMeasure(ProductUnitMeasureViewModel product)
+        {
+            ProductUnitMeasureViewModel createdProductUnitMeasureViewModel = Utils.CreateBase<ProductUnitMeasure, ProductUnitMeasureViewModel>(product);
+            Clients.Others.createProductUnitMeasure(createdProductUnitMeasureViewModel);
+            return createdProductUnitMeasureViewModel;
+        }
+
+        public IEnumerable<ProductUnitMeasureViewModel> ReadProductUnitMeasure()
+        {
+            var productUnitMeasureViewModels = Utils.ReadBase<ProductUnitMeasure, ProductUnitMeasureViewModel>().AsEnumerable();
+            return productUnitMeasureViewModels;
+        }
+
+        public void UpdateProductUnitMeasure(ProductUnitMeasureViewModel product)
+        {
+            var updatedProductUnitMeasureViewModel = Utils.UpdateBase<ProductUnitMeasure, ProductUnitMeasureViewModel>(product);
+            Clients.Others.updateProductUnitMeasure(updatedProductUnitMeasureViewModel);
+        }
+
+        public void DestroyProductUnitMeasure(ProductUnitMeasureViewModel productUnitMeasure)
+        {
+            var deletedProductUnitMeasureViewModel = Utils.DeleteBase<ProductUnitMeasure, ProductUnitMeasureViewModel>(productUnitMeasure);
+            Clients.Others.destroyProductUnitMeasure(deletedProductUnitMeasureViewModel);
+        }
+
+        public ProductStoreViewModel CreateProductStore(ProductStoreViewModel product)
+        {
+            ProductStoreViewModel createdProductStoreViewModel = Utils.CreateBase<ProductStore, ProductStoreViewModel>(product);
+            Clients.Others.createProductStore(createdProductStoreViewModel);
+            return createdProductStoreViewModel;
+        }
+
+        public IEnumerable<ProductStoreViewModel> ReadProductStore()
+        {
+            var productStoreViewModels = Utils.ReadBase<ProductStore, ProductStoreViewModel>().AsEnumerable();
+            return productStoreViewModels;
+        }
+
+        public void UpdateProductStore(ProductStoreViewModel product)
+        {
+            var updatedProductStoreViewModel = Utils.UpdateBase<ProductStore, ProductStoreViewModel>(product);
+            Clients.Others.updateProductStore(updatedProductStoreViewModel);
+        }
+
+        public void DestroyProductStore(ProductStoreViewModel productStore)
+        {
+            var deletedProductStoreViewModel = Utils.DeleteBase<ProductStore, ProductStoreViewModel>(productStore);
+            Clients.Others.destroyProductStore(deletedProductStoreViewModel);
         }
     }
 }
