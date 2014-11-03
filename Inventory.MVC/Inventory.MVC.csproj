@@ -190,6 +190,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\ChartController.cs" />
+    <Compile Include="Controllers\CodeController.cs" />
     <Compile Include="Controllers\ControllerBase.cs" />
     <Compile Include="Controllers\ControllerConstants.cs" />
     <Compile Include="Controllers\ForeignKeyController.cs" />
@@ -484,6 +485,7 @@
     <Content Include="Content\Kendo\web\Uniform\sprite.png" />
     <Content Include="Content\Kendo\web\Uniform\sprite_2x.png" />
     <Content Include="Content\MyStyleSheet.css" />
+    <Content Include="Content\shared\world-map.png" />
     <Content Include="Content\textures\brushed-metal.png" />
     <Content Include="Content\textures\dots1.png" />
     <Content Include="Content\textures\dots10.png" />
@@ -514,6 +516,15 @@
     <Content Include="Content\textures\stripe6.png" />
     <Content Include="Content\textures\transparency.png" />
     <Content Include="Content\textures\transtexture.png" />
+    <Content Include="Content\web\foods\200\11.jpg" />
+    <Content Include="Content\web\foods\200\12.jpg" />
+    <Content Include="Content\web\foods\200\31.jpg" />
+    <Content Include="Content\web\foods\200\32.jpg" />
+    <Content Include="Content\web\foods\200\33.jpg" />
+    <Content Include="Content\web\foods\200\59.jpg" />
+    <Content Include="Content\web\foods\200\60.jpg" />
+    <Content Include="Content\web\foods\200\69.jpg" />
+    <Content Include="Content\web\foods\200\72.jpg" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -1373,6 +1384,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Chart\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Code\QrCode.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Code\BarCode.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\web\foods\200\Thumbs.db" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

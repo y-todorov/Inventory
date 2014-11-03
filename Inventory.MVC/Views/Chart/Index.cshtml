@@ -1,6 +1,11 @@
-﻿@(Html.Kendo().Chart()
+﻿<style>
+    #chart {
+        background: center no-repeat url('@Url.Content("~/Content/shared/world-map.png")')
+    }
+</style>
+@(Html.Kendo().Chart()
         .Name("chart")
-        .Title("Брутен вътрешен продукт")
+        .Title("Брутен вътрешен продукт - разтеж в %")
         .HtmlAttributes(new { style = "width:100%;height:100%"})
         .Legend(legend => legend
             .Position(ChartLegendPosition.Bottom)
