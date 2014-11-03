@@ -135,7 +135,7 @@ namespace Inventory.MVC.Extensions
             builder.ToolBar(t =>
             {
                 t.Create();
-                t.Excel();
+                t.Excel().Text("Експорт в Ексел");
                 //t.Pdf();
                 //t.Save();
             }); // това е бъг, трябва да си е преведено
