@@ -1,0 +1,32 @@
+﻿@(
+    Html.Kendo().Map()
+        .Name("map")
+                .Center(42.6845946, 23.3366951)
+        .Zoom(12)
+        .Layers(layers =>
+        {
+            layers.Add()
+                .Type(MapLayerType.Tile)
+                .UrlTemplate("http://#= subdomain #.tile.openstreetmap.org/#= zoom #/#= x #/#= y #.png")
+                .Subdomains("a", "b", "c")
+                .Attribution("&copy; <a href='http://osm.org/copyright'>OpenStreetMap contributors</a>");
+        })
+        .Markers(markers =>
+        {
+            markers.Add()
+                .Location(42.6845946, 23.3366951)
+                .Shape(MapMarkersShape.PinTarget)
+                .Tooltip(tooltip => tooltip.Content("Склад НДК"));
+            markers.Add()
+               .Location(42.7006815, 23.3277258)
+               .Shape(MapMarkersShape.PinTarget)
+               .Tooltip(tooltip => tooltip.Content("Склад Централна ЖП гара"));
+            markers.Add()
+              .Location(42.664133, 23.3726367)
+              .Shape(MapMarkersShape.PinTarget)
+              .Tooltip(tooltip => tooltip.Content("Склад Арена Армеец"));
+            
+        })
+)
+
+

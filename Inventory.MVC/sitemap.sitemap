@@ -15,6 +15,9 @@
       <!--<siteMapNode controller="productwasteheader" action="index" title="Product wastes" />-->
       <!--<siteMapNode controller="recipiewaste" action="index" title="Recipie wastes" />-->
     </siteMapNode>
+    <siteMapNode title="Карти">
+      <siteMapNode controller="Map" action="index" title="Карта на света" />
+    </siteMapNode>
     <!--<siteMapNode title="Sales">
       <siteMapNode controller="SalesOrderHeader" action="index" title="Sales orders" />
       <siteMapNode controller="PaymentType" action="index" title="Payment types" />
