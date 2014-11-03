@@ -18,6 +18,9 @@
     <siteMapNode title="Карти">
       <siteMapNode controller="Map" action="index" title="Карта на света" />
     </siteMapNode>
+    <siteMapNode title="Графики">
+      <siteMapNode controller="chart" action="index" title="БВП" />
+    </siteMapNode>
     <!--<siteMapNode title="Sales">
       <siteMapNode controller="SalesOrderHeader" action="index" title="Sales orders" />
       <siteMapNode controller="PaymentType" action="index" title="Payment types" />
