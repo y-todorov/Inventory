@@ -13,29 +13,31 @@ namespace Inventory.MVC.Infrastructure.TasksImplementations
     {
         public void Execute()
         {
-            //if (HttpContext.Current != null)
-            //{
-            //    HttpRequest request = HttpContext.Current.Request;
-            //    string key = request.RawUrl + Thread.CurrentThread.ManagedThreadId;
-            //    var sw = MemoryCache.Default.Get(key) as Stopwatch;
+            if (HttpContext.Current != null)
+            {
+                HttpRequest request = HttpContext.Current.Request;
+                string key = request.RawUrl + Thread.CurrentThread.ManagedThreadId;
+                var sw = MemoryCache.Default.Get(key) as Stopwatch;
 
-            //    if (sw != null)
-            //    {
-            //        double mills = Math.Round(sw.Elapsed.TotalMilliseconds, 3);
-            //        IHubContext context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
+                if (sw != null)
+                {
+                    double mills = sw.Elapsed.TotalMilliseconds;
+                    //IHubContext context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
 
-            //        string user = string.Empty;
-            //        if (HttpContext.Current.User != null)
-            //        {
-            //            user = HttpContext.Current.User.Identity.Name;
-            //        }
+                    string user = string.Empty;
+                    if (HttpContext.Current.User != null)
+                    {
+                        user = HttpContext.Current.User.Identity.Name;
+                    }
 
-            //        string message = "User: " + user + ", Path: " + request.RawUrl + ", milliseconds: " + mills;
+                    string message = "User: " + user + ", Path: " + request.RawUrl + ", milliseconds: " + mills;
 
-            //        context.Clients.All.notify(message);
-            //        MemoryCache.Default.Remove(key);
-            //    }
-            //}
+                    Trace.WriteLine(message);
+
+                    //context.Clients.All.notify(message);
+                    MemoryCache.Default.Remove(key);
+                }
+            }
         }
     }
 }

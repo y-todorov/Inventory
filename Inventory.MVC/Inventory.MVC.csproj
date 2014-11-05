@@ -218,6 +218,7 @@
     <Compile Include="Infrastructure\StructureMapDependencyResolver.cs" />
     <Compile Include="Infrastructure\StructureMapFilterProvider.cs" />
     <Compile Include="Infrastructure\TasksImplementations\RunAfterEachRequestSignalR.cs" />
+    <Compile Include="Infrastructure\TasksImplementations\RunOnEachRequestSetPingUrl.cs" />
     <Compile Include="Infrastructure\TasksImplementations\RunOnEachRequestSignalR.cs" />
     <Compile Include="Infrastructure\Tasks\IRunAfterEachRequest.cs" />
     <Compile Include="Infrastructure\Tasks\IRunAtInit.cs" />
@@ -528,6 +529,7 @@
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
+    <Content Include="ping.html" />
     <Content Include="Scripts\globalize.culture.bg-BG.js" />
     <Content Include="Scripts\globalize.culture.bg.js" />
     <Content Include="Scripts\globalize.js" />

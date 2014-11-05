@@ -45,21 +45,21 @@ namespace Inventory.MVC
             AutoMapperConfig.Execute();
 
 
-            TheContainer = new Container();
             DependencyResolver.SetResolver(
-                           new StructureMapDependencyResolver(() => TheContainer));
+                            new StructureMapDependencyResolver(() => TheContainer ?? ObjectFactory.Container));
 
-            TheContainer.Configure(cfg =>
+
+            ObjectFactory.Configure(cfg =>
             {
                 cfg.AddRegistry(new StandardRegistry());
                 cfg.AddRegistry(new ControllerRegistry());
                 cfg.AddRegistry(new ActionFilterRegistry(
-                    () => TheContainer));
+                    () => TheContainer ?? ObjectFactory.Container));
                 cfg.AddRegistry(new MvcRegistry());
                 cfg.AddRegistry(new TaskRegistry());
             });
 
-            using (var container = TheContainer.GetNestedContainer())
+            using (var container = ObjectFactory.Container.GetNestedContainer())
             {
                 foreach (var task in container.GetAllInstances<IRunAtInit>())
                 {
@@ -76,12 +76,29 @@ namespace Inventory.MVC
 
         public void Application_BeginRequest()
         {
-            TheContainer = new Container();
+            TheContainer = ObjectFactory.Container.GetNestedContainer();
 
             foreach (var task in TheContainer.GetAllInstances<IRunOnEachRequest>())
             {
                 task.Execute();
             }
         }
+
+        public void Application_EndRequest()
+        {
+            try
+            {
+                foreach (var task in TheContainer.GetAllInstances<IRunAfterEachRequest>())
+                {
+                    task.Execute();
+                }
+            }
+            finally
+            {
+                TheContainer.Dispose();
+                TheContainer = null;
+            }
+        }
+
     }
 }

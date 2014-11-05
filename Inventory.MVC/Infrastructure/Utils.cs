@@ -17,15 +17,11 @@ namespace Inventory.MVC.Infrastructure
 {
     public static class Utils
     {
-         public static IContainer GetContainerFromHttpRequest()
-        {
-             IContainer container = (IContainer)HttpContext.Current.Items["_Container"];
-             return container;
-        }
+        
 
          public static TViewModelType CreateBase<TEntityType, TViewModelType>(TViewModelType viewModel) where TEntityType : class
          {
-             using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
+             using (InventoryContext context = new InventoryContext())
              {
                  if (viewModel != null)
                  {
@@ -41,7 +37,7 @@ namespace Inventory.MVC.Infrastructure
 
          public static IEnumerable<TViewModelType> ReadBase<TEntityType, TViewModelType>() where TEntityType : class
          {
-             using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
+             using (InventoryContext context = new InventoryContext())
              {
                  var viewModels = context.Set<TEntityType>().AsQueryable().Project().To<TViewModelType>().ToList();
                  return viewModels;
@@ -52,7 +48,7 @@ namespace Inventory.MVC.Infrastructure
          {
              if (viewModel != null)
              {
-                 using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
+                 using (InventoryContext context = new InventoryContext())
                  {
                      var entity = context.Set<TEntityType>().Find((viewModel as ViewModelBase).Id);
 
@@ -70,7 +66,7 @@ namespace Inventory.MVC.Infrastructure
 
          public static TViewModelType DeleteBase<TEntityType, TViewModelType>(TViewModelType viewModel) where TEntityType : class
          {
-             using (InventoryContext context = Utils.GetContainerFromHttpRequest().GetInstance<InventoryContext>())
+             using (InventoryContext context = new InventoryContext())
              {
                  var entity = context.Set<TEntityType>().Find((viewModel as ViewModelBase).Id);
 
