@@ -3,6 +3,8 @@
         .Name("map")
                 .Center(42.6845946, 23.3366951)
         .Zoom(12)
+        .Controls(controls => controls.Attribution(true).Navigator(true).Zoom(true))
+        
         .Layers(layers =>
         {
             layers.Add()
@@ -10,6 +12,7 @@
                 .UrlTemplate("http://#= subdomain #.tile.openstreetmap.org/#= zoom #/#= x #/#= y #.png")
                 .Subdomains("a", "b", "c")
                 .Attribution("&copy; <a href='http://osm.org/copyright'>OpenStreetMap contributors</a>");
+            
         })
         .Markers(markers =>
         {
