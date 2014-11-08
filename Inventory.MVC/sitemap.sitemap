@@ -1,19 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-
 <siteMap>
   <siteMapNode title="Home" controller="home" action="index">
-    <!--<siteMapNode title="Dashboard" controller="home" action="index">
-    </siteMapNode>-->
     <siteMapNode title="Производство">
       <siteMapNode controller="product" action="index" title="Продукти" />
       <siteMapNode controller="category" action="index" title="Категории" />
       <siteMapNode controller="unitmeasure" action="index" title="Мерни единици" />
       <siteMapNode controller="store" action="index" title="Складове" />
-      <!--<siteMapNode controller="recipe" action="index" title="Recipies" />-->
-      <!--<siteMapNode controller="productinventoryheader" action="index" title="Product inventories" />-->
-      <!--<siteMapNode controller="productinventory" action="index" title="Product inventories" />-->
-      <!--<siteMapNode controller="productwasteheader" action="index" title="Product wastes" />-->
-      <!--<siteMapNode controller="recipiewaste" action="index" title="Recipie wastes" />-->
     </siteMapNode>
     <siteMapNode title="Карти">
       <siteMapNode controller="Map" action="index" title="Карта на света" />
@@ -24,45 +16,9 @@
     <siteMapNode title="Кодове">
       <siteMapNode controller="Code" action="BarCode" title="Бар кодове" />
       <siteMapNode controller="Code" action="QrCode" title="Кю ар кодове" />
-
     </siteMapNode>
-    <!--<siteMapNode title="Sales">
-      <siteMapNode controller="SalesOrderHeader" action="index" title="Sales orders" />
-      <siteMapNode controller="PaymentType" action="index" title="Payment types" />
-      <siteMapNode controller="Customer" action="index" title="Customers" />
+    <siteMapNode title="Документи">
+      <siteMapNode controller="Document" action="Index" title="Папки/Файлове" />
     </siteMapNode>
-    <siteMapNode title="Purchasing">
-      <siteMapNode controller="PurchaseOrderHeader" action="index" title="Purchase orders" />
-      <siteMapNode controller="PurchaseOrderDetail" action="index" title="Purchase order details" />
-      <siteMapNode controller="Vendor" action="index" title="Vendors" />
-      <siteMapNode controller="ProductVendor" action="index" title="Product vendors" />
-      <siteMapNode controller="ShipMethod" action="index" title="Ship methods" />
-    </siteMapNode>
-    <siteMapNode title="Human resources">
-      <siteMapNode controller="Employee" action="index" title="Employees" />
-      --><!--<siteMapNode controller="Shift" action="index" title="Shifts" />
-      <siteMapNode controller="Department" action="index" title="Departments" />
-      <siteMapNode controller="EmployeeDepartment" action="index" title="Employee Departments" />--><!--
-    </siteMapNode>
-    --><!--<siteMapNode title="Charts">
-      <siteMapNode title="Vendors">
-        <siteMapNode controller="Chart" action="index" title="Vendor purchase value per week" />
-      </siteMapNode>
-    </siteMapNode>--><!--
-    
-    <siteMapNode title="Admin">
-      --><!--<siteMapNode controller="EmailTemplate" action="index" title="Email Templates" />--><!--
-      <siteMapNode controller="SendGridMail" action="index" title="SentMails" />
-    </siteMapNode>
-    --><!--
-    <siteMapNode title="History">
-
-    </siteMapNode>
-    <siteMapNode title="Admin">
-
-    </siteMapNode>
-    <siteMapNode title="Account">
-
-    </siteMapNode>-->
   </siteMapNode>
 </siteMap>

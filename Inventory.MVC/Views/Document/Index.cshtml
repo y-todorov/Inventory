@@ -1,0 +1,74 @@
+﻿@(Html.Kendo().Splitter()
+      .Name("vertical")
+      .Orientation(SplitterOrientation.Horizontal)
+      .Panes(verticalPanes =>
+      {
+          verticalPanes.Add()
+              .Size("100%")
+              .HtmlAttributes(new {id = "top-pane"})
+              .Scrollable(false)
+              .Collapsible(false)
+              .Content(
+                  Html.Kendo().TreeView()
+                      .Name("treeview")
+                      .Items(treeview =>
+                      {
+                          treeview.Add().Text("My Web Site")
+                              .SpriteCssClasses("folder")
+                              .Expanded(true)
+                              .Items(root =>
+                              {
+                                  root.Add().Text("images")
+                                      .Expanded(true)
+                                      .SpriteCssClasses("folder")
+                                      .Items(images =>
+                                      {
+                                          images.Add().Text("logo.png")
+                                              .SpriteCssClasses("image");
+
+                                          images.Add().Text("body-back.png")
+                                              .SpriteCssClasses("image");
+
+                                          images.Add().Text("my-photo.jpg")
+                                              .SpriteCssClasses("image");
+                                      });
+
+                                  root.Add().Text("resources")
+                                      .Expanded(true)
+                                      .SpriteCssClasses("folder")
+                                      .Items(resources =>
+                                      {
+                                          resources.Add().Text("pdf")
+                                              .Expanded(true)
+                                              .SpriteCssClasses("folder")
+                                              .Items(pdf =>
+                                              {
+                                                  pdf.Add().Text("brochure.pdf")
+                                                      .SpriteCssClasses("pdf");
+
+                                                  pdf.Add().Text("prices.pdf")
+                                                      .SpriteCssClasses("pdf");
+                                              });
+
+                                          resources.Add().Text("zip")
+                                              .SpriteCssClasses("folder");
+                                      });
+
+                                  root.Add().Text("about.html")
+                                      .SpriteCssClasses("html");
+
+                                  root.Add().Text("contacts.html")
+                                      .SpriteCssClasses("html");
+
+                                  root.Add().Text("index.html")
+                                      .SpriteCssClasses("html");
+
+                                  root.Add().Text("portfolio.html")
+                                      .SpriteCssClasses("html");
+                              });
+                      }).ToHtmlString()
+              );
+
+          verticalPanes.Add().Size("100%");
+      })
+      )

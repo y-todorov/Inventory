@@ -193,6 +193,7 @@
     <Compile Include="Controllers\CodeController.cs" />
     <Compile Include="Controllers\ControllerBase.cs" />
     <Compile Include="Controllers\ControllerConstants.cs" />
+    <Compile Include="Controllers\DocumentController.cs" />
     <Compile Include="Controllers\ForeignKeyController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -1395,6 +1396,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\web\foods\200\Thumbs.db" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Document\Index.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
