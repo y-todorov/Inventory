@@ -49,7 +49,7 @@ namespace Inventory.Tests.PC
          //public void UploadFileTest()
          //{
          //    FileInfo fi = new FileInfo(@"C:\tmp\test.txt");
-         //    var file = pCloud.UploadFileAsync(fi.OpenRead(), testFolderId,fi.Name, CancellationToken.None).Result;
+         //    var file = pCloud.UploadFileAsync(fi.OpenRead(), testFolderId, fi.Name, CancellationToken.None).Result;
          //}
     }
 }

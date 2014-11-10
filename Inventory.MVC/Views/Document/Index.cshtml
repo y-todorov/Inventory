@@ -1,74 +1,69 @@
-﻿@(Html.Kendo().Splitter()
+﻿@using Inventory.MVC.Extensions
+@using Inventory.MVC.Models
+
+<script>
+    var crudHub = $.connection.crudHub;
+    var hubStart = $.connection.hub.start();
+</script>
+
+
+@(Html.Kendo().Splitter()
       .Name("vertical")
       .Orientation(SplitterOrientation.Horizontal)
+      .HtmlAttributes(new { style = "height: 800px; " })
+
       .Panes(verticalPanes =>
       {
           verticalPanes.Add()
-              .Size("100%")
-              .HtmlAttributes(new {id = "top-pane"})
-              .Scrollable(false)
-              .Collapsible(false)
+              .Size("300px")
+              .MinSize("100px")
+              .MaxSize("600px")
+              .HtmlAttributes(new { id = "top-pane" })
               .Content(
-                  Html.Kendo().TreeView()
-                      .Name("treeview")
-                      .Items(treeview =>
+               Html.Kendo().ToolBar()
+                      .Name("ToolBar")
+                      .Items(items =>
                       {
-                          treeview.Add().Text("My Web Site")
-                              .SpriteCssClasses("folder")
-                              .Expanded(true)
-                              .Items(root =>
-                              {
-                                  root.Add().Text("images")
-                                      .Expanded(true)
-                                      .SpriteCssClasses("folder")
-                                      .Items(images =>
-                                      {
-                                          images.Add().Text("logo.png")
-                                              .SpriteCssClasses("image");
+                          items.Add().Type(CommandType.ButtonGroup).Buttons(buttons =>
+                          {
+                              buttons.Add().Text("Добави").Togglable(true).Group("text-align").SpriteCssClass("k-tool-icon k-justifyLeft");
+                              buttons.Add().Text("Промени").Togglable(true).Group("text-align").SpriteCssClass("k-tool-icon k-justifyCenter");
+                              buttons.Add().Text("Изтрий").Togglable(true).Group("text-align").SpriteCssClass("k-tool-icon k-justifyRight");
+                          });
 
-                                          images.Add().Text("body-back.png")
-                                              .SpriteCssClasses("image");
+                      }).ToHtmlString() +
 
-                                          images.Add().Text("my-photo.jpg")
-                                              .SpriteCssClasses("image");
-                                      });
+                  Html.Kendo().TreeView()
+                      .Events(events => events.Select("tvSelect"))
+    .Name("treeview")
+    //.DataUrlField("id")
+    .DataTextField("Name")
+    .DataSource(dataSource => dataSource
+        .Read(read => read
+            .Action("GetFolders", "Document")
+        )
+    ).ToHtmlString()
 
-                                  root.Add().Text("resources")
-                                      .Expanded(true)
-                                      .SpriteCssClasses("folder")
-                                      .Items(resources =>
-                                      {
-                                          resources.Add().Text("pdf")
-                                              .Expanded(true)
-                                              .SpriteCssClasses("folder")
-                                              .Items(pdf =>
-                                              {
-                                                  pdf.Add().Text("brochure.pdf")
-                                                      .SpriteCssClasses("pdf");
-
-                                                  pdf.Add().Text("prices.pdf")
-                                                      .SpriteCssClasses("pdf");
-                                              });
-
-                                          resources.Add().Text("zip")
-                                              .SpriteCssClasses("folder");
-                                      });
-
-                                  root.Add().Text("about.html")
-                                      .SpriteCssClasses("html");
-
-                                  root.Add().Text("contacts.html")
-                                      .SpriteCssClasses("html");
-
-                                  root.Add().Text("index.html")
-                                      .SpriteCssClasses("html");
-
-                                  root.Add().Text("portfolio.html")
-                                      .SpriteCssClasses("html");
-                              });
-                      }).ToHtmlString()
               );
 
-          verticalPanes.Add().Size("100%");
+          verticalPanes.Add().Size("100%").HtmlAttributes(new { id = "right-pane" })
+              .Content(
+
+ Html.Kendo().Grid<FileViewModel>()
+            .AddBaseOptions()
+            .Name("FileViewModel").ToHtmlString()
+
+              );
       })
       )
+
+<script type="text/javascript">
+    function tvSelect(e) {
+
+        debugger;
+
+        // `this` refers to the TreeView object
+        var dataItem = this.dataItem(e.node);
+
+    }
+</script>

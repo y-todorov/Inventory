@@ -46,6 +46,9 @@
     <Reference Include="AutoMapper.Net4">
       <HintPath>..\packages\AutoMapper.3.2.1\lib\net40\AutoMapper.Net4.dll</HintPath>
     </Reference>
+    <Reference Include="Kendo.DynamicLinq">
+      <HintPath>..\packages\Kendo.DynamicLinq.1.1.2.0\lib\net40\Kendo.DynamicLinq.dll</HintPath>
+    </Reference>
     <Reference Include="Kendo.Mvc">
       <HintPath>..\lib\Kendo.Mvc.dll</HintPath>
     </Reference>
@@ -63,6 +66,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="pCloud.NET SDK">
+      <HintPath>..\lib\pCloud.NET SDK.dll</HintPath>
+    </Reference>
     <Reference Include="StructureMap">
       <HintPath>..\packages\structuremap.3.1.4.143\lib\net40\StructureMap.dll</HintPath>
     </Reference>
@@ -73,6 +79,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Linq.Dynamic">
+      <HintPath>..\packages\System.Linq.Dynamic.1.0.0\lib\net40\System.Linq.Dynamic.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -231,7 +240,9 @@
     <Compile Include="Infrastructure\Utils.cs" />
     <Compile Include="ModelBinders\YordanDateTimeModelBinder.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\DirectoryViewModel.cs" />
     <Compile Include="Models\ElementViewModel.cs" />
+    <Compile Include="Models\FileViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\Person.cs" />
@@ -386,9 +397,21 @@
     <Content Include="Content\Kendo\web\kendo.bootstrap.css" />
     <Content Include="Content\Kendo\web\kendo.bootstrap.mobile.css" />
     <Content Include="Content\Kendo\web\kendo.common-bootstrap.core.css" />
+    <Content Include="Content\Kendo\web\kendo.common-bootstrap.core.min.css">
+      <DependentUpon>kendo.common-bootstrap.core.css</DependentUpon>
+    </Content>
     <Content Include="Content\Kendo\web\kendo.common-bootstrap.css" />
+    <Content Include="Content\Kendo\web\kendo.common-bootstrap.min.css">
+      <DependentUpon>kendo.common-bootstrap.css</DependentUpon>
+    </Content>
     <Content Include="Content\Kendo\web\kendo.common.core.css" />
+    <Content Include="Content\Kendo\web\kendo.common.core.min.css">
+      <DependentUpon>kendo.common.core.css</DependentUpon>
+    </Content>
     <Content Include="Content\Kendo\web\kendo.common.css" />
+    <Content Include="Content\Kendo\web\kendo.common.min.css">
+      <DependentUpon>kendo.common.css</DependentUpon>
+    </Content>
     <Content Include="Content\Kendo\web\kendo.default.css" />
     <Content Include="Content\Kendo\web\kendo.default.mobile.css" />
     <Content Include="Content\Kendo\web\kendo.flat.css" />
@@ -1418,7 +1441,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>1844</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:1844/</IISUrl>
+          <IISUrl>http://localhost:1844</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

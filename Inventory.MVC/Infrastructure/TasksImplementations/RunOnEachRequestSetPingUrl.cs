@@ -18,7 +18,7 @@ namespace Inventory.MVC.Infrastructure.TasksImplementations
             if (string.IsNullOrEmpty(pingUrl))
             {
                 pingUrl = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
-                          HttpContext.Current.Request.ApplicationPath + "ping.html";
+                          HttpContext.Current.Request.ApplicationPath;//  + "/"+ "ping.html"; http://inventory-11.apphb.com
                 MemoryCache.Default.Set("pingPage", pingUrl, null);
                 Timer t = new Timer(1000);
                 t.Elapsed += t_Elapsed;

@@ -5,6 +5,9 @@ using System.Web;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Inventory.MVC.Models;
+//using Kendo.Mvc.UI;
+using Kendo.DynamicLinq;
+using Kendo.Mvc.Extensions;
 using Microsoft.AspNet.SignalR;
 using Inventory.DAL;
 using StructureMap;
@@ -98,11 +101,17 @@ namespace SignalRLocalHub.Hubs
             return createdProductStoreViewModel;
         }
 
-        public IEnumerable<ProductStoreViewModel> ReadProductStore()
+        public IEnumerable<ProductStoreViewModel> ReadProductStore(DataSourceRequest request)
         {
             var productStoreViewModels = Utils.ReadBase<ProductStore, ProductStoreViewModel>().AsEnumerable();
             return productStoreViewModels;
         }
+
+        //public DataSourceResult ReadProductStore(DataSourceRequest request)
+        //{
+        //    var productStoreViewModels = Utils.ReadBase<ProductStore, ProductStoreViewModel>().AsEnumerable();
+        //    return productStoreViewModels.AsQueryable().ToDataSourceResult(request);
+        //}
 
         public void UpdateProductStore(ProductStoreViewModel product)
         {
@@ -114,6 +123,11 @@ namespace SignalRLocalHub.Hubs
         {
             var deletedProductStoreViewModel = Utils.DeleteBase<ProductStore, ProductStoreViewModel>(productStore);
             Clients.Others.destroyProductStore(deletedProductStoreViewModel);
+        }
+
+        public DataSourceResult ReadFileViewModel(DataSourceRequest request)
+        {
+            return null; // не бачка
         }
     }
 }

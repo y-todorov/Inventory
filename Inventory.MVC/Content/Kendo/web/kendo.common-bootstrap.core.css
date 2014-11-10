@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
@@ -2676,7 +2676,7 @@ div.k-flatcolorpicker {
   background-image: none;
 }
 .k-flatcolorpicker .k-selected-color {
-  background-image: url("textures/transtexture.png");
+  background-image: url("common/textures/transtexture.png");
   background-position: 50% 50%;
   text-align: right;
 }
@@ -2772,11 +2772,11 @@ div.k-flatcolorpicker {
   /* Opera 11.10+ */
   background: -ms-linear-gradient(left, #ff0000 0%, #ffff00 16%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 84%, #ff0004 100%);
   /* IE10+ */
-  background: -left-linear-gradient(left,#ff0000 0%,#ffff00 16%,#00ff00 33%,#00ffff 50%,#0000ff 67%,#ff00ff 84%,#ff0004 100%);
+  background: linear-gradient(left, #ff0000 0%, #ffff00 16%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 84%, #ff0004 100%);
   /* W3C */
 }
 .k-flatcolorpicker .k-transparency-slider .k-slider-track {
-  background-image: url("textures/transparency.png");
+  background-image: url("common/textures/transparency.png");
   background-size: 100% auto;
   background-position: 100% 50%;
   background-repeat: no-repeat;
@@ -2801,7 +2801,7 @@ div.k-flatcolorpicker {
   /* Opera 11.10+ */
   background: -ms-linear-gradient(top, rgba(0, 0, 0, 0) 0%, #000000 100%), /* IE10+ */ -ms-linear-gradient(left, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
   /* IE10+ */
-  background: -top-linear-gradient(top,rgba(0,0,0,0) 0%,#000000 100%), /* W3C */ -left-linear-gradient(left,#ffffff 0%,rgba(255,255,255,0) 100%);
+  background: linear-gradient(top, rgba(0, 0, 0, 0) 0%, #000000 100%), /* W3C */ linear-gradient(left, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
   /* W3C */
   height: 180px;
   margin-bottom: 5px;
@@ -2814,11 +2814,11 @@ div.k-flatcolorpicker {
 }
 .k-ie7 .k-flatcolorpicker .k-hue-slider .k-slider-track,
 .k-ie8 .k-flatcolorpicker .k-hue-slider .k-slider-track {
-  background: url("textures/hue.png") repeat 0 50%;
+  background: url("common/textures/hue.png") repeat 0 50%;
 }
 .k-ie7 .k-flatcolorpicker .k-transparency-slider .k-slider-track,
 .k-ie8 .k-flatcolorpicker .k-transparency-slider .k-slider-track {
-  background: url("textures/transparency.png") repeat 0 50%;
+  background: url("common/textures/transparency.png") repeat 0 50%;
 }
 .k-ie7 .k-flatcolorpicker .k-hsv-gradient,
 .k-ie8 .k-flatcolorpicker .k-hsv-gradient {
