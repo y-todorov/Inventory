@@ -7,8 +7,12 @@ namespace Inventory.MVC.Models
 {
     public class FileViewModel
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         public string Name { get; set; }
+
+        public long Size { get; set; }
+
+        public DateTime DateCreated { get; set; }
     }
 }

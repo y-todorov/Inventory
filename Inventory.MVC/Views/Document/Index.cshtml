@@ -36,7 +36,7 @@
                   Html.Kendo().TreeView()
                       .Events(events => events.Select("tvSelect"))
     .Name("treeview")
-    //.DataUrlField("id")
+              //.DataUrlField("id")
     .DataTextField("Name")
     .DataSource(dataSource => dataSource
         .Read(read => read
@@ -49,21 +49,77 @@
           verticalPanes.Add().Size("100%").HtmlAttributes(new { id = "right-pane" })
               .Content(
 
- Html.Kendo().Grid<FileViewModel>()
-            .AddBaseOptions()
-            .Name("FileViewModel").ToHtmlString()
+ Html.Kendo().Grid<FileViewModel>().Name("FileViewModel")
+           .Columns(columns =>
+           {
+               columns.Bound("Id");
+               columns.Bound("Name");
+               columns.Bound("Size");
+               columns.Bound("DateCreated");
+
+
+           })
+             .Editable(e => e.DisplayDeleteConfirmation(true).Mode(GridEditMode.PopUp).Window(w => w.Title("Редакция")))
+                .ColumnMenu(c => c.Enabled(false))
+                .Groupable(
+                    gsb =>
+                        gsb.Enabled(true))
+                .Pageable(
+                    pb =>
+                        pb.PageSizes(new[] { 5, 10, 100, 999 })
+                            .Refresh(true)
+                            .Info(true)
+                            .Enabled(true)
+                            .Input(true)
+                            .ButtonCount(10)
+                )
+              // DateTime.Now.Ticks този код няма да сработи. Страницата просто се зарежда веднъж и повече не минава от тук колкото и да цъкаме експорт
+                .Excel(excel => excel.AllPages(true).FileName("InventoryReport.xlsx").Filterable(true))
+              // Не се превежда хубаво
+              //.Pdf(pdf => pdf.FileName("InventoryReport.pdf").Date(DateTime.Now)
+              //    .Author("InventoryAuthor").Subject("Inventory Subject Report").Title("Inventory Title").PaperSize("A3").Margin(0,0,0,0).Keywords("MVC REPORT INVENTORY"))
+                .Sortable(ssb => ssb.AllowUnsort(true).Enabled(true).SortMode(GridSortMode.SingleColumn))
+                .Filterable() // this is if And/Or is visible
+                .Reorderable(r => r.Columns(true))
+                .Resizable(resize => resize.Columns(true))
+         
+                      .DataSource(dataSource => dataSource
+                      .Ajax()
+                      .Batch(false)
+                      
+                       .PageSize(20)
+                      .Model(m => m.Id(f => f.Id))
+                      .Read(read => read.Action("ReadFiles", "Document").Data("getTreeviewSelectedItem")))
+            .ToHtmlString()
+
 
               );
       })
-      )
+)
 
 <script type="text/javascript">
     function tvSelect(e) {
-
-        debugger;
-
         // `this` refers to the TreeView object
         var dataItem = this.dataItem(e.node);
+
+        var grid = $("#FileViewModel").data("kendoGrid");
+        grid.dataSource.read();
+
+    }
+
+    function getTreeviewSelectedItem() {
+        //debugger;
+        var treeview = $("#treeview").data("kendoTreeView");
+        var selected = treeview.select();
+        var fullName = "";
+        if (selected.length != 0) {
+            fullName = treeview.dataItem(selected).FullName;
+        }
+
+        return {
+            folderFullPath: fullName
+        }
+
 
     }
 </script>

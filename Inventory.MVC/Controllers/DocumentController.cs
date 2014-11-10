@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Kendo.Mvc.Extensions;
+using Kendo.Mvc.UI;
 using PCloud.NET;
 using System.IO;
 using Inventory.MVC.Models;
@@ -23,7 +25,7 @@ namespace Inventory.MVC.Controllers
             if (string.IsNullOrEmpty(id))
             {
                 DirectoryInfo di = new DirectoryInfo(@"C:\");
-                dirs = new List<DirectoryInfo>() {di};
+                dirs = new List<DirectoryInfo>() { di };
             }
             else
             {
@@ -50,32 +52,39 @@ namespace Inventory.MVC.Controllers
                     hasChildren = hasChildren
                 });
             }
-
-
-            //var res = dirs.Select(d => new DirectoryViewModel
-            //{
-            //    id = d.FullName,
-            //    Name = d.Name,
-            //    FullName = d.FullName,
-            //    hasChildren = Directory.GetDirectories(d.FullName).Length != 0
-            //});
-
             return Json(dvms, JsonRequestBehavior.AllowGet);
-
-
-            //var dataContext = new SampleEntities();
-
-            //var employees = from e in dataContext.Employees
-            //                where (id.HasValue ? e.ReportsTo == id : e.ReportsTo == null)
-            //                select new
-            //                {
-            //                    id = e.EmployeeID,
-            //                    Name = e.FirstName + " " + e.LastName,
-            //                    hasChildren = e.Employees1.Any()
-            //                };
-
-            //return Json(employees, JsonRequestBehavior.AllowGet);
-            return null;
         }
+
+
+
+        public ActionResult ReadFiles([DataSourceRequest] DataSourceRequest request, string folderFullPath)
+        {
+            List<FileViewModel> fvms = new List<FileViewModel>();
+            try
+            {
+                var files = Directory.GetFiles(folderFullPath);
+                foreach (string file in files)
+                {
+                    FileInfo fi = new FileInfo(file);
+                    FileViewModel fvm = new FileViewModel()
+                    {
+                        Id = fi.Name.GetHashCode(),
+                        Name = fi.Name,
+                        Size = fi.Length,
+                        DateCreated = fi.CreationTime
+                    };
+                    fvms.Add(fvm);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            //return Json(fvms, JsonRequestBehavior.AllowGet); // da fack no, here is not this way!!!
+
+            return Json(fvms.ToDataSourceResult(request));
+        }
+
     }
 }
