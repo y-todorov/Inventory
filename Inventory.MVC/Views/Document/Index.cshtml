@@ -34,7 +34,7 @@
                       }).ToHtmlString() +
 
                   Html.Kendo().TreeView()
-                      .Events(events => events.Select("tvSelect"))
+                      .Events(events => events.Change("tvSelect"))
     .Name("treeview")
               //.DataUrlField("id")
     .DataTextField("Name")
@@ -108,12 +108,12 @@
     }
 
     function getTreeviewSelectedItem() {
-        //debugger;
+        debugger;
         var treeview = $("#treeview").data("kendoTreeView");
         var selected = treeview.select();
         var fullName = "";
         if (selected.length != 0) {
-            fullName = treeview.dataItem(selected).FullName;
+            fullName = treeview.dataItem(selected[0]).FullName;
         }
 
         return {

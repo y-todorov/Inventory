@@ -62,7 +62,7 @@ namespace Inventory.MVC.Controllers
             List<FileViewModel> fvms = new List<FileViewModel>();
             try
             {
-                var files = Directory.GetFiles(folderFullPath);
+                var files = Directory.GetFiles(folderFullPath, "*.*", SearchOption.AllDirectories).Take(1000);
                 foreach (string file in files)
                 {
                     FileInfo fi = new FileInfo(file);
