@@ -18,7 +18,7 @@ namespace Inventory.MVC.Extensions
 {
     public static class GridBuilderExtension
     {
-      
+
 
         public static GridBuilder<T> ConfigureDataSource<T>(this GridBuilder<T> builder, DataSourceType dst, string entityTypeName) where T : class
         {
@@ -29,8 +29,13 @@ namespace Inventory.MVC.Extensions
                     case DataSourceType.Custom:
                         dataSource
                             .SignalR().Schema(s => s.Model(m => m.Id("Id")))
+                            .ServerAggregates(false)
+                            .ServerFiltering(false)
+                            .ServerGrouping(false)
+                            .ServerPaging(false)
+                            .ServerSorting(false)
                             .AutoSync(false)
-
+                               .PageSize(10) // Това е важно! оправя Na / Na от 11 записа
                             .Events(events => events.Error("errorHandler")
                                 .Push(@"
                                    function(e) {
@@ -58,7 +63,9 @@ namespace Inventory.MVC.Extensions
                     case DataSourceType.Ajax:
                         dataSource
                             .Ajax()
+                            .ServerOperation(false)
                             .AutoSync(false)
+                               .PageSize(10) // Това е важно! оправя Na / Na от 11 записа
                             .Batch(false)
                             .Events(events => events.Error("errorHandler")
                                 .Push(@"
@@ -77,7 +84,7 @@ namespace Inventory.MVC.Extensions
                 }
 
 
-              
+
             });
             return builder;
         }
@@ -97,7 +104,7 @@ namespace Inventory.MVC.Extensions
                         gsb.Enabled(true))
                 .Pageable(
                     pb =>
-                        pb.PageSizes(new[] {5, 10, 100, 999})
+                        pb.PageSizes(new[] { 5, 10, 100, 999 })
                             .Refresh(true)
                             .Info(true)
                             .Enabled(true)
@@ -114,42 +121,42 @@ namespace Inventory.MVC.Extensions
                 .Reorderable(r => r.Columns(true))
                 .Resizable(resize => resize.Columns(true))
                 .ConfigureDataSource(dst, entityTypeName);
-//                .DataSource(dataSource => dataSource
-//                    .SignalR()
-//                    .AutoSync(false)
-//                    .PageSize(5) // Това е важно! оправя Na / Na от 11 записа
-//                    .Events(events => events.Error("errorHandler")
-//                        .Push(@"
-//                                   function(e) {
-//                                   var notification = $(""#notification"").data(""kendoNotification"");
-//                                   notification.success(e.type);
-//                                   }
-//                               ")
-//                                       )
-//                    .Batch(false)
-//                    .Transport(tr => tr
-//                        .Promise("hubStart")
-//                            .Hub("crudHub")
-//                        .Client(c => c
-//                            .Read("read" + entityTypeName)
-//                            .Create("create" + entityTypeName)
-//                            .Update("update" + entityTypeName)
-//                            .Destroy("destroy" + entityTypeName))
-//                        .Server(s => s
-//                            .Read("read" + entityTypeName)
-//                            .Create("create" + entityTypeName)
-//                            .Update("update" + entityTypeName)
-//                            .Destroy("destroy" + entityTypeName)))
-//                            .Schema(schema => schema
-//                    .Model(m =>
-//                    {
-//                        m.Id("Id");
-//                        m.Field("Id", typeof(long)).Editable(false);
-//                        m.Field("ModifiedOn", typeof(DateTime?)).Editable(false).DefaultValue(null);
-//                        m.Field("CreatedOn", typeof(DateTime?)).Editable(false).DefaultValue(null);
+            //                .DataSource(dataSource => dataSource
+            //                    .SignalR()
+            //                    .AutoSync(false)
+            //                    .PageSize(5) // Това е важно! оправя Na / Na от 11 записа
+            //                    .Events(events => events.Error("errorHandler")
+            //                        .Push(@"
+            //                                   function(e) {
+            //                                   var notification = $(""#notification"").data(""kendoNotification"");
+            //                                   notification.success(e.type);
+            //                                   }
+            //                               ")
+            //                                       )
+            //                    .Batch(false)
+            //                    .Transport(tr => tr
+            //                        .Promise("hubStart")
+            //                            .Hub("crudHub")
+            //                        .Client(c => c
+            //                            .Read("read" + entityTypeName)
+            //                            .Create("create" + entityTypeName)
+            //                            .Update("update" + entityTypeName)
+            //                            .Destroy("destroy" + entityTypeName))
+            //                        .Server(s => s
+            //                            .Read("read" + entityTypeName)
+            //                            .Create("create" + entityTypeName)
+            //                            .Update("update" + entityTypeName)
+            //                            .Destroy("destroy" + entityTypeName)))
+            //                            .Schema(schema => schema
+            //                    .Model(m =>
+            //                    {
+            //                        m.Id("Id");
+            //                        m.Field("Id", typeof(long)).Editable(false);
+            //                        m.Field("ModifiedOn", typeof(DateTime?)).Editable(false).DefaultValue(null);
+            //                        m.Field("CreatedOn", typeof(DateTime?)).Editable(false).DefaultValue(null);
 
-//                    }
-//                    )));
+            //                    }
+            //                    )));
 
 
             PropertyInfo[] modelEntityProperties = viewModelEntityType.GetProperties();
