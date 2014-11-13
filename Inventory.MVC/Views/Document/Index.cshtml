@@ -11,7 +11,6 @@
       .Name("vertical")
       .Orientation(SplitterOrientation.Horizontal)
       .HtmlAttributes(new { style = "height: 800px; " })
-
       .Panes(verticalPanes =>
       {
           verticalPanes.Add()
@@ -20,7 +19,7 @@
               .MaxSize("600px")
               .HtmlAttributes(new { id = "top-pane" })
               .Content(
-               Html.Kendo().ToolBar()
+                  Html.Kendo().ToolBar()
                       .Name("ToolBar")
                       .Items(items =>
                       {
@@ -30,53 +29,103 @@
                               buttons.Add().Text("Промени").Togglable(true).Group("text-align").SpriteCssClass("k-tool-icon k-justifyCenter");
                               buttons.Add().Text("Изтрий").Togglable(true).Group("text-align").SpriteCssClass("k-tool-icon k-justifyRight");
                           });
-
                       }).ToHtmlString() +
-
                   Html.Kendo().TreeView()
                       .Events(events => events.Change("tvSelect"))
-    .Name("treeview")
+                      .Name("treeview")
               //.DataUrlField("id")
-    .DataTextField("Name")
-    .DataSource(dataSource => dataSource
-        .Read(read => read
-            .Action("GetFolders", "Document")
-        )
-    ).ToHtmlString()
-
+                      .DataTextField("Name")
+                      .DataSource(dataSource => dataSource
+                          .Read(read => read
+                              .Action("GetFolders", "Document")
+                          )
+                      ).ToHtmlString()
               );
 
           verticalPanes.Add().Size("100%").HtmlAttributes(new { id = "right-pane" })
               .Content(
-
- Html.Kendo().Grid<FileViewModel>().Name("FileViewModel")
- .AddBaseOptions(DataSourceType.Ajax)
-
+                  Html.Kendo().Grid<FileViewModel>().Name("FileViewModel")
+                      .AddBaseOptions(DataSourceType.Ajax)
+                      .Events(e => e.DataBound("gridDataBound"))
                       .DataSource(dataSource => dataSource
-                                 .Ajax()
-
-
-
-
-                                 .Read(read => read.Action("ReadFiles", "Document").Data("getTreeviewSelectedItem"))
-
-                                 )
-                                 .ToolBar(t => t.Template(Html.Kendo().ToolBar()
-    .Name("ToolBar2")
-    .Items(items =>
-    {
-        items.Add().Template(Html.Kendo().TextBox().Name("tbSearch").ToHtmlString());
-        items.Add().Template(Html.Kendo().Button().Name("btnSearch").Content("Търси").ToHtmlString());
-    }).ToHtmlString()))
-              
-            .ToHtmlString()
-
-
+                          .Ajax()
+                          .Events(e => e.RequestEnd("dsRequestEnd"))
+                          .Read(read => read.Action("ReadFiles", "Document").Data("getTreeviewSelectedItem"))
+                      )
+                      .ToolBar(t => t.Template(Html.Kendo().ToolBar()
+                          .Name("ToolBar2")
+                          .Items(items =>
+                          {
+                              items.Add().Template(Html.Kendo().TextBox().Name("tbSearch").ToHtmlString());
+                              items.Add().Template(Html.Kendo().Button().Name("btnSearch").Content("Търси").Events(e => e.Click("btnSearchClick")).ToHtmlString());
+                          }).ToHtmlString()))
+                      .ToHtmlString()
               );
       })
 )
 
 <script type="text/javascript">
+    var initialDataSource;
+
+    var isReinitNeed = true;
+
+    function gridDataBound(a, b, c) {
+        if (isReinitNeed === false) {
+            var grid = $("#FileViewModel").data("kendoGrid");
+            //var gridData = grid.dataSource.view();
+            var gridData = grid.dataSource.data(); // this fixes colours when grouping
+            initialDataSource = gridData;
+            isReinitNeed = true;
+        }
+    }
+
+    function dsRequestEnd(a, b, c) {
+
+        isReinitNeed = false;
+    }
+
+
+    function btnSearchClick(e) {
+        debugger;
+        var grid = $("#FileViewModel").data("kendoGrid");
+        //var gridData = grid.dataSource.view();
+        //var gridData = grid.dataSource.data(); // this fixes colours when grouping
+
+        var gridData = initialDataSource;
+
+        var tbSearch = $("#tbSearch");
+        var searchVal = tbSearch.val();
+        var arrResult = [];
+        for (var i = 0; i < gridData.length; i++) {
+
+            var currData = gridData[i];
+
+            for (var property in currData) {
+
+                if (currData.hasOwnProperty(property)) {
+
+                    var valToCheck = currData[property];
+                    if (valToCheck != null) {
+                        if (valToCheck.toString().indexOf(searchVal.toString()) > -1) {
+                            arrResult.push(gridData[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        grid.dataSource.data(arrResult);
+        //grid.dataSource.data = arrResult;
+        //grid.dataSource.read();
+
+        //grid.dataSource.read();
+        grid.refresh();
+
+
+
+    }
+
     function tvSelect(e) {
         // `this` refers to the TreeView object
         var dataItem = this.dataItem(e.node);
@@ -87,7 +136,6 @@
     }
 
     function getTreeviewSelectedItem() {
-        debugger;
         var treeview = $("#treeview").data("kendoTreeView");
         var selected = treeview.select();
         var fullName = "";
