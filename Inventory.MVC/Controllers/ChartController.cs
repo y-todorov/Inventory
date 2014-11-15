@@ -13,5 +13,11 @@ namespace Inventory.MVC.Controllers
         {
             return View();
         }
+
+        public ActionResult Processes()
+        {
+            return View();
+        }
+        
     }
 }

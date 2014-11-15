@@ -62,20 +62,24 @@ namespace Inventory.MVC.Controllers
             List<FileViewModel> fvms = new List<FileViewModel>();
             try
             {
-                
-                    
-                var files = Directory.GetFiles(folderFullPath, "*.*", SearchOption.AllDirectories);//.Take(1000);
-                foreach (string file in files)
+                if (!string.IsNullOrEmpty(folderFullPath) &&
+                    !folderFullPath.ToCharArray().Intersect(Path.GetInvalidPathChars()).Any())
                 {
-                    FileInfo fi = new FileInfo(file);
-                    FileViewModel fvm = new FileViewModel()
+                    DirectoryInfo info = new DirectoryInfo(folderFullPath);
+
+                    var files = Directory.GetFiles(folderFullPath, "*.*", SearchOption.AllDirectories); //.Take(1000);
+                    foreach (string file in files)
                     {
-                        Id = fi.Name.GetHashCode(),
-                        Name = fi.Name,
-                        Size = fi.Length,
-                        DateCreated = fi.CreationTime
-                    };
-                    fvms.Add(fvm);
+                        FileInfo fi = new FileInfo(file);
+                        FileViewModel fvm = new FileViewModel()
+                        {
+                            Id = fi.Name.GetHashCode(),
+                            Name = fi.Name,
+                            Size = fi.Length,
+                            DateCreated = fi.CreationTime
+                        };
+                        fvms.Add(fvm);
+                    }
                 }
             }
             catch (Exception ex)

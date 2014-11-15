@@ -14,9 +14,9 @@
   <files>
     <file>/Content/Kendo/web/kendo.common.css</file>
 	<file>/Content/Kendo/web/kendo.rtl.css</file>
-	<file>/Content/Kendo/web/kendo.blueopal.css</file>
+	<file>/Content/Kendo/web/kendo.default.css</file>
 	<file>/Content/Kendo/dataviz/kendo.dataviz.css</file>
-	<file>/Content/Kendo/dataviz/kendo.dataviz.blueopal.css</file>
+	<file>/Content/Kendo/dataviz/kendo.dataviz.default.css</file>
 	<!--<file>/Content/Kendo/mobile/kendo.mobile.all.css</file>-->
 	<file>/Content/MyStyleSheet.css</file>
   </files>

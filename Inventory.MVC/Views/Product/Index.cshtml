@@ -7,9 +7,93 @@
     var hubStart = $.connection.hub.start();
 </script>
 @(
-        Html.Kendo().Grid<ProductViewModel>()
-            .AddBaseOptions()
-            .Name("ProductViewModelGrid")
-        )
+ Html.Kendo().Grid<ProductViewModel>()
+
+                .Columns(columns =>
+            {
+                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox'  class='checkbox' />")
+                    .HeaderTemplate("<input type='checkbox' id='masterCheckBox' onclick='checkAll(this)'/>").Width(200);
+            }
+                        ).AddBaseOptions()
+                    .Name("grid")
+)
 
 
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var grid = $("#grid").data("kendoGrid");
+
+        //bind click event to the checkbox
+        grid.table.on("click", ".checkbox", selectRow);
+
+        $("#showSelection").bind("click", function () {
+            var checked = [];
+            for (var i in checkedIds) {
+                if (checkedIds[i]) {
+                    checked.push(i);
+                }
+            }
+
+            alert(checked);
+        });
+
+
+
+        //$('#grid').on('click', '.checkbox', function () {
+        //    var checked = $(this).is(':checked');
+        //    var dataItem = grid.dataItem($(this).closest('tr'));
+        //    dataItem.set('IsAdmin', checked);
+        //});
+
+
+    });
+
+    var checkedIds = {};
+
+    //on click of the checkbox:
+    function selectRow() {
+        var checked = this.checked,
+            row = $(this).closest("tr"),
+            grid = $("#grid").data("kendoGrid"),
+            dataItem = grid.dataItem(row);
+
+        if (checked) {
+            //-select the row
+            row.addClass("k-state-selected");
+        } else {
+            //-remove selection
+            row.removeClass("k-state-selected");
+        }
+    }
+
+    //on dataBound event restore previous selected rows:
+    function onDataBound(e) {
+        var view = this.dataSource.view();
+        for (var i = 0; i < view.length; i++) {
+            if (checkedIds[view[i].id]) {
+                this.tbody.find("tr[data-uid='" + view[i].uid + "']")
+                    .addClass("k-state-selected")
+                    .find(".checkbox")
+                    .attr("checked", "checked");
+            }
+        }
+    }
+
+    function checkAll(ele) {
+        //debugger;
+        var state = $(ele).is(':checked');
+        var grid = $('#grid').data().kendoGrid;
+        $.each(grid.dataSource.view(), function (r) {
+            if (state == true) {
+                //debugger;
+                //var row = $(this).closest("tr");
+
+                //selectRow(this);
+            }
+        });
+        grid.refresh();
+    }
+
+</script>

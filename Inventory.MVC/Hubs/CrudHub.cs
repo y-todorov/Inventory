@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -13,6 +14,7 @@ using Inventory.DAL;
 using StructureMap;
 using Inventory.MVC.Infrastructure;
 using Microsoft.AspNet.SignalR.Hubs;
+using System.Diagnostics;
 
 namespace SignalRLocalHub.Hubs
 {
@@ -129,5 +131,32 @@ namespace SignalRLocalHub.Hubs
         {
             return null; // не бачка
         }
+
+        /// <summary>
+        /// Никога не връщай цял обект- може да не може да  се сериализира, винаги връщай само определени пропъртита!
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ProcessViewModel> ReadProcesses()
+        {
+            IEnumerable<Process> processes = Process.GetProcesses().OrderByDescending(p => p.WorkingSet64).Take(20); ;
+            var res = processes.Select(p => new ProcessViewModel 
+            {
+                HandleCount = p.HandleCount,
+                ThreadsCount = p.Threads.Count,
+                WorkingSet64 = p.WorkingSet64 / 1024 / 1024,
+                ProcessName = p.ProcessName
+            });
+
+
+            //var mem = processes.Select(p => new
+            //{
+            //   p.WorkingSet64,
+            //   p.Threads[].
+            //});
+
+
+            return res;
+         }
+        
     }
 }

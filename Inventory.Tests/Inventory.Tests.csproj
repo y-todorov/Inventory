@@ -62,6 +62,7 @@
     <Compile Include="CodeFirstTest.cs" />
     <Compile Include="Database\TransferDatabaseTest.cs" />
     <Compile Include="PC\PCloudTests.cs" />
+    <Compile Include="PerformanceCoutntersTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

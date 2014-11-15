@@ -202,14 +202,18 @@ namespace Inventory.MVC.Extensions
                         }
 
                     }
-                    columns.Command(command => { command.Edit().Text(string.Empty); command.Destroy().Text(string.Empty); });
+                    //columns.Command(command => { command.Edit().Text(string.Empty) ; command.Destroy().Text(string.Empty); });
                 });
 
             builder.ToolBar(t =>
             {
                 t.Create();
+            t.Custom().Text("Редактиране");
+                 
+            
+                t.Custom().Text("Изтриване");
                 t.Excel().Text("Експорт в Ексел");
-                //t.Pdf();
+                t.Pdf().Text("Експорт в Pdf");
                 //t.Save();
             }); // това е бъг, трябва да си е преведено
 
