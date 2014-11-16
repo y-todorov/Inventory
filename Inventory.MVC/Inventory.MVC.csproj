@@ -211,6 +211,7 @@
     <Compile Include="Controllers\StoreController.cs" />
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\UnitMeasureController.cs" />
+    <Compile Include="Extensions\ChartBuilderExtensions.cs" />
     <Compile Include="Extensions\GridBuilderExtension.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Inventory.Utils;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,44 +14,16 @@ namespace Inventory.Tests
         [Fact]
         public void TestPerfCounterCategory()
         {
-            const String categoryName = "Process";
-            const String counterName = "ElapsedTimeSample";
+            var processes = Process.GetProcesses();
 
-            List<string> namesOfAll = new List<string>();
-
-            PerformanceCounterCategory[] categories =
-                System.Diagnostics.PerformanceCounterCategory.GetCategories();
-            foreach (PerformanceCounterCategory category in categories)
+            foreach (Process process in processes)
             {
-                if (category.CategoryType != PerformanceCounterCategoryType.SingleInstance)
-                {
-                    string[] names = category.GetInstanceNames();
-                    foreach (string name in names)
-                    {
-
-                        try
-                        {
-                            foreach (var counter in category.GetCounters(name))
-                            {
-                                namesOfAll.Add(counter.CounterName);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-
-                        }
-
-                    }
-                }
-                else
-                {
-                    foreach (var counter in category.GetCounters())
-                    {
-                        namesOfAll.Add(counter.CounterName);
-                    }
-                }
+                var res = PerformanceCounterUtils.GetPerformanceCountersForProcess("Process", process.ProcessName);
             }
 
+            
+
+           
 
         }
 
