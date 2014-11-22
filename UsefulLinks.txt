@@ -1,1 +1,6 @@
-http://www.growingwiththeweb.com/2012/12/aspnet-mvc-display-and-editor-templates.html
+http://www.growingwiththeweb.com/2012/12/aspnet-mvc-display-and-editor-templates.html\\\
+
+http://www.hongkiat.com/blog/pacejs-progress-bar/
+
+use geoJSON 
+

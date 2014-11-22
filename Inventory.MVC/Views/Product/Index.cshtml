@@ -12,12 +12,13 @@
                 .Columns(columns =>
             {
                 columns.Template(@<text></text>).ClientTemplate("<input type='checkbox'  class='checkbox' />")
-                    .HeaderTemplate("<input type='checkbox' id='masterCheckBox' onclick='checkAll(this)'/>").Width(200);
+                    .HeaderTemplate("<input type='checkbox' id='masterCheckBox' onclick='checkAll(this)'/>").Width(20);
             }
                         ).AddBaseOptions()
                     .Name("grid")
+                    
+                    
 )
-
 
 <script type="text/javascript">
 

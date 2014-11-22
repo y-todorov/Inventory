@@ -11,6 +11,8 @@ namespace Inventory.MVC.Attributes
     {
         public Type EntityType { get; set; }
 
+        public string PropertyNameInViewModel { get; set; }
+
         public string DataValueField { get; set; }
 
         public string DataTextField { get; set; }

@@ -13,13 +13,25 @@ namespace Inventory.Tests
     public class CodeFirstTest
     {
         [Fact]
-        public void Test()
+        public void SearchAllEntities()
         {
+            string search = "12";
+            using (var context = new InventoryContext())
+            {
+                var stringProperties = typeof(Product).GetProperties().Where(prop =>
+    prop.PropertyType == typeof(string));
+
+
+                var res = context.Products.FullTextSearch("1", false).ToList();;
+
+
+
+            }
             Assert.True(true);
         }
 
         [Fact]
-        
+
         public void SaveProductTest()
         {
             return;
@@ -41,7 +53,7 @@ namespace Inventory.Tests
                 prod.Category = pc;
                 prod.Store = st;
                 prod.UnitMeasure = pum;
-                
+
                 context.Products.Add(prod);
 
                 var prod1 = new Product
@@ -64,5 +76,5 @@ namespace Inventory.Tests
             }
         }
 
-}
+    }
 }

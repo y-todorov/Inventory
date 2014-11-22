@@ -24,6 +24,9 @@ namespace Inventory.MVC
 
             Mapper.CreateMap<ProductUnitMeasureViewModel, ProductUnitMeasure>();
             Mapper.CreateMap<ProductUnitMeasure, ProductUnitMeasureViewModel>();
+
+            Mapper.CreateMap<ChangeLogViewModel, ChangeLog>();
+            Mapper.CreateMap<ChangeLog, ChangeLogViewModel>();
         }
 
         public class CustomResolver : ValueResolver<double, decimal>

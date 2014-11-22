@@ -106,6 +106,24 @@ namespace Inventory.MVC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Индустрия.
+        /// </summary>
+        public static string Industry {
+            get {
+                return ResourceManager.GetString("Industry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Община.
+        /// </summary>
+        public static string Municipality {
+            get {
+                return ResourceManager.GetString("Municipality", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Изберете дата.
         /// </summary>
         public static string PlaceHolderTextDate {
@@ -165,6 +183,33 @@ namespace Inventory.MVC.Resources {
         public static string PlaceHolderTextStringForeignKey {
             get {
                 return ResourceManager.GetString("PlaceHolderTextStringForeignKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Категория.
+        /// </summary>
+        public static string ProductCategory {
+            get {
+                return ResourceManager.GetString("ProductCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Склад.
+        /// </summary>
+        public static string ProductStore {
+            get {
+                return ResourceManager.GetString("ProductStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Мярка.
+        /// </summary>
+        public static string ProductUnitMeasure {
+            get {
+                return ResourceManager.GetString("ProductUnitMeasure", resourceCulture);
             }
         }
         
@@ -295,11 +340,29 @@ namespace Inventory.MVC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Регион.
+        /// </summary>
+        public static string Region {
+            get {
+                return ResourceManager.GetString("Region", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Полето {0} е задължително!.
         /// </summary>
         public static string RequiredErrorMessage {
             get {
                 return ResourceManager.GetString("RequiredErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Град.
+        /// </summary>
+        public static string Town {
+            get {
+                return ResourceManager.GetString("Town", resourceCulture);
             }
         }
         

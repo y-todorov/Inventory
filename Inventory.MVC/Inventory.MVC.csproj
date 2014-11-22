@@ -194,6 +194,8 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Controllers\ChangeLogController.cs" />
     <Compile Include="Attributes\DateDisplayAttributeYordan.cs" />
     <Compile Include="Attributes\RelationAttribute.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -241,17 +243,23 @@
     <Compile Include="Infrastructure\Utils.cs" />
     <Compile Include="ModelBinders\YordanDateTimeModelBinder.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\ChangeLogViewModel.cs" />
     <Compile Include="Models\DirectoryViewModel.cs" />
     <Compile Include="Models\ElementViewModel.cs" />
     <Compile Include="Models\FileViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\IndustryViewModel.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\MunicipalityViewModel.cs" />
     <Compile Include="Models\Person.cs" />
     <Compile Include="Models\ProcessViewModel.cs" />
     <Compile Include="Models\ProductCategoryViewModel.cs" />
     <Compile Include="Models\ProductStoreViewModel.cs" />
     <Compile Include="Models\ProductUnitMeasureViewModel.cs" />
     <Compile Include="Models\ProductViewModel.cs" />
+    <Compile Include="Models\RegionViewModel.cs" />
+    <Compile Include="Models\SearchViewModel.cs" />
+    <Compile Include="Models\TownViewModel.cs" />
     <Compile Include="Models\ViewModelBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\ViewModelResources.Designer.cs">
@@ -274,6 +282,7 @@
     <Content Include="Content\BlueOpal\slider-v.gif" />
     <Content Include="Content\BlueOpal\sprite.png" />
     <Content Include="Content\BlueOpal\sprite_2x.png" />
+    <Content Include="Content\bootstrapSimplex.css" />
     <Content Include="Content\CssBundle.css" />
     <Content Include="Content\CssBundle.min.css" />
     <Content Include="Content\favicon.ico" />
@@ -1106,6 +1115,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\Admin\Controllers\" />
+    <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="Areas\Admin\Views\Home\" />
+    <Folder Include="Areas\Admin\Views\Shared\" />
     <Folder Include="Views\ForeignKey\" />
   </ItemGroup>
   <ItemGroup>
@@ -1427,6 +1440,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Chart\Processes.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Areas\Admin\Views\web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\ChangeLog\Index.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

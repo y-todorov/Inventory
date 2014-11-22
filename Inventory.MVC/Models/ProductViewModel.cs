@@ -57,22 +57,31 @@ namespace Inventory.MVC.Models
         [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_CategoryId_Name")]
         [UIHint("GridForeignKey")]
-        [RelationAttribute(EntityType = typeof(ProductCategory), DataTextField = "Name", DataValueField = "Id")]
+        [RelationAttribute(EntityType = typeof(ProductCategory), DataTextField = "Name", DataValueField = "Id", PropertyNameInViewModel="Category")]
         [AdditionalMetadata("modelType", "ProductCategoryViewModel")]
         public long? CategoryId { get; set; }
 
         [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_UnitMeasureId_Name")]
         [UIHint("GridForeignKey")]
-        [RelationAttribute(EntityType = typeof(ProductUnitMeasure), DataTextField = "Name", DataValueField = "Id")]
+        [RelationAttribute(EntityType = typeof(ProductUnitMeasure), DataTextField = "Name", DataValueField = "Id", PropertyNameInViewModel="UnitMeasure")]
         [AdditionalMetadata("modelType", "ProductUnitMeasureViewModel")]
         public long? UnitMeasureId { get; set; }
 
         [Display(ResourceType = typeof(ViewModelResources),
             Name = "ProductViewModel_StoreId_Name")]
         [UIHint("GridForeignKey")]
-        [RelationAttribute(EntityType = typeof(ProductStore), DataTextField = "Name", DataValueField = "Id")]
+        [RelationAttribute(EntityType = typeof(ProductStore), DataTextField = "Name", DataValueField = "Id", PropertyNameInViewModel = "Store")]
         [AdditionalMetadata("modelType", "ProductStoreViewModel")]
         public long? StoreId { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        public ProductCategoryViewModel Category { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        public ProductUnitMeasureViewModel UnitMeasure { get; set; }
+
+        [HiddenInput(DisplayValue = false)]
+        public ProductStoreViewModel Store { get; set; }
     }
 }

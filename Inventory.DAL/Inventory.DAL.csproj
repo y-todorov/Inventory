@@ -48,14 +48,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeLog.cs" />
     <Compile Include="Element.cs" />
     <Compile Include="EntityBase.cs" />
+    <Compile Include="Industry.cs" />
     <Compile Include="InventoryContext.cs" />
+    <Compile Include="Municipality.cs" />
+    <Compile Include="ObjectContextExtensions.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductCategory.cs" />
     <Compile Include="ProductStore.cs" />
     <Compile Include="ProductUnitMeasure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Region.cs" />
+    <Compile Include="SeedData\SeedData.cs" />
+    <Compile Include="Town.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -132,6 +132,12 @@
   <data name="ElementViewModel_Name_Name" xml:space="preserve">
     <value>Име</value>
   </data>
+  <data name="Industry" xml:space="preserve">
+    <value>Индустрия</value>
+  </data>
+  <data name="Municipality" xml:space="preserve">
+    <value>Община</value>
+  </data>
   <data name="PlaceHolderTextDate" xml:space="preserve">
     <value>Изберете дата</value>
   </data>
@@ -152,6 +158,15 @@
   </data>
   <data name="PlaceHolderTextStringForeignKey" xml:space="preserve">
     <value>Изберете стойност ...</value>
+  </data>
+  <data name="ProductCategory" xml:space="preserve">
+    <value>Категория</value>
+  </data>
+  <data name="ProductStore" xml:space="preserve">
+    <value>Склад</value>
+  </data>
+  <data name="ProductUnitMeasure" xml:space="preserve">
+    <value>Мярка</value>
   </data>
   <data name="ProductViewModel_CategoryId_Name" xml:space="preserve">
     <value>Категория</value>
@@ -195,8 +210,14 @@
   <data name="ProductViewModel_UnitsOnOrder_Name" xml:space="preserve">
     <value>Поръчано</value>
   </data>
+  <data name="Region" xml:space="preserve">
+    <value>Регион</value>
+  </data>
   <data name="RequiredErrorMessage" xml:space="preserve">
     <value>Полето {0} е задължително!</value>
+  </data>
+  <data name="Town" xml:space="preserve">
+    <value>Град</value>
   </data>
   <data name="ViewModelBase_CreatedBy_Name" xml:space="preserve">
     <value>Създаден от</value>

@@ -33,5 +33,10 @@ namespace Inventory.DAL
 
         public long? StoreId { get; set; } // Vajno e da e nullabe, togava cascade deletes is false
         public ProductStore Store { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} - {1}.{2}", "Продукт", Id, Name);
+        }
     }
 }

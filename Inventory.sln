@@ -25,6 +25,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{ED4CA4E5-4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory.ConsoleApp", "Inventory.ConsoleApp\Inventory.ConsoleApp.csproj", "{5CFF8F19-B2DC-48F4-8644-06F218204573}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{28DB6CFA-41FF-457B-842D-17889813432A}"
+	ProjectSection(SolutionItems) = preProject
+		SeedData\grad.txt = SeedData\grad.txt
+		SeedData\oblast.txt = SeedData\oblast.txt
+		SeedData\obshtina.txt = SeedData\obshtina.txt
+		SeedData\raionVsofia.txt = SeedData\raionVsofia.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,5 +65,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{397BB8EF-2F16-495D-BF7D-D12840746F23} = {C0DCC10E-8603-439A-9522-0E7550A8E04D}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

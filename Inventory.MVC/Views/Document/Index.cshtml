@@ -56,6 +56,7 @@
                           .Name("ToolBar2")
                           .Items(items =>
                           {
+                              items.Add().Template(Html.Kendo().AutoComplete().Name("autocom").ToHtmlString());
                               items.Add().Template(Html.Kendo().TextBox().Name("tbSearch").ToHtmlString());
                               items.Add().Template(Html.Kendo().Button().Name("btnSearch").Content("Търси").Events(e => e.Click("btnSearchClick")).ToHtmlString());
                           }).ToHtmlString()))

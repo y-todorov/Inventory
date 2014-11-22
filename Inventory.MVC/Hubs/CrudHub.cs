@@ -46,6 +46,32 @@ namespace SignalRLocalHub.Hubs
             Clients.Others.destroyProduct(deletedProductViewModel);
         }
 
+
+        public ChangeLogViewModel CreateChangeLog(ChangeLogViewModel changeLog)
+        {
+            ChangeLogViewModel createdProductViewModel = Utils.CreateBase<ChangeLog, ChangeLogViewModel>(changeLog);
+            Clients.Others.createChangeLog(createdProductViewModel);
+            return createdProductViewModel;
+        }
+
+        public IEnumerable<ChangeLogViewModel> ReadChangeLog()
+        {
+            var changeLogViewModels = Utils.ReadBase<ChangeLog, ChangeLogViewModel>().AsEnumerable();
+            return changeLogViewModels;
+        }
+
+        public void UpdateChangeLog(ChangeLogViewModel changeLog)
+        {
+            var updatedChangeLogViewModel = Utils.UpdateBase<ChangeLog, ChangeLogViewModel>(changeLog);
+            Clients.Others.updateChangeLog(updatedChangeLogViewModel);
+        }
+
+        public void DestroyChangeLog(ChangeLogViewModel changeLog)
+        {
+            var deletedChangeLogViewModel = Utils.DeleteBase<ChangeLog, ChangeLogViewModel>(changeLog);
+            Clients.Others.destroyChangeLog(deletedChangeLogViewModel);
+        }
+
         public ProductCategoryViewModel CreateProductCategory(ProductCategoryViewModel product)
         {
             ProductCategoryViewModel createdProductCategoryViewModel = Utils.CreateBase<ProductCategory, ProductCategoryViewModel>(product);

@@ -20,5 +20,8 @@
     <siteMapNode title="Документи">
       <siteMapNode controller="Document" action="Index" title="Папки/Файлове" />
     </siteMapNode>
+    <siteMapNode title="Черна кутия">
+      <siteMapNode controller="ChangeLog" action="Index" title="Черна кутия" />
+    </siteMapNode>
   </siteMapNode>
 </siteMap>

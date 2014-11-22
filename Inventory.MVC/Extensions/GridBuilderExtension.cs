@@ -92,13 +92,14 @@ namespace Inventory.MVC.Extensions
         // It is EXTREMELY important NOT to set the name here. This is because of details grids. There name MUST be  .Name("ProductInventoryViewModelGrid_#=ProductInventoryHeaderId#")
         public static GridBuilder<T> AddBaseOptions<T>(this GridBuilder<T> builder, DataSourceType dst = DataSourceType.Custom) where T : class
         {
-
+            
             Type viewModelEntityType = typeof(T);
             string entityTypeName = viewModelEntityType.Name.Substring(0, viewModelEntityType.Name.IndexOf("ViewModel"));
             builder
                 .Editable(
                     e => e.DisplayDeleteConfirmation(true).Mode(GridEditMode.PopUp).Window(w => w.Title("Редакция")))
-                .ColumnMenu(c => c.Enabled(false))
+                .ColumnMenu(c => c.Enabled(true).Columns(false)) // Columns(true) е много глупаво, трябва да се направи от централизирано място а не от всяка колона
+                
                 .Groupable(
                     gsb =>
                         gsb.Enabled(true))
@@ -119,7 +120,8 @@ namespace Inventory.MVC.Extensions
                 .Sortable(ssb => ssb.AllowUnsort(true).Enabled(true).SortMode(GridSortMode.SingleColumn))
                 .Filterable() // this is if And/Or is visible
                 .Reorderable(r => r.Columns(true))
-                .Resizable(resize => resize.Columns(true))
+                .Resizable(c => c.Columns(true))
+                .ColumnResizeHandleWidth(10)
                 .ConfigureDataSource(dst, entityTypeName);
             //                .DataSource(dataSource => dataSource
             //                    .SignalR()
@@ -170,13 +172,21 @@ namespace Inventory.MVC.Extensions
                     columns.Bound("Id"); // временно ги махам докато разбера как да са readonly е  Popup едит
                     foreach (PropertyInfo propertyInfo in modelEntityProperties)
                     {
+                        if (propertyInfo.GetCustomAttributes<HiddenInputAttribute>().Any())
+                        {
+                            continue;
+                        }
                         RelationAttribute rellAttribute =
                              propertyInfo.GetCustomAttributes<RelationAttribute>().FirstOrDefault();
                         if (rellAttribute != null)
                         {
+
+
+
                             columns.ForeignKey(propertyInfo.Name,
                                 testContext.Set(rellAttribute.EntityType).AsQueryable(), rellAttribute.DataValueField,
-                                rellAttribute.DataTextField);
+                                rellAttribute.DataTextField);//.ClientTemplate("<a href=\"#:data."
+                                //+ propertyInfo.Name + "#\">" + "#:data." + rellAttribute.PropertyNameInViewModel + ".Name" + "#  </a>").Locked(false).Lockable(true);
                             continue;
                         }
 
@@ -198,19 +208,19 @@ namespace Inventory.MVC.Extensions
                         }
                         //else
                         {
-                            columns.Bound(propertyInfo.Name).Width("200px"); //.Title(transaltedName);
+                            columns.Bound(propertyInfo.Name).Locked(true).Lockable(true); //.Width("200px"); //.Title(transaltedName);
                         }
 
                     }
-                    //columns.Command(command => { command.Edit().Text(string.Empty) ; command.Destroy().Text(string.Empty); });
+                    columns.Command(command => { command.Edit().Text(string.Empty); command.Destroy().Text(string.Empty); });
                 });
 
             builder.ToolBar(t =>
             {
                 t.Create();
-            t.Custom().Text("Редактиране");
-                 
-            
+                t.Custom().Text("Редактиране");
+
+
                 t.Custom().Text("Изтриване");
                 t.Excel().Text("Експорт в Ексел");
                 t.Pdf().Text("Експорт в Pdf");
