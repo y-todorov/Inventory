@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -119,24 +119,33 @@
             }
         },
 
-        _filterSource: function(filter) {
-            var that = this,
-                options = that.options,
-                dataSource = that.dataSource,
-                expression = dataSource.filter() || {};
+        _filterSource: function(filter, force) {
+            var that = this;
+            var options = that.options;
+            var dataSource = that.dataSource;
+            var expression = extend({}, dataSource.filter() || {});
 
-            removeFiltersForField(expression, options.dataTextField);
+            var removed = removeFiltersForField(expression, options.dataTextField);
+
+            if ((filter || removed) && that.trigger("filtering", { filter: filter })) {
+                return;
+            }
 
             if (filter) {
                 expression = expression.filters || [];
                 expression.push(filter);
             }
 
-            dataSource.filter(expression);
+            if (!force) {
+                dataSource.filter(expression);
+            } else {
+                dataSource.read(expression);
+            }
         },
 
         _header: function() {
-            var template = this.options.headerTemplate;
+            var that = this;
+            var template = that.options.headerTemplate;
             var header;
 
             if ($.isFunction(template)) {
@@ -144,11 +153,16 @@
             }
 
             if (template) {
-                this.list.prepend(template);
+                that.list.prepend(template);
 
-                header = this.ul.prev();
+                header = that.ul.prev();
 
-                this.header = header[0] ? header : null;
+                that.header = header[0] ? header : null;
+                if (that.header) {
+                    that.angular("compile", function(){
+                        return { elements: that.header };
+                    });
+                }
             }
         },
 
@@ -393,9 +407,7 @@
                     list = that.list,
                     height = that.options.height,
                     visible = that.popup.visible(),
-                    filterInput = that.filterInput,
-                    header = that.header,
-                    offsetHeight = 0,
+                    offsetTop,
                     popups;
 
                 popups = list.add(list.parent(".k-animation-container")).show();
@@ -405,17 +417,11 @@
                 popups.height(height);
 
                 if (height !== "auto") {
-                    if (filterInput) {
-                        offsetHeight += filterInput.outerHeight();
-                    }
+                    offsetTop = that.ul[0].offsetTop;
 
-                    if (header) {
-                        offsetHeight += header.outerHeight();
+                    if (offsetTop) {
+                        height = list.height() - offsetTop;
                     }
-                }
-
-                if (offsetHeight) {
-                    height = list.height() - offsetHeight;
                 }
 
                 that.ul.height(height);
@@ -1088,16 +1094,27 @@
     });
 
     function removeFiltersForField(expression, field) {
+        var filters;
+        var found = false;
+
         if (expression.filters) {
-            expression.filters = $.grep(expression.filters, function(filter) {
-                removeFiltersForField(filter, field);
+            filters = $.grep(expression.filters, function(filter) {
+                found = removeFiltersForField(filter, field);
                 if (filter.filters) {
                     return filter.filters.length;
                 } else {
                     return filter.field != field;
                 }
             });
+
+            if (!found && expression.filters.length !== filters.length) {
+                found = true;
+            }
+
+            expression.filters = filters;
         }
+
+        return found;
     }
 })(window.kendo.jQuery);
 

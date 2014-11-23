@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -217,12 +217,6 @@
                         whiskers: {
                             width: 2
                         },
-                        mean: {
-                            width: 2
-                        },
-                        median: {
-                            width: 2
-                        },
                         border: {
                             width: 2,
                             opacity: 1
@@ -325,14 +319,6 @@
                     width: 7,
                     height: 7
                 }
-            },
-            rotate: {
-                thumb: {
-                    width: 14
-                }
-            },
-            handles: {
-                type: "rectangle"
             }
         },
         selectable: {
@@ -350,6 +336,9 @@
                     width: 8,
                     height: 8
                 }
+            },
+            editable: {
+                tools: ["edit", "delete"]
             }
         }
     };
@@ -2956,6 +2945,442 @@
                 ["#1c9ec4", "#d2ecf3"],
                 ["#ff63a5", "#ffe0ed"],
                 ["#1cc47b", "#d2f3e5"]
+            ]
+        }
+    });
+
+
+     registerTheme("material", {
+       chart: {
+            title: {
+                color: "#444444"
+            },
+            legend: {
+                labels: {
+                    color: "#444444"
+                },
+                inactiveItems: {
+                    labels: {
+                        color: "#CBCBCB"
+                    },
+                    markers: {
+                        color: "#CBCBCB"
+                    }
+                }
+            },
+            seriesDefaults: {
+                labels: {
+                    color: "#444444"
+                },
+                errorBars: {
+                    color: "#444444"
+                },
+                notes: {
+                    icon: {
+                        background: "transparent",
+                        border: {
+                            color: "#e5e5e5"
+                        }
+                    },
+                    label: {
+                        color: "#444444"
+                    },
+                    line: {
+                        color: "#e5e5e5"
+                    }
+                },
+                candlestick: {
+                    downColor: "#c7c7c7",
+                    line: {
+                        color: "#787878"
+                    }
+                },
+                area: {
+                    opacity: 0.9
+                },
+                waterfall: {
+                    line: {
+                        color: "#e5e5e5"
+                    }
+                },
+                horizontalWaterfall: {
+                    line: {
+                        color: "#e5e5e5"
+                    }
+                },
+                overlay: {
+                    gradient: "none"
+                },
+                border: {
+                    _brightness: 1
+                }
+            },
+            seriesColors: ["#3f51b5", "#03a9f4", "#4caf50", "#f9ce1d", "#ff9800", "#ff5722"],
+            axisDefaults: {
+                line: {
+                    color: "#e5e5e5"
+                },
+                labels: {
+                    color: "#444444"
+                },
+                minorGridLines: {
+                    color: "#e5e5e5"
+                },
+                majorGridLines: {
+                    color: "#e5e5e5"
+                },
+                title: {
+                    color: "#444444"
+                },
+                crosshair: {
+                    color: "#7f7f7f"
+                },
+                notes: {
+                    icon: {
+                        background: "transparent",
+                        border: {
+                            color: "#e5e5e5"
+                        }
+                    },
+                    label: {
+                        color: "#444444"
+                    },
+                    line: {
+                        color: "#e5e5e5"
+                    }
+                }
+            }
+        },
+        gauge: {
+            pointer: {
+                color: "#3f51b5"
+            },
+            scale: {
+                rangePlaceholderColor: "#e5e5e5",
+
+                labels: {
+                    color: "#444444"
+                },
+                minorTicks: {
+                    color: "#444444"
+                },
+                majorTicks: {
+                    color: "#444444"
+                },
+                line: {
+                    color: "#444444"
+                }
+            }
+        },
+        diagram: {
+            shapeDefaults: {
+                fill: {
+                    color: "#3f51b5"
+                },
+                connectorDefaults: {
+                    fill: {
+                        color: "#7f7f7f"
+                    },
+                    stroke: {
+                        color: WHITE
+                    },
+                    hover: {
+                        fill: {
+                            color: WHITE
+                        },
+                        stroke: {
+                            color: "#7f7f7f"
+                        }
+                    }
+                },
+                content: {
+                    color: "#444444"
+                }
+            },
+            editable: {
+                resize: {
+                    handles: {
+                        fill: {
+                            color: WHITE
+                        },
+                        stroke: {
+                            color: "#444444"
+                        },
+                        hover: {
+                            fill: {
+                                color: "#444444"
+                            },
+                            stroke: {
+                                color: "#444444"
+                            }
+                        }
+                    }
+                },
+                rotate: {
+                    thumb: {
+                        stroke: {
+                            color: "#444444"
+                        },
+                        fill: {
+                            color: "#444444"
+                        }
+                    }
+                }
+            },
+            selectable: {
+                stroke: {
+                    color: "#444444"
+                }
+            },
+            connectionDefaults: {
+                stroke: {
+                    color: "#7f7f7f"
+                },
+                content: {
+                    color: "#444444"
+                },
+                selection: {
+                    handles: {
+                        fill: {
+                            color: WHITE
+                        },
+                        stroke: {
+                            color: "#444444"
+                        }
+                    },
+                    stroke: {
+                        color: "#444444"
+                    }
+                }
+            }
+        },
+        treeMap: {
+            colors: [
+                ["#3f51b5", "#cff3f0"],
+                ["#03a9f4", "#e5f6fe"],
+                ["#4caf50", "#edf7ed"],
+                ["#f9ce1d", "#fefae8"],
+                ["#ff9800", "#fff4e5"],
+                ["#ff5722", "#ffeee8"]
+            ]
+        }
+    });
+
+    registerTheme("materialblack", {
+       chart: {
+            title: {
+                color: "#fff"
+            },
+            legend: {
+                labels: {
+                    color: "#fff"
+                },
+                inactiveItems: {
+                    labels: {
+                        color: "#CBCBCB"
+                    },
+                    markers: {
+                        color: "#CBCBCB"
+                    }
+                }
+            },
+            seriesDefaults: {
+                labels: {
+                    color: "#fff"
+                },
+                errorBars: {
+                    color: "#fff"
+                },
+                notes: {
+                    icon: {
+                        background: "transparent",
+                        border: {
+                            color: "#e5e5e5"
+                        }
+                    },
+                    label: {
+                        color: "#fff"
+                    },
+                    line: {
+                        color: "#e5e5e5"
+                    }
+                },
+                candlestick: {
+                    downColor: "#c7c7c7",
+                    line: {
+                        color: "#787878"
+                    }
+                },
+                area: {
+                    opacity: 0.9
+                },
+                waterfall: {
+                    line: {
+                        color: "#4d4d4d"
+                    }
+                },
+                horizontalWaterfall: {
+                    line: {
+                        color: "#4d4d4d"
+                    }
+                },
+                overlay: {
+                    gradient: "none"
+                },
+                border: {
+                    _brightness: 1
+                }
+            },
+            chartArea: {
+                background: "#1c1c1c"
+            },
+            seriesColors: ["#3f51b5", "#03a9f4", "#4caf50", "#f9ce1d", "#ff9800", "#ff5722"],
+            axisDefaults: {
+                line: {
+                    color: "#4d4d4d"
+                },
+                labels: {
+                    color: "#fff"
+                },
+                minorGridLines: {
+                    color: "#4d4d4d"
+                },
+                majorGridLines: {
+                    color: "#4d4d4d"
+                },
+                title: {
+                    color: "#fff"
+                },
+                crosshair: {
+                    color: "#7f7f7f"
+                },
+                notes: {
+                    icon: {
+                        background: "transparent",
+                        border: {
+                            color: "#4d4d4d"
+                        }
+                    },
+                    label: {
+                        color: "#fff"
+                    },
+                    line: {
+                        color: "#4d4d4d"
+                    }
+                }
+            }
+        },
+        gauge: {
+            pointer: {
+                color: "#3f51b5"
+            },
+            scale: {
+                rangePlaceholderColor: "#4d4d4d",
+
+                labels: {
+                    color: "#fff"
+                },
+                minorTicks: {
+                    color: "#fff"
+                },
+                majorTicks: {
+                    color: "#fff"
+                },
+                line: {
+                    color: "#fff"
+                }
+            }
+        },
+        diagram: {
+            shapeDefaults: {
+                fill: {
+                    color: "#3f51b5"
+                },
+                connectorDefaults: {
+                    fill: {
+                        color: "#7f7f7f"
+                    },
+                    stroke: {
+                        color: WHITE
+                    },
+                    hover: {
+                        fill: {
+                            color: WHITE
+                        },
+                        stroke: {
+                            color: "#7f7f7f"
+                        }
+                    }
+                },
+                content: {
+                    color: "#fff"
+                }
+            },
+            editable: {
+                resize: {
+                    handles: {
+                        fill: {
+                            color: WHITE
+                        },
+                        stroke: {
+                            color: "#fff"
+                        },
+                        hover: {
+                            fill: {
+                                color: "#fff"
+                            },
+                            stroke: {
+                                color: "#fff"
+                            }
+                        }
+                    }
+                },
+                rotate: {
+                    thumb: {
+                        stroke: {
+                            color: "#fff"
+                        },
+                        fill: {
+                            color: "#fff"
+                        }
+                    }
+                }
+            },
+            selectable: {
+                stroke: {
+                    color: "#fff"
+                }
+            },
+            connectionDefaults: {
+                stroke: {
+                    color: "#7f7f7f"
+                },
+                content: {
+                    color: "#fff"
+                },
+                selection: {
+                    handles: {
+                        fill: {
+                            color: WHITE
+                        },
+                        stroke: {
+                            color: "#fff"
+                        }
+                    },
+                    stroke: {
+                        color: "#fff"
+                    }
+                }
+            }
+        },
+        treeMap: {
+            colors: [
+                ["#3f51b5", "#cff3f0"],
+                ["#03a9f4", "#e5f6fe"],
+                ["#4caf50", "#edf7ed"],
+                ["#f9ce1d", "#fefae8"],
+                ["#ff9800", "#fff4e5"],
+                ["#ff5722", "#ffeee8"]
             ]
         }
     });

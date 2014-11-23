@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -11,6 +11,42 @@
 })(function(){
 
 
+
+/* Filter cell operator messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.operators =
+$.extend(true, kendo.ui.FilterCell.prototype.options.operators,{
+  "date": {
+    "eq": "Is gelijk aan",
+    "gt": "Is na",
+    "gte": "Is op of na",
+    "lt": "Is voor",
+    "lte": "Is op of voor",
+    "neq": "Is ongelijk aan"
+  },
+  "enum": {
+    "eq": "Is gelijk aan",
+    "neq": "Is ongelijk aan"
+  },
+  "number": {
+    "eq": "Is gelijk aan",
+    "gt": "Is groter dan",
+    "gte": "Is groter of gelijk aan",
+    "lt": "Is kleiner dan",
+    "lte": "Is kleiner of gelijk aan",
+    "neq": "Is ongelijk aan"
+  },
+  "string": {
+    "contains": "Bevat",
+    "doesnotcontain": "Bevat niet",
+    "endswith": "Eindigt op",
+    "eq": "Is gelijk aan",
+    "neq": "Is ongelijk aan",
+    "startswith": "Begint met"
+  }
+});
+}
 
 /* Filter menu operator messages */
 
@@ -184,6 +220,19 @@ $.extend(true, kendo.ui.Editor.prototype.options.messages,{
 });
 }
 
+/* Filter cell messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.messages =
+$.extend(true, kendo.ui.FilterCell.prototype.options.messages,{
+  "clear": "Filter wissen",
+  "filter": "Filter",
+  "isFalse": "is niet waar",
+  "isTrue": "is waar",
+  "operator": "Operator"
+});
+}
+
 /* FilterMenu messages */
 
 if (kendo.ui.FilterMenu) {
@@ -325,6 +374,7 @@ $.extend(true, kendo.ui.Upload.prototype.options.localization,{
   "uploadSelectedFiles": "Bestanden uploaden"
 });
 }
+
 
 return window.kendo;
 

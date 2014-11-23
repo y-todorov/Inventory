@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -68,6 +68,10 @@
             that.length = array.length;
 
             that.wrapAll(array, that);
+        },
+
+        at: function(index) {
+            return this[index];
         },
 
         toJSON: function() {
@@ -150,6 +154,8 @@
         },
 
         slice: slice,
+
+        sort: [].sort,
 
         join: join,
 
@@ -333,6 +339,32 @@
         }
     });
 
+    var LazyObservableArray = ObservableArray.extend({
+        init: function(data, type) {
+            Observable.fn.init.call(this);
+
+            this.type = type || ObservableObject;
+
+            for (var idx = 0; idx < data.length; idx++) {
+                this[idx] = data[idx];
+            }
+
+            this.length = idx;
+            this._parent = proxy(function() { return this; }, this);
+        },
+        at: function(index) {
+            var item = this[index];
+
+            if (!(item instanceof this.type)) {
+                item = this[index] = this.wrap(item, this._parent);
+            } else {
+                item.parent = this._parent;
+            }
+
+            return item;
+        }
+    });
+
     function eventHandler(context, type, field, prefix) {
         return function(e) {
             var event = {}, key;
@@ -369,7 +401,7 @@
             for (field in value) {
                 member = value[field];
 
-                if (field.charAt(0) != "_") {
+                if (typeof member === "object" && member && !member.getTime && field.charAt(0) != "_") {
                     member = that.wrap(member, field, parent);
                 }
 
@@ -1245,6 +1277,7 @@
                 };
             }
 
+
             for (idx = 0, length = data.length; idx < length; idx++) {
                 current = data[idx];
 
@@ -1252,6 +1285,7 @@
                     result.push(current);
                 }
             }
+
             return new Query(result);
         },
 
@@ -1463,12 +1497,18 @@
             group = options.group,
             sort = normalizeGroup(group || []).concat(normalizeSort(options.sort || [])),
             total,
+            filterCallback = options.filterCallback,
             filter = options.filter,
             skip = options.skip,
             take = options.take;
 
         if (filter) {
             query = query.filter(filter);
+
+            if (filterCallback) {
+                query = filterCallback(query);
+            }
+
             total = query.toArray().length;
         }
 
@@ -1493,20 +1533,6 @@
             data: query.toArray()
         };
     };
-
-    function calculateAggregates(data, options) {
-        options = options || {};
-
-        var query = new Query(data),
-            aggregates = options.aggregate,
-            filter = options.filter;
-
-        if(filter) {
-            query = query.filter(filter);
-        }
-
-        return query.aggregate(aggregates);
-    }
 
     var LocalTransport = Class.extend({
         init: function(options) {
@@ -1895,12 +1921,13 @@
             itemIndex;
 
         for (idx = 0, length = data.length; idx < length; idx++) {
-            if (data[idx].hasSubgroups) {
-                result = result.concat(flattenGroups(data[idx].items));
+            var group = data.at(idx);
+            if (group.hasSubgroups) {
+                result = result.concat(flattenGroups(group.items));
             } else {
-                items = data[idx].items;
+                items = group.items;
                 for (itemIndex = 0; itemIndex < items.length; itemIndex++) {
-                    result.push(items[itemIndex]);
+                    result.push(items.at(itemIndex));
                 }
             }
         }
@@ -1911,23 +1938,19 @@
         var idx, length, group, items;
         if (model) {
             for (idx = 0, length = data.length; idx < length; idx++) {
-                group = data[idx];
-                items = group.items;
+                group = data.at(idx);
 
                 if (group.hasSubgroups) {
-                    wrapGroupItems(items, model);
-                } else if (items.length && !(items[0] instanceof model)) {
-                    items.type = model;
-                    items.wrapAll(items, items);
+                    wrapGroupItems(group.items, model);
+                } else {
+                    group.items = new LazyObservableArray(group.items, model);
                 }
             }
         }
     }
 
     function eachGroupItems(data, func) {
-        var idx, length;
-
-        for (idx = 0, length = data.length; idx < length; idx++) {
+        for (var idx = 0, length = data.length; idx < length; idx++) {
             if (data[idx].hasSubgroups) {
                 if (eachGroupItems(data[idx].items, func)) {
                     return true;
@@ -1938,14 +1961,58 @@
         }
     }
 
+    function replaceInRanges(ranges, data, item, observable) {
+        for (var idx = 0; idx < ranges.length; idx++) {
+            if (ranges[idx].data === data) {
+                break;
+            }
+            if (replaceInRange(ranges[idx].data, item, observable)) {
+                break;
+            }
+        }
+    }
+
+    function replaceInRange(items, item, observable) {
+        for (var idx = 0, length = items.length; idx < length; idx++) {
+            if (items[idx] && items[idx].hasSubgroups) {
+                return replaceInRange(items[idx].items, item, observable);
+            } else if (items[idx] === item || items[idx] === observable) {
+               items[idx] = observable;
+               return true;
+            }
+        }
+    }
+
+    function replaceWithObservable(view, data, ranges, type) {
+        for (var viewIndex = 0, length = view.length; viewIndex < length; viewIndex++) {
+            var item = view[viewIndex];
+
+            if (!item || item instanceof type) {
+                continue;
+            }
+
+            if (item.hasSubgroups !== undefined) {
+                replaceWithObservable(item.items, data, ranges, type);
+            } else {
+                for (var idx = 0; idx < data.length; idx++) {
+                    if (data[idx] === item) {
+                        view[viewIndex] = data.at(idx);
+                        replaceInRanges(ranges, data, item, view[viewIndex]);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     function removeModel(data, model) {
         var idx, length;
 
         for (idx = 0, length = data.length; idx < length; idx++) {
-            if (data[idx].uid == model.uid) {
-                model = data[idx];
+            var dataItem = data.at(idx);
+            if (dataItem.uid == model.uid) {
                 data.splice(idx, 1);
-                return model;
+                return dataItem;
             }
         }
     }
@@ -2097,6 +2164,8 @@
             that._aggregate = options.aggregate;
             that._total = options.total;
 
+            that._shouldDetachObservableParents = true;
+
             Observable.fn.init.call(that);
 
             that.transport = Transport.create(options, data);
@@ -2131,6 +2200,7 @@
             model = that.reader.model || {};
 
             that._detachObservableParents();
+
             that._data = that._observe(that._data);
             that._online = true;
 
@@ -2138,7 +2208,7 @@
         },
 
         options: {
-            data: [],
+            data: null,
             schema: {
                modelBase: Model
             },
@@ -2205,10 +2275,19 @@
             this[operation](data);
         },
 
-        _flatData: function(data) {
-            if (this._isServerGrouped()) {
-                return flattenGroups(data);
+        _flatData: function(data, skip) {
+            if (data) {
+                if (this._isServerGrouped()) {
+                    return flattenGroups(data);
+                }
+
+                if (!skip) {
+                    for (var idx = 0; idx < data.length; idx++) {
+                        data.at(idx);
+                    }
+                }
             }
+
             return data;
         },
 
@@ -2243,7 +2322,7 @@
         },
 
         at: function(index) {
-            return this._data[index];
+            return this._data.at(index);
         },
 
         data: function(value) {
@@ -2257,6 +2336,7 @@
                 that._storeData();
 
                 that._ranges = [];
+                that.trigger("reset");
                 that._addRange(that._data);
 
                 that._total = that._data.length;
@@ -2264,12 +2344,28 @@
 
                 that._process(that._data);
             } else {
+                if (that._data) {
+                    for (var idx = 0; idx < that._data.length; idx++) {
+                        that._data.at(idx);
+                    }
+                }
+
                 return that._data;
             }
         },
 
-        view: function() {
-            return this._view;
+        view: function(value) {
+            if (value === undefined) {
+                return this._view;
+            } else {
+                this._view = this._observeView(value);
+            }
+        },
+
+        _observeView: function(data) {
+            replaceWithObservable(data, this._data, this._ranges, this.reader.model || ObservableObject);
+
+            return new LazyObservableArray(data, this.reader.model);
         },
 
         flatView: function() {
@@ -2389,11 +2485,22 @@
         },
 
         pushDestroy: function(items) {
+            var pushed = this._removeItems(items);
+
+            if (pushed.length) {
+                this.trigger("push", {
+                    type: "destroy",
+                    items: pushed
+                });
+            }
+        },
+
+        _removeItems: function(items) {
             if (!isArray(items)) {
                 items = [items];
             }
 
-            var pushed = [];
+            var destroyed = [];
             var autoSync = this.options.autoSync;
             this.options.autoSync = false;
             try {
@@ -2404,8 +2511,9 @@
 
                     this._eachItem(this._data, function(items){
                         for (var idx = 0; idx < items.length; idx++) {
-                            if (items[idx].id === model.id) {
-                                pushed.push(items[idx]);
+                            var item = items.at(idx);
+                            if (item.id === model.id) {
+                                destroyed.push(item);
                                 items.splice(idx, 1);
                                 found = true;
                                 break;
@@ -2422,12 +2530,7 @@
                 this.options.autoSync = autoSync;
             }
 
-            if (pushed.length) {
-                this.trigger("push", {
-                    type: "destroy",
-                    items: pushed
-                });
-            }
+            return destroyed;
         },
 
         remove: function(model) {
@@ -2460,6 +2563,7 @@
                 updated = [],
                 destroyed = that._destroyed,
                 data = that._flatData(that._data);
+            var promise;
 
             if (that.online()) {
 
@@ -2480,7 +2584,7 @@
                 promises.push.apply(promises, that._send("update", updated));
                 promises.push.apply(promises, that._send("destroy", destroyed));
 
-                $.when
+                promise = $.when
                  .apply(null, promises)
                  .then(function() {
                     var idx, length;
@@ -2499,7 +2603,11 @@
                 that._storeData(true);
 
                 that._change({ action: "sync" });
+
+                promise = $.Deferred().resolve().promise();
             }
+
+            return promise;
         },
 
         cancelChanges: function(model) {
@@ -2700,6 +2808,7 @@
 
         read: function(data) {
             var that = this, params = that._params(data);
+            var deferred = $.Deferred();
 
             that._queueRequest(params, function() {
                 if (!that.trigger(REQUESTSTART, { type: "read" })) {
@@ -2710,16 +2819,36 @@
                     if (that.online()) {
                         that.transport.read({
                             data: params,
-                            success: proxy(that.success, that),
-                            error: proxy(that.error, that)
+                            success: function(data) {
+                                that.success(data);
+
+                                deferred.resolve();
+                            },
+                            error: function() {
+                                var args = slice.call(arguments);
+
+                                that.error.apply(that, args);
+
+                                deferred.reject.apply(deferred, args);
+                            }
                         });
                     } else if (that.options.offlineStorage != null){
                         that.success(that.offlineData());
+
+                        deferred.resolve();
                     }
                 } else {
                     that._dequeueRequest();
+
+                    deferred.resolve();
                 }
             });
+
+            return deferred.promise();
+        },
+
+        _readAggregates: function(data) {
+            return this.reader.aggregates(data);
         },
 
         success: function(data) {
@@ -2739,11 +2868,13 @@
                 that._total = that.reader.total(data);
 
                 if (that._aggregate && options.serverAggregates) {
-                    that._aggregateResult = that.reader.aggregates(data);
+                    that._aggregateResult = that._readAggregates(data);
                 }
 
                 data = that._readData(data);
             } else {
+                data = that._readData(data);
+
                 var items = [];
 
                 for (var idx = 0; idx < data.length; idx++) {
@@ -2773,8 +2904,9 @@
             if (that.options.offlineStorage != null) {
                 that._eachItem(that._data, function(items) {
                     for (var idx = 0; idx < items.length; idx++) {
-                        if (items[idx].__state__ == "update") {
-                            items[idx].dirty = true;
+                        var item = items.at(idx);
+                        if (item.__state__ == "update") {
+                            item.dirty = true;
                         }
                     }
                 });
@@ -2790,28 +2922,35 @@
         },
 
         _detachObservableParents: function() {
-            if (this._data) {
+            if (this._data && this._shouldDetachObservableParents) {
                 for (var idx = 0; idx < this._data.length; idx++) {
-                    this._data[idx].parent = null;
+                    if (this._data[idx].parent) {
+                        this._data[idx].parent = noop;
+                    }
                 }
             }
         },
 
         _storeData: function(updatePristine) {
+            var serverGrouping = this._isServerGrouped();
+            var model = this.reader.model;
+
             function items(data) {
                 var state = [];
 
                 for (var idx = 0; idx < data.length; idx++) {
-                    var item = data[idx].toJSON();
+                    var dataItem = data.at(idx);
+                    var item = dataItem.toJSON();
 
-                    if (serverGrouping && data[idx].items) {
-                        item.items = items(data[idx].items);
+                    if (serverGrouping && dataItem.items) {
+                        item.items = items(dataItem.items);
                     } else {
-                        item.uid = data[idx].uid;
+                        item.uid = dataItem.uid;
+
                         if (model) {
-                            if (data[idx].isNew()) {
+                            if (dataItem.isNew()) {
                                 item.__state__ = "create";
-                            } else if (data[idx].dirty) {
+                            } else if (dataItem.dirty) {
                                 item.__state__ = "update";
                             }
                         }
@@ -2821,11 +2960,8 @@
 
                 return state;
             }
+
             if (this.options.offlineStorage != null) {
-                var model = this.reader.model;
-                var serverGrouping = this._isServerGrouped();
-
-
                 var state = items(this._data);
 
                 for (var idx = 0; idx < this._destroyed.length; idx++) {
@@ -2845,7 +2981,7 @@
         _addRange: function(data) {
             var that = this,
                 start = that._skip || 0,
-                end = start + that._flatData(data).length;
+                end = start + that._flatData(data, true).length;
 
             that._ranges.push({ start: start, end: end, data: data });
             that._ranges.sort( function(x, y) { return x.start - y.start; } );
@@ -2933,22 +3069,27 @@
             }
             return false;
         },
+
         _observe: function(data) {
             var that = this,
                 model = that.reader.model,
                 wrap = false;
+
+            that._shouldDetachObservableParents = true;
 
             if (model && data.length) {
                 wrap = !(data[0] instanceof model);
             }
 
             if (data instanceof ObservableArray) {
+                that._shouldDetachObservableParents = false;
                 if (wrap) {
                     data.type = that.reader.model;
                     data.wrapAll(data, data);
                 }
             } else {
-                data = new ObservableArray(data, that.reader.model);
+                var arrayType = that.pageSize() ? LazyObservableArray : ObservableArray;
+                data = new arrayType(data, that.reader.model);
                 data.parent = function() { return that.parent(); };
             }
 
@@ -2999,6 +3140,20 @@
             }
         },
 
+        _calculateAggregates: function (data, options) {
+            options = options || {};
+
+            var query = new Query(data),
+                aggregates = options.aggregate,
+                filter = options.filter;
+
+            if (filter) {
+                query = query.filter(filter);
+            }
+
+            return query.aggregate(aggregates);
+        },
+
         _process: function (data, e) {
             var that = this,
                 options = {},
@@ -3027,12 +3182,12 @@
 
             if (that.options.serverAggregates !== true) {
                 options.aggregate = that._aggregate;
-                that._aggregateResult = calculateAggregates(data, options);
+                that._aggregateResult = that._calculateAggregates(data, options);
             }
 
-            result = Query.process(data, options);
+            result = that._queryProcess(data, options);
 
-            that._view = result.data;
+            that.view(result.data);
 
             if (result.total !== undefined && !that.options.serverFiltering) {
                 that._total = result.total;
@@ -3043,6 +3198,10 @@
             e.items = e.items || that._view;
 
             that.trigger(CHANGE, e);
+        },
+
+        _queryProcess: function(data, options) {
+            return Query.process(data, options);
         },
 
         _mergeState: function(options) {
@@ -3087,62 +3246,43 @@
         },
 
         query: function(options) {
-            var that = this,
-                result,
-                remote = that.options.serverSorting || that.options.serverPaging || that.options.serverFiltering || that.options.serverGrouping || that.options.serverAggregates;
+            var result;
+            var remote = this.options.serverSorting || this.options.serverPaging || this.options.serverFiltering || this.options.serverGrouping || this.options.serverAggregates;
 
-            if (remote || ((that._data === undefined || that._data.length === 0) && !that._destroyed.length)) {
-                that.read(that._mergeState(options));
-            } else {
-                if (!that.trigger(REQUESTSTART, { type: "read" })) {
-                    that.trigger(PROGRESS);
-
-                    result = Query.process(that._data, that._mergeState(options));
-
-                    if (!that.options.serverFiltering) {
-                        if (result.total !== undefined) {
-                            that._total = result.total;
-                        } else {
-                            that._total = that._data.length;
-                        }
-                    }
-
-                    that._view = result.data;
-                    that._aggregateResult = calculateAggregates(that._data, options);
-                    that.trigger(REQUESTEND, { });
-                    that.trigger(CHANGE, { items: result.data });
-                }
+            if (remote || ((this._data === undefined || this._data.length === 0) && !this._destroyed.length)) {
+                return this.read(this._mergeState(options));
             }
+
+            if (!this.trigger(REQUESTSTART, { type: "read" })) {
+                this.trigger(PROGRESS);
+
+                result = this._queryProcess(this._data, this._mergeState(options));
+
+                if (!this.options.serverFiltering) {
+                    if (result.total !== undefined) {
+                        this._total = result.total;
+                    } else {
+                        this._total = this._data.length;
+                    }
+                }
+
+                this._aggregateResult = this._calculateAggregates(this._data, options);
+                this.view(result.data);
+                this.trigger(REQUESTEND, { });
+                this.trigger(CHANGE, { items: result.data });
+            }
+
+            return $.Deferred().resolve().promise();
         },
 
         fetch: function(callback) {
-            var that = this;
-
-            return $.Deferred(function(deferred) {
-                var success = function(e) {
-                    that.unbind(ERROR, error);
-
-                    deferred.resolve();
-
-                    if (callback) {
-                        callback.call(that, e);
-                    }
-                };
-
-                var error = function(e) {
-                    deferred.reject(e);
-                };
-
-                that.one(CHANGE, success);
-                that.one(ERROR, error);
-                that._query();
-            }).promise();
+            return this._query().then(proxy(callback, this));
         },
 
         _query: function(options) {
             var that = this;
 
-            that.query(extend({}, {
+            return that.query(extend({}, {
                 page: that.page(),
                 pageSize: that.pageSize(),
                 sort: that.sort(),
@@ -3394,7 +3534,7 @@
 
                     for (takeIdx = skipIdx; takeIdx < length; takeIdx++) {
                         range = ranges[takeIdx];
-                        flatData = that._flatData(range.data);
+                        flatData = that._flatData(range.data, true);
 
                         if (flatData.length && start + count >= range.start) {
                             rangeData = range.data;
@@ -3402,7 +3542,7 @@
 
                             if (!remote) {
                                 var sort = normalizeGroup(that.group() || []).concat(normalizeSort(that.sort() || []));
-                                processed = Query.process(range.data, { sort: sort, filter: that.filter() });
+                                processed = that._queryProcess(range.data, { sort: sort, filter: that.filter() });
                                 flatData = rangeData = processed.data;
 
                                 if (processed.total !== undefined) {
@@ -3493,7 +3633,7 @@
                 }
 
                 range.data = that._observe(temp);
-                range.end = range.start + that._flatData(range.data).length;
+                range.end = range.start + that._flatData(range.data, true).length;
                 that._ranges.sort( function(x, y) { return x.start - y.start; } );
                 that._total = that.reader.total(data);
 
@@ -3585,7 +3725,7 @@
                 range = this._ranges[idx];
                 range.start = range.start - startOffset;
 
-                rangeLength = this._flatData(range.data).length;
+                rangeLength = this._flatData(range.data, true).length;
                 startOffset = range.end - rangeLength;
                 range.end = range.start + rangeLength;
             }
@@ -3602,6 +3742,9 @@
             transportOptions.read = typeof transportOptions.read === STRING ? { url: transportOptions.read } : transportOptions.read;
 
             if (options.type) {
+                kendo.data.transports = kendo.data.transports || {};
+                kendo.data.schemas = kendo.data.schemas || {};
+
                 if (kendo.data.transports[options.type] && !isPlainObject(kendo.data.transports[options.type])) {
                     transport = new kendo.data.transports[options.type](extend(transportOptions, { data: data }));
                 } else {
@@ -3615,7 +3758,7 @@
                 transport = isFunction(transportOptions.read) ? transportOptions : new RemoteTransport(transportOptions);
             }
         } else {
-            transport = new LocalTransport({ data: options.data });
+            transport = new LocalTransport({ data: options.data || [] });
         }
         return transport;
     };
@@ -3734,6 +3877,8 @@
     }
 
     var Node = Model.define({
+        id: "id",
+
         init: function(value) {
             var that = this,
                 hasChildren = that.hasChildren || value && value.hasChildren,
@@ -3979,7 +4124,7 @@
                 return node;
             }
 
-            data = this._flatData(this.data());
+            data = this._flatData(this._data);
 
             if (!data) {
                 return;
@@ -4112,6 +4257,10 @@
                 buffer._change();
             });
 
+            dataSource.bind("reset", function() {
+                buffer._reset();
+            });
+
             this._syncWithDataSource();
 
             this.setViewSize(viewSize);
@@ -4123,7 +4272,10 @@
         },
 
         at: function(index)  {
-            var pageSize = this.pageSize, item;
+            var pageSize = this.pageSize,
+                item,
+                itemPresent = true,
+                changeTo;
 
             if (index >= this.total()) {
                 this.trigger("endreached", {index: index });
@@ -4135,9 +4287,8 @@
             }
             if (this.useRanges) {
                 // out of range request
-                if (index < this.dataOffset || index > this.skip + pageSize) {
-                    var offset = Math.floor(index / pageSize) * pageSize;
-                    this.range(offset);
+                if (index < this.dataOffset || index >= this.skip + pageSize) {
+                    itemPresent = this.range(Math.floor(index / pageSize) * pageSize);
                 }
 
                 // prefetch
@@ -4147,7 +4298,7 @@
 
                 // mid-range jump - prefetchThreshold and nextPageThreshold may be equal, do not change to else if
                 if (index === this.midPageThreshold) {
-                    this.range(this.nextMidRange);
+                    this.range(this.nextMidRange, true);
                 }
                 // next range jump
                 else if (index === this.nextPageThreshold) {
@@ -4162,14 +4313,13 @@
                     }
                 }
 
-                item = this.dataSource.at(index - this.dataOffset);
+                if (itemPresent) {
+                    return this.dataSource.at(index - this.dataOffset);
+                } else {
+                    this.trigger("endreached", { index: index });
+                    return null;
+                }
             }
-
-            if (item === undefined) {
-                this.trigger("endreached", { index: index });
-            }
-
-            return item;
         },
 
         indexOf: function(item) {
@@ -4183,8 +4333,8 @@
         next: function() {
             var buffer = this,
                 pageSize = buffer.pageSize,
-                offset = buffer.skip - buffer.viewSize, // this calculation relies that the buffer has already jumped into the mid range segment
-                pageSkip = math.max(math.floor(offset / pageSize), 0) * pageSize + pageSize;
+                offset = buffer.skip - buffer.viewSize + pageSize,
+                pageSkip = math.max(math.floor(offset / pageSize), 0) * pageSize;
 
             this.offset = offset;
             this.dataSource.prefetch(pageSkip, pageSize, function() {
@@ -4192,25 +4342,35 @@
             });
         },
 
-        range: function(offset) {
+        range: function(offset, nextRange) {
             if (this.offset === offset) {
-                return;
+                return true;
             }
 
             var buffer = this,
                 pageSize = this.pageSize,
-                pageSkip = math.max(math.floor(offset / pageSize), 0) * pageSize + pageSize,
+                pageSkip = math.max(math.floor(offset / pageSize), 0) * pageSize,
                 dataSource = this.dataSource;
 
-            this.offset = offset;
-            this._recalculate();
+            if (nextRange) {
+                pageSkip += pageSize;
+            }
+
             if (dataSource.inRange(offset, pageSize)) {
+                this.offset = offset;
+                this._recalculate();
                 this._goToRange(offset);
+                return true;
             } else if (this.prefetch) {
                 dataSource.prefetch(pageSkip, pageSize, function() {
+                    buffer.offset = offset;
+                    buffer._recalculate();
                     buffer._goToRange(offset, true);
                 });
+                return false;
             }
+
+            return true;
         },
 
         syncDataSource: function() {
@@ -4251,15 +4411,19 @@
             this.dataSource.enableRequestsInProgress();
         },
 
+        _reset: function() {
+            this._syncPending = true;
+        },
+
         _change: function() {
-            var dataSource = this.dataSource,
-                firstItemUid = dataSource.firstItemUid();
+            var dataSource = this.dataSource;
 
             this.length = this.useRanges ? dataSource.lastRange().end : dataSource.view().length;
 
-            if (this._firstItemUid !== firstItemUid || !this.useRanges) {
+            if (this._syncPending) {
                 this._syncWithDataSource();
                 this._recalculate();
+                this._syncPending = false;
                 this.trigger("reset", { offset: this.offset });
             }
 
@@ -4381,6 +4545,7 @@
         Node: Node,
         ObservableObject: ObservableObject,
         ObservableArray: ObservableArray,
+        LazyObservableArray: LazyObservableArray,
         LocalTransport: LocalTransport,
         RemoteTransport: RemoteTransport,
         Cache: Cache,

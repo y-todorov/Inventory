@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -221,9 +221,7 @@
 
             that._tabindex();
 
-            if (!that.wrapper.filter("[role=tree]").length) {
-                that.wrapper.attr("role", "tree");
-            }
+            that.root.attr("role", "tree");
 
             that._dataSource(inferred);
 
@@ -430,7 +428,13 @@
                     return result;
                 },
                 groupAttributes: function(group) {
-                    return group.expanded !== true ? " style='display:none'" : "";
+                    var attributes = "";
+
+                    if (!group.firstLevel) {
+                        attributes = "role='group'";
+                    }
+
+                    return attributes + (group.expanded !== true ? " style='display:none'" : "");
                 },
                 groupCssClass: function(group) {
                     var cssClass = "k-group";
@@ -448,7 +452,7 @@
                     "</div>"
                 ),
                 group: templateNoWith(
-                    "<ul class='#= data.r.groupCssClass(data.group) #'#= data.r.groupAttributes(data.group) # role='group'>" +
+                    "<ul class='#= data.r.groupCssClass(data.group) #'#= data.r.groupAttributes(data.group) #>" +
                         "#= data.renderItems(data) #" +
                     "</ul>"
                 ),
@@ -489,9 +493,9 @@
                 ),
                 item: templateNoWith(
                     "# var item = data.item, r = data.r; #" +
-                    "<li role='treeitem' class='#= r.wrapperCssClass(data.group, item) #'" +
-                        " " + kendo.attr("uid") + "='#= item.uid #'" +
-                        "#=item.selected ? \"aria-selected='true'\" : ''#" +
+                    "<li role='treeitem' class='#= r.wrapperCssClass(data.group, item) #' " +
+                        kendo.attr("uid") + "='#= item.uid #' " +
+                        "aria-selected='#= item.selected ? \"true\" : \"false \" #' " +
                         "#=item.enabled === false ? \"aria-disabled='true'\" : ''#" +
                     ">" +
                         "#= r.itemElement(data) #" +
@@ -519,6 +523,10 @@
             this._dataSource();
 
             this.dataSource.fetch();
+
+            if (options.checkboxes && options.checkboxes.checkChildren) {
+                this.updateIndeterminate();
+            }
         },
 
         _bindDataSource: function() {
@@ -1328,7 +1336,7 @@
                             }
 
                             isCollapsed = true;
-                            node.removeAttr(ARIASELECTED)
+                            node.attr(ARIASELECTED, false)
                                 .attr(ARIADISABLED, true);
                         }
 
@@ -1373,7 +1381,7 @@
                 i;
 
             if (e.field) {
-                if (!items[0].level) {
+                if (!items[0] || !items[0].level) {
                     return;
                 }
 
@@ -1412,15 +1420,22 @@
 
                     if (!items.length) {
                         updateNodeHtml(parentNode);
+
+                        this.trigger("itemChange", { item: parentNode, data: node, ns: ui });
                     } else {
                         this._appendItems(e.index, items, parentNode);
 
+                        var children = subGroup(parentNode).children();
+
                         if (loadOnDemand && checkChildren) {
-                            this._bubbleIndeterminate(subGroup(parentNode).children().last());
+                            this._bubbleIndeterminate(children.last());
+                        }
+
+                        for (i = 0; i < children.length; i++) {
+                            var child = children.eq(i);
+                            this.trigger("itemChange", { item: child, data: this.dataItem(child), ns: ui });
                         }
                     }
-
-                    this.trigger("itemChange", { item: parentNode, data: node, ns: ui });
                 } else {
 
                     var groupHtml = this._renderGroup({
@@ -1439,26 +1454,21 @@
 
                         this.root
                             .attr("class", group.attr("class"))
-                            .attr("role", group.attr("role"))
                             .html(group.html());
                     } else {
                         this.root = this.wrapper.html(groupHtml).children("ul");
                     }
 
+                    this.root.attr("role", "tree");
+
                     this._angularItems("compile");
                 }
             }
 
-            // expand any expanded items
             for (i = 0; i < items.length; i++) {
                 if (!loadOnDemand || items[i].expanded) {
                     items[i].load();
                 }
-            }
-
-            // update indeterminate state when appending / moving items
-            if (checkChildren) {
-                this.updateIndeterminate();
             }
 
             this.trigger(DATABOUND, {
@@ -1568,24 +1578,30 @@
         },
 
         _toggle: function(node, dataItem, expand) {
-            var that = this,
-                options = that.options,
-                contents = nodeContents(node),
-                direction = expand ? "expand" : "collapse",
-                animation = options.animation[direction],
-                loaded;
+            var options = this.options;
+            var contents = nodeContents(node);
+            var direction = expand ? "expand" : "collapse";
+            var loaded, empty;
 
             if (contents.data("animating")) {
                 return;
             }
 
-            if (!that._trigger(direction, node)) {
-                that._expanded(node, expand);
+            if (!this._trigger(direction, node)) {
+                this._expanded(node, expand);
 
                 loaded = dataItem && dataItem.loaded();
+                empty = !contents.children().length;
 
-                if (loaded && contents.children().length > 0) {
-                    that._updateNodeClasses(node, {}, { expanded: expand });
+                if (expand && (!loaded || empty)) {
+                    if (options.loadOnDemand) {
+                        this._progress(node, true);
+                    }
+
+                    contents.remove();
+                    dataItem.load();
+                } else {
+                    this._updateNodeClasses(node, {}, { expanded: expand });
 
                     if (contents.css("display") == (expand ? "block" : "none")) {
                         return;
@@ -1595,20 +1611,17 @@
                         contents.css("height", contents.height()).css("height");
                     }
 
-                    contents.kendoStop(true, true).kendoAnimate(extend({ reset: true }, animation, {
-                        complete: function() {
-                            if (expand) {
-                                contents.css("height", "");
-                            }
-                        }
-                    }));
-                } else if (expand) {
-                    if (options.loadOnDemand) {
-                        that._progress(node, true);
-                    }
-
-                    contents.remove();
-                    dataItem.load();
+                    contents
+                        .kendoStop(true, true)
+                        .kendoAnimate(extend(
+                            { reset: true },
+                            options.animation[direction],
+                            { complete: function() {
+                                if (expand) {
+                                    contents.css("height", "");
+                                }
+                            } }
+                        ));
                 }
             }
         },
@@ -1982,12 +1995,13 @@
            },
            cursorOffset: {
                left: 10,
-               top: kendo.support.touch || kendo.support.msPointers || kendo.support.pointers ? -40 / kendo.support.zoomLevel() : 10
+               top: kendo.support.mobileOS ? -40 / kendo.support.zoomLevel() : 10
            },
            dragstart: proxy(that.dragstart, that),
            dragcancel: proxy(that.dragcancel, that),
            drag: proxy(that.drag, that),
-           dragend: proxy(that.dragend, that)
+           dragend: proxy(that.dragend, that),
+           $angular: treeview.options.$angular
         });
     }
 

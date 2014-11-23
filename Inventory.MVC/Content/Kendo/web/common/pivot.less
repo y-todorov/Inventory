@@ -19,7 +19,7 @@
     font-size: .9em;
     text-align: left;
     position: relative;
-    padding: .3em 3.3em .3em .3em;
+    padding: .3em 5em .3em .3em;
 }
 
 .k-field-actions
@@ -29,7 +29,8 @@
     top: 3px;
 }
 
-.k-pivot .k-grid
+/*IE7 requires the following style to be applied to cells directly*/
+.k-pivot .k-grid td
 {
     white-space: nowrap;
 }
@@ -87,11 +88,6 @@
 .k-pivot .k-grid-header .k-header
 {
     vertical-align: top;
-}
-
-.k-pivot .k-grid-header tr + tr > .k-header
-{
-    border-top-width: 1px;
 }
 
 .k-header.k-alt,
@@ -158,32 +154,43 @@ td.k-alt
 
 .k-fieldselector p .k-icon
 {
-    margin: 0 5px;
+    margin: 0 5px 0 0;
 }
 
 .k-fieldselector .k-columns
 {
     border-style: solid;
-    border-width: 1px 0 0;
+    border-width: 0;
 }
 
 .k-fieldselector .k-columns > div
 {
-    padding: .6em 0;
+    overflow: auto;
+    padding: .6em;
     border-style: solid;
-}
-
-.k-fieldselector .k-columns > div
-{
     border-width: 0 0 0 1px;
-    width: 49%;
     float: left;
+    width: 45%;
 }
 
 .k-fieldselector .k-columns > div:first-child
 {
-    border-width: 0 1px 0 0;
+    border-width: 0;
     margin-right: -1px;
+}
+
+.k-fieldselector .k-columns > div + div
+{
+    float: right;
+    border-width: 0;
+}
+
+.k-fieldselector div.k-treeview
+{
+    border-width: 0;
+    margin-right: -1px;
+    padding-left: 4px;
+    overflow: visible;
 }
 
 .k-fieldselector .k-list-container
@@ -208,6 +215,38 @@ td.k-alt
     font-size: .9em;
     line-height: 1.2em;
     min-height: 1em;
+}
+
+/* KPI icons */
+
+.k-i-kpi-decrease
+{
+    background-position: 0 0;
+}
+
+.k-i-kpi-denied
+{
+    background-position: -16px 0;
+}
+
+.k-i-kpi-equal
+{
+    background-position: -32px 0;
+}
+
+.k-i-kpi-hold
+{
+    background-position: -48px 0;
+}
+
+.k-i-kpi-increase
+{
+    background-position: -64px 0;
+}
+
+.k-i-kpi-open
+{
+    background-position: -80px 0;
 }
 
 /* Pivot end */

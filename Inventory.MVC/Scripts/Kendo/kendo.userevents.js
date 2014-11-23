@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -321,7 +321,8 @@
 
             extend(that, {
                 element: element,
-                surface: options.global ? $(document.documentElement) : $(options.surface || element),
+                // the touch events lock to the element anyway, so no need for the global setting
+                surface: options.global && !support.touch ? $(document.documentElement) : $(options.surface || element),
                 stopPropagation: options.stopPropagation,
                 pressed: false
             });

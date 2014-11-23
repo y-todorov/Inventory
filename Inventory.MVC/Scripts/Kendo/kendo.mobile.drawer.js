@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -33,8 +33,11 @@
 
             mobile.ui.Widget.fn.init.call(this, element, options);
 
-            this._layout();
-            this._scroller();
+            if (!this.options.$angular) {
+                this._layout();
+                this._scroller();
+            }
+
             this._model();
 
             var pane = this.element.closest(roleSelector("pane")).data("kendoMobilePane"),
@@ -159,6 +162,7 @@
             this.element.show();
 
             this.trigger(SHOW, { view: this });
+            this._invokeNgController();
             return true;
         },
 

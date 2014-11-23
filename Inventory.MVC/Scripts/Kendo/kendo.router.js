@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -262,7 +262,7 @@
 
             this._navigate(to, silent, function(adapter) {
                 adapter.replace(to);
-                this.locations[this.locations - 1] = this.current;
+                this.locations[this.locations.length - 1] = this.current;
             });
         },
 
@@ -371,12 +371,12 @@
         return optional ? match : '([^\/]+)';
     }
 
-    function routeToRegExp(route) {
+    function routeToRegExp(route, ignoreCase) {
         return new RegExp('^' + route
             .replace(escapeRegExp, '\\$&')
             .replace(optionalParam, '(?:$1)?')
             .replace(namedParam, namedParamReplace)
-            .replace(splatParam, '(.*?)') + '$');
+            .replace(splatParam, '(.*?)') + '$', ignoreCase ? "i" : "");
     }
 
     function stripUrl(url) {
@@ -384,9 +384,9 @@
     }
 
     var Route = kendo.Class.extend({
-        init: function(route, callback) {
+        init: function(route, callback, ignoreCase) {
             if (!(route instanceof RegExp)) {
-                route = routeToRegExp(route);
+                route = routeToRegExp(route, ignoreCase);
             }
 
             this.route = route;
@@ -436,6 +436,7 @@
             this.pushState = options.pushState;
             this.hashBang = options.hashBang;
             this.root = options.root;
+            this.ignoreCase = options.ignoreCase !== false;
 
             this.bind([INIT, ROUTE_MISSING, CHANGE, SAME], options);
         },
@@ -473,7 +474,7 @@
         },
 
         route: function(route, callback) {
-            this.routes.push(new Route(route, callback));
+            this.routes.push(new Route(route, callback, this.ignoreCase));
         },
 
         navigate: function(url, silent) {

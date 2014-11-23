@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -115,10 +115,12 @@
             for (attrName in cached.attr) {
                 if (attr[attrName] === undefined) {
                     if (node[attrName] !== undefined) {
-                        if (attrName !== "style") {
+                        if (attrName === "style") {
+                            node.style.cssText = "";
+                        } else if (attrName === "className") {
                             node[attrName] = "";
                         } else {
-                            node.style.cssText = "";
+                            node.removeAttribute(attrName);
                         }
                     } else {
                         node.removeAttribute(attrName);
@@ -185,6 +187,8 @@
                for (var child = lastChild ? lastChild.nextSibling : parent.firstChild; child; child = child.nextSibling) {
                    this.nodes.push(child);
                }
+           } else {
+               this.nodes = cached.nodes.slice(0);
            }
        }
     };

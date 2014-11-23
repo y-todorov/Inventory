@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -20,18 +20,18 @@
     var isPlainObject = $.isPlainObject;
     var extend = $.extend;
     var browser = kendo.support.browser;
-    var isIE = browser.msie;
-    var oldIE = isIE && browser.version < 9;
     var keys = kendo.keys;
     var Query = kendo.data.Query;
     var NS = ".kendoGanttTimeline";
     var CLICK = "click";
+    var DBLCLICK = "dblclick";
     var KEYDOWN = "keydown";
     var DOT = ".";
     var TIME_HEADER_TEMPLATE = kendo.template("#=kendo.toString(start, 't')#");
     var DAY_HEADER_TEMPLATE = kendo.template("#=kendo.toString(start, 'ddd M/dd')#");
     var WEEK_HEADER_TEMPLATE = kendo.template("#=kendo.toString(start, 'ddd M/dd')# - #=kendo.toString(kendo.date.addDays(end, -1), 'ddd M/dd')#");
     var MONTH_HEADER_TEMPLATE = kendo.template("#=kendo.toString(start, 'MMM')#");
+    var YEAR_HEADER_TEMPLATE = kendo.template("#=kendo.toString(start, 'yyyy')#");
     var RESIZE_HINT = kendo.template('<div class="#=styles.marquee#">' +
                            '<div class="#=styles.marqueeColor#"></div>' +
                        '</div>');
@@ -55,6 +55,9 @@
         },
         month: {
             type: "kendo.ui.GanttMonthView"
+        },
+        year: {
+            type: "kendo.ui.GanttYearView"
         }
     };
 
@@ -101,12 +104,15 @@
         rowsTable: "k-gantt-rows",
         columnsTable: "k-gantt-columns",
         tasksTable: "k-gantt-tasks",
+        resource: "k-resource",
+        resourceAlt: "k-resource k-alt",
         task: "k-task",
         taskSingle: "k-task-single",
         taskMilestone: "k-task-milestone",
         taskSummary: "k-task-summary",
         taskWrap: "k-task-wrap",
         taskMilestoneWrap: "k-milestone-wrap",
+        resourcesWrap: "k-resources-wrap",
         taskDot: "k-task-dot",
         taskDotStart: "k-task-start",
         taskDotEnd: "k-task-end",
@@ -312,10 +318,17 @@
         _tasksTable: function(tasks) {
             var rows = [];
             var row;
+            var cell;
             var position;
             var task;
+            var styles = GanttView.styles;
             var coordinates = this._taskCoordinates = {};
-            var milestoneWidth = Math.round(this._calculateMilestoneWidth());
+            var size = this._calculateMilestoneWidth();
+            var milestoneWidth = Math.round(size.width);
+            var resourcesField = this.options.resourcesField;
+            var className = [styles.resource, styles.resourceAlt];
+            var resourcesPosition;
+            var resourcesMargin = this._calculateResourcesMargin();
 
             var addCoordinates = function(rowIndex) {
                 var taskLeft;
@@ -341,11 +354,22 @@
 
                 position = this._taskPosition(task);
 
-                row = kendoDomElement("tr", null, [
-                    kendoDomElement("td", null, [
-                        this._renderTask(tasks[i], position)
-                    ])
-                ]);
+                row = kendoDomElement("tr", null);
+
+                cell = kendoDomElement("td", null, [this._renderTask(tasks[i], position)]);
+
+                if (task[resourcesField] && task[resourcesField].length) {
+                    resourcesPosition = Math.max((position.width || size.clientWidth), 0) + position.left;
+
+                    cell.children.push(kendoDomElement("div",
+                        {
+                            className: styles.resourcesWrap,
+                            style: { left: resourcesPosition + "px", width: (this._tableWidth - (resourcesPosition + resourcesMargin)) + "px" }
+                        },
+                        this._renderResources(task[resourcesField], className[i % 2])));
+                }
+
+                row.children.push(cell);
 
                 rows.push(row);
 
@@ -400,17 +424,33 @@
         },
 
         _calculateMilestoneWidth: function() {
-            var milestoneWidth;
+            var size;
             var className = GanttView.styles.task + " " + GanttView.styles.taskMilestone;
             var milestone = $("<div class='" + className + "' style='visibility: hidden; position: absolute'>");
 
             this.content.append(milestone);
 
-            milestoneWidth = milestone[0].getBoundingClientRect().width;
+            size = {
+                "width": milestone[0].getBoundingClientRect().width,
+                "clientWidth": milestone[0].clientWidth
+            };
 
             milestone.remove();
 
-            return milestoneWidth;
+            return size;
+        },
+
+        _calculateResourcesMargin: function() {
+            var margin;
+            var wrapper = $("<div class='" + GanttView.styles.resourcesWrap + "' style='visibility: hidden; position: absolute'>");
+
+            this.content.append(wrapper);
+
+            margin = parseInt(wrapper.css("margin-left"), 10);
+
+            wrapper.remove();
+
+            return margin;
         },
 
         _renderTask: function(task, position) {
@@ -497,6 +537,23 @@
             ]);
 
             return element;
+        },
+
+        _renderResources: function(resources, className) {
+            var children = [];
+            var resource;
+
+            for (var i = 0, length = resources.length; i < length; i++) {
+                resource = resources[i];
+                children.push(kendoDomElement("span", {
+                    className: className,
+                    style: {
+                        "color": resource.get("color")
+                    }
+                }, [kendoTextElement(resource.get("name"))]));
+            }
+
+            return children;
         },
 
         _taskPosition: function(task) {
@@ -1197,6 +1254,29 @@
             return slots;
         },
 
+        _years: function(start, end) {
+            var slotEnd;
+            var slots = [];
+
+            start = new Date(start);
+            end = new Date(end);
+
+            while (start < end) {
+                slotEnd = new Date(start);
+                slotEnd.setFullYear(slotEnd.getFullYear() + 1);
+
+                slots.push({
+                    start: start,
+                    end: slotEnd,
+                    span: 12
+                });
+
+                start = slotEnd;
+            }
+
+            return slots;
+        },
+
         _slotHeaders: function(slots, template) {
             var columns = [];
             var slot;
@@ -1355,6 +1435,44 @@
             return rows;
         }
     });
+    
+    kendo.ui.GanttYearView = GanttView.extend({
+        name: "year",
+
+        options: {
+            yearHeaderTemplate: YEAR_HEADER_TEMPLATE,
+            monthHeaderTemplate: MONTH_HEADER_TEMPLATE
+        },
+
+        range: function(range) {
+            this.start = kendo.date.firstDayOfMonth(new Date(range.start.setMonth(0)));
+            this.end = kendo.date.firstDayOfMonth(new Date(range.end.setMonth(12))); //set month to first month of next year
+        },
+
+        _createSlots: function() {
+            var slots = [];
+            var monthSlots = this._months(this.start, this.end);
+
+            $(monthSlots).each(function(index, slot) {
+                slot.span = 1;
+            });
+
+            slots.push(this._years(this.start, this.end));
+            slots.push(monthSlots);
+
+            return slots;
+        },
+
+        _layout: function() {
+            var rows = [];
+            var options = this.options;
+
+            rows.push(this._slotHeaders(this._slots[0], kendo.template(options.yearHeaderTemplate)));
+            rows.push(this._slotHeaders(this._slots[1], kendo.template(options.monthHeaderTemplate)));
+
+            return rows;
+        }
+    });
 
     var timelineStyles = {
         wrapper: "k-timeline k-grid k-widget",
@@ -1415,7 +1533,8 @@
                 views: {
                     day: "Day",
                     week: "Week",
-                    month: "Month"
+                    month: "Month",
+                    year: "Year"
                 }
             },
             snap: true,
@@ -1493,13 +1612,21 @@
                     continue;
                 }
 
-                name = isSettings ? view.type : view;
+                name = isSettings ? ((typeof view.type !== "string") ? view.title : view.type) : view;
 
                 defaultView = defaultViews[name];
 
                 if (defaultView) {
-                    view = extend({ title: this.options.messages.views[name] }, isSettings ? view : {}, defaultView);
+                    if (isSettings) {
+                        view.type = defaultView.type;
+                    }
 
+                    defaultView.title = this.options.messages.views[name];
+                }
+
+                view = extend({ title: name }, defaultView, isSettings ? view : {});
+
+                if (name) {
                     this.views[name] = view;
 
                     if (!selected || view.selected) {
@@ -1595,8 +1722,8 @@
             var end = new Query(tasks).sort(endOrder).toArray()[0].end || new Date();
 
             return {
-                start: start,
-                end: end
+                start: new Date(start),
+                end: new Date(end)
             };
         },
 
@@ -1653,7 +1780,7 @@
                 dragInProgress = false;
             };
 
-            if (this.options.editable !== true) {
+            if (!this.options.editable) {
                 return;
             }
 
@@ -1729,7 +1856,7 @@
                 dragInProgress = false;
             };
 
-            if (this.options.editable !== true) {
+            if (!this.options.editable) {
                 return;
             }
 
@@ -1830,7 +1957,7 @@
                     .css("left", width);
             };
 
-            if (this.options.editable !== true) {
+            if (!this.options.editable) {
                 return;
             }
 
@@ -1897,7 +2024,7 @@
             var startY;
             var content;
             var contentOffset;
-            var useVML = kendo.support.browser.msie && kendo.support.browser.version < 9;
+            var useVML = browser.msie && browser.version < 9;
             var styles = GanttTimeline.styles;
 
             var cleanUp = function() {
@@ -1925,7 +2052,7 @@
                 }
             };
 
-            if (this.options.editable !== true) {
+            if (!this.options.editable) {
                 return;
             }
 
@@ -1961,6 +2088,8 @@
                     if (!dragInProgress) {
                         return;
                     }
+
+                    that.view()._removeDependencyDragHint();
 
                     var target = $(kendo.elementUnderCursor(e));
                     var currentX = e.x.location + content.scrollLeft() - contentOffset.left;
@@ -2086,12 +2215,17 @@
             var that = this;
             var styles = GanttTimeline.styles;
 
-            if (this.options.editable === true) {
+            if (this.options.editable) {
                 this._tabindex();
 
                 this.wrapper
                     .on(CLICK + NS, DOT + styles.taskDelete, function(e) {
                         that.trigger("removeTask", { uid: $(this).closest(DOT + styles.task).attr("data-uid") });
+                        e.stopPropagation();
+                        e.preventDefault();
+                    })
+                    .on(DBLCLICK + NS, DOT + styles.task, function(e) {
+                        that.trigger("editTask", { uid: $(this).attr("data-uid") });
                         e.stopPropagation();
                         e.preventDefault();
                     })

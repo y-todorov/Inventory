@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -11,7 +11,7 @@
 })(function(){
 
 /*jshint eqnull: true, loopfunc: true, evil: true, boss: true, freeze: false*/
-(function($, undefined) {
+(function($, window, undefined) {
     var kendo = window.kendo = window.kendo || { cultures: {} },
         extend = $.extend,
         each = $.each,
@@ -38,7 +38,7 @@
         slice = [].slice,
         globalize = window.Globalize;
 
-    kendo.version = "2014.2.903";
+    kendo.version = "2014.3.1119";
 
     function Class() {}
 
@@ -654,17 +654,14 @@ function pad(number, digits, end) {
                 result = math.abs(minutes / 60).toString().split(".")[0];
                 minutes = math.abs(minutes) - (result * 60);
 
-                result = (sign ? "-" : "+") + pad(result);
+                result = (sign ? "+" : "-") + pad(result);
                 result += ":" + pad(minutes);
-            } else if (match === "zz") {
+            } else if (match === "zz" || match === "z") {
                 result = date.getTimezoneOffset() / 60;
                 sign = result < 0;
 
                 result = math.abs(result).toString().split(".")[0];
-                result = (sign ? "-" : "+") + pad(result);
-            } else if (match === "z") {
-                result = date.getTimezoneOffset() / 60;
-                result = (result > 0 ? "+" : "") + result.toString().split(".")[0];
+                result = (sign ? "+" : "-") + (match === "zz" ? pad(result) : result);
             }
 
             return result !== undefined ? result : match.slice(1, match.length - 1);
@@ -1743,19 +1740,29 @@ function pad(number, digits, end) {
 
     function deepExtendOne(destination, source) {
         var ObservableArray = kendo.data.ObservableArray,
+            LazyObservableArray = kendo.data.LazyObservableArray,
             DataSource = kendo.data.DataSource,
             HierarchicalDataSource = kendo.data.HierarchicalDataSource,
             property,
             propValue,
             propType,
+            propInit,
             destProp;
 
         for (property in source) {
             propValue = source[property];
             propType = typeof propValue;
-            if (propType === OBJECT && propValue !== null &&
-                propValue.constructor !== Array && propValue.constructor !== ObservableArray &&
-                propValue.constructor !== DataSource && propValue.constructor !== HierarchicalDataSource) {
+
+            if (propType === OBJECT && propValue !== null) {
+                propInit = propValue.constructor;
+            } else {
+                propInit = null;
+            }
+
+            if (propInit &&
+                propInit !== Array && propInit !== ObservableArray && propInit !== LazyObservableArray &&
+                propInit !== DataSource && propInit !== HierarchicalDataSource) {
+
                 if (propValue instanceof Date) {
                     destination[property] = new Date(propValue.getTime());
                 } else if (isFunction(propValue.clone)) {
@@ -2430,7 +2437,7 @@ function pad(number, digits, end) {
         effects: kendo.effects || effects,
         mobile: kendo.mobile || { },
         data: kendo.data || {},
-        dataviz: kendo.dataviz || {ui: { roles: {}}},
+        dataviz: kendo.dataviz || {},
         keys: {
             INSERT: 45,
             DELETE: 46,
@@ -2541,6 +2548,20 @@ function pad(number, digits, end) {
             return role.replace(/(\S+)/g, "[" + kendo.attr("role") + "=$1],").slice(0, -1);
         },
 
+        directiveSelector: function(directives) {
+            var selectors = directives.split(" ");
+
+            if (selectors) {
+                for (var i = 0; i < selectors.length; i++) {
+                    if (selectors[i] != "view") {
+                        selectors[i] = selectors[i].replace(/(\w*)(view|bar|strip|over)$/, "$1-$2");
+                    }
+                }
+            }
+
+            return selectors.join(" ").replace(/(\S+)/g, "kendo-mobile-$1,").slice(0, -1);
+        },
+
         triggeredByInput: function(e) {
             return (/^(label|input|textarea|select)$/i).test(e.target.tagName);
         },
@@ -2564,7 +2585,18 @@ function pad(number, digits, end) {
 
             Observable.fn.init.call(that);
 
+            var dataSource = options ? options.dataSource : null;
+
+            if (dataSource) {
+                // avoid deep cloning the data source
+                options = extend({}, options, { dataSource: {} });
+            }
+
             options = that.options = extend(true, {}, that.options, options);
+
+            if (dataSource) {
+                options.dataSource = dataSource;
+            }
 
             if (!that.element.attr(kendo.attr("role"))) {
                 that.element.attr(kendo.attr("role"), (options.name || "").toLowerCase());
@@ -2827,7 +2859,7 @@ function pad(number, digits, end) {
 
         if (!result) {
             result = new widget(element, options);
-        } else {
+        } else if (!$.isEmptyObject(options)) {
             result.setOptions(options);
         }
 
@@ -3034,6 +3066,8 @@ function pad(number, digits, end) {
             return kendo.mobile.application && kendo.mobile.application.options && kendo.mobile.application.options.useNativeScrolling;
         },
 
+        roles: {},
+
         ui: {
             Widget: MobileWidget,
             DataBoundWidget: DataBoundWidget.extend(MobileWidget.prototype),
@@ -3042,6 +3076,21 @@ function pad(number, digits, end) {
                 kendo.ui.plugin(widget, kendo.mobile.ui, "Mobile");
             }
         }
+    });
+
+    deepExtend(kendo.dataviz, {
+        init: function(element) {
+            kendo.init(element, kendo.dataviz.ui);
+        },
+        ui: {
+            roles: {},
+            themes: {},
+            views: [],
+            plugin: function(widget) {
+                kendo.ui.plugin(widget, kendo.dataviz.ui);
+            }
+        },
+        roles: {}
     });
 
     kendo.touchScroller = function(elements, options) {
@@ -3860,8 +3909,8 @@ function pad(number, digits, end) {
             var args = arguments;
 
             function exec() {
-                lastExecTime = +new Date();
                 fn.apply(that, args);
+                lastExecTime = +new Date();
             }
 
             // first execution
@@ -3938,7 +3987,105 @@ function pad(number, digits, end) {
         return start;
     };
 
-})(jQuery);
+    kendo.compileMobileDirective = function(element, scopeSetup) {
+        var angular = window.angular;
+
+        element.attr("data-" + kendo.ns + "role", element[0].tagName.toLowerCase().replace('kendo-mobile-', '').replace('-', ''));
+
+        angular.element(element).injector().invoke(["$compile", function($compile) {
+            var scope = angular.element(element).scope();
+            if (scopeSetup) {
+                scopeSetup(scope);
+            }
+            $compile(element)(scope);
+            scope.$digest();
+        }]);
+
+        return kendo.widgetInstance(element, kendo.mobile.ui);
+    };
+
+    // kendo.saveAs -----------------------------------------------
+    (function() {
+        function postToProxy(dataURI, fileName, proxyURL) {
+            var form = $("<form>").attr({
+                action: proxyURL,
+                method: "POST"
+            });
+
+            var parts = dataURI.split(";base64,");
+
+            $('<input>').attr({
+                value: parts[0].replace("data:", ""),
+                name: "contentType",
+                type: "hidden"
+            }).appendTo(form);
+
+            $('<input>').attr({
+                value: parts[1],
+                name: "base64",
+                type: "hidden"
+            }).appendTo(form);
+
+            $('<input>').attr({
+                value: fileName,
+                name: "fileName",
+                type: "hidden"
+            }).appendTo(form);
+
+            form.appendTo("body").submit().remove();
+        }
+
+        var fileSaver = document.createElement("a");
+        var downloadAttribute = "download" in fileSaver;
+
+        function saveAsBlob(dataURI, fileName) {
+            var blob = dataURI; // could be a Blob object
+
+            if (typeof dataURI == "string") {
+                var parts = dataURI.split(";base64,");
+                var contentType = parts[0];
+                var base64 = atob(parts[1]);
+                var array = new Uint8Array(base64.length);
+
+                for (var idx = 0; idx < base64.length; idx++) {
+                    array[idx] = base64.charCodeAt(idx);
+                }
+                blob = new Blob([array.buffer], { type: contentType });
+            }
+
+            navigator.msSaveBlob(blob, fileName);
+        }
+
+        function saveAsDataURI(dataURI, fileName) {
+            if (window.Blob && dataURI instanceof Blob) {
+                dataURI = URL.createObjectURL(dataURI);
+            }
+
+            fileSaver.download = fileName;
+            fileSaver.href = dataURI;
+
+            var e = document.createEvent("MouseEvents");
+            e.initMouseEvent("click", true, false, window,
+                0, 0, 0, 0, 0, false, false, false, false, 0, null);
+
+            fileSaver.dispatchEvent(e);
+        }
+
+        kendo.saveAs = function(options) {
+            var save = postToProxy;
+
+            if (!options.forceProxy) {
+                if (downloadAttribute) {
+                    save = saveAsDataURI;
+                } else if (navigator.msSaveBlob) {
+                    save = saveAsBlob;
+                }
+            }
+
+            save(options.dataURI, options.fileName, options.proxyURL);
+        };
+    })();
+})(jQuery, window);
 
 return window.kendo;
 

@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -11,6 +11,42 @@
 })(function(){
 
 
+
+/* Filter cell operator messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.operators =
+$.extend(true, kendo.ui.FilterCell.prototype.options.operators,{
+  "date": {
+    "eq": "Est égal à",
+    "gte": "Est postérieur ou égal à",
+    "gt": "Est postérieur",
+    "lte": "Est antérieur ou égal à",
+    "lt": "Est antérieur",
+    "neq": "N’est pas égal à"
+  },
+  "number": {
+    "eq": "Est égal à",
+    "gte": "Est supérieur ou égal à",
+    "gt": "Est supérieur à",
+    "lte": "Est inférieur ou égal à",
+    "lt": "Est inférieur à",
+    "neq": "N’est pas égal à"
+  },
+  "string": {
+    "endswith": "Se termine par",
+    "eq": "Est égal à",
+    "neq": "N’est pas égal à",
+    "startswith": "Commence par",
+    "contains": "Contient",
+    "doesnotcontain": "Ne contient pas"
+  },
+  "enum": {
+    "eq": "Est égal à",
+    "neq": "N’est pas égal à"
+  }
+});
+}
 
 /* Filter menu operator messages */
 
@@ -158,6 +194,19 @@ $.extend(true, kendo.ui.Pager.prototype.options.messages,{
   "next": "Aller à la page suivante",
   "previous": "Aller à la page précédente",
   "morePages": "Plusieurs pages"
+});
+}
+
+/* FilterCell messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.messages =
+$.extend(true, kendo.ui.FilterCell.prototype.options.messages,{
+  "filter": "Filtrer",
+  "clear": "Effacer filtre",
+  "isFalse": "est fausse",
+  "isTrue": "est vrai",
+  "operator": "Opérateur"
 });
 }
 
@@ -325,6 +374,7 @@ $.extend(true, kendo.ui.Scheduler.prototype.options.messages,{
   "showWorkDay": "Montrer les heures ouvrables"
 });
 }
+
 
 return window.kendo;
 

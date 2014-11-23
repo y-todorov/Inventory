@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -35,8 +35,12 @@
         options: {
             name: "PivotFieldMenu",
             filter: null,
+            filterable: true,
+            sortable: true,
             messages: {
                 info: "Show items with value that:",
+                sortAscending: "Sort Ascending",
+                sortDescending: "Sort Descending",
                 filterFields: "Fields Filter",
                 filter: "Filter",
                 include: "Include Fields...",
@@ -60,6 +64,8 @@
 
             this.wrapper = $(kendo.template(MENUTEMPLATE)({
                 ns: kendo.ns,
+                filterable: options.filterable,
+                sortable: options.sortable,
                 messages: options.messages
             }));
 
@@ -76,17 +82,22 @@
 
             this._createWindow();
 
-            this._initFilterForm();
+            if (options.filterable) {
+                this._initFilterForm();
+            }
         },
 
         _initFilterForm: function() {
             var filterForm = this.menu.element.find(".k-filter-item");
+            var filterProxy = proxy(this._filter, this);
 
             this._filterOperator = new kendo.ui.DropDownList(filterForm.find("select"));
             this._filterValue = filterForm.find(".k-textbox");
 
+
             filterForm
-                .on("click" + NS, ".k-button-filter", proxy(this._filter, this))
+                .on("submit" + NS, filterProxy)
+                .on("click" + NS, ".k-button-filter", filterProxy)
                 .on("click" + NS, ".k-button-clear", proxy(this._reset, this));
         },
 
@@ -119,9 +130,11 @@
             return filter;
         },
 
-        _filter: function() {
+        _filter: function(e) {
             var that = this;
             var value = that._filterValue.val();
+
+            e.preventDefault();
 
             if (!value) {
                 that.menu.close();
@@ -141,9 +154,11 @@
             that.menu.close();
         },
 
-        _reset: function() {
+        _reset: function(e) {
             var that = this;
             var filter = that._clearFilters(that.currentMember);
+
+            e.preventDefault();
 
             if (!filter.filters[0]) {
                 filter = {};
@@ -152,6 +167,20 @@
             that.dataSource.filter(filter);
             that._setFilterForm(null);
             that.menu.close();
+        },
+
+        _sort: function(dir) {
+            var field = this.currentMember;
+            var expressions = (this.dataSource.sort() || []);
+
+            expressions = removeExpr(expressions, field);
+            expressions.push({
+                field: field,
+                dir: dir
+            });
+
+            this.dataSource.sort(expressions);
+            this.menu.close();
         },
 
         setDataSource: function(dataSource) {
@@ -295,7 +324,10 @@
             var expression;
 
             this.currentMember = $(e.event.target).closest("[" + attr + "]").attr(attr);
-            this._setFilterForm(findFilters(this.dataSource.filter(), this.currentMember)[0]);
+
+            if (this.options.filterable) {
+                this._setFilterForm(findFilters(this.dataSource.filter(), this.currentMember)[0]);
+            }
         },
 
         _select: function(e) {
@@ -305,6 +337,10 @@
 
             if (item.hasClass("k-include-item")) {
                 this.includeWindow.center().open();
+            } else if (item.hasClass("k-sort-asc")) {
+                this._sort("asc");
+            } else if (item.hasClass("k-sort-desc")) {
+                this._sort("desc");
             }
         },
 
@@ -339,6 +375,18 @@
             this.element = null;
         }
     });
+
+    function removeExpr(expressions, name) {
+        var result = [];
+
+        for (var idx = 0, length = expressions.length; idx < length; idx++) {
+            if (expressions[idx].field !== name) {
+                result.push(expressions[idx]);
+            }
+        }
+
+        return result;
+    }
 
     function findFilters(filter, member, operator) {
         if (!filter) {
@@ -413,6 +461,24 @@
         '</div>';
 
     var MENUTEMPLATE = '<ul class="k-pivot-fieldmenu">'+
+                        '# if (sortable) {#'+
+                        '<li class="k-item k-sort-asc">'+
+                            '<span class="k-link">'+
+                                '<span class="k-icon k-i-sort-asc"></span>'+
+                                '${messages.sortAscending}'+
+                            '</span>'+
+                        '</li>'+
+                        '<li class="k-item k-sort-desc">'+
+                            '<span class="k-link">'+
+                                '<span class="k-icon k-i-sort-desc"></span>'+
+                                '${messages.sortDescending}'+
+                            '</span>'+
+                        '</li>'+
+                            '# if (filterable) {#'+
+                            '<li class="k-separator"></li>'+
+                            '# } #'+
+                        '# } #'+
+                        '# if (filterable) {#'+
                         '<li class="k-item k-include-item">'+
                             '<span class="k-link">'+
                                 '<span class="k-icon k-filter"></span>'+
@@ -429,6 +495,7 @@
                                 '<li>' + LABELMENUTEMPLATE + '</li>'+
                             '</ul>'+
                         '</li>'+
+                        '# } #'+
                     '</ul>';
 
     var WINDOWTEMPLATE = '<div class="k-popup-edit-form k-pivot-filter-window"><div class="k-edit-form-container">'+

@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -14,7 +14,6 @@
     var kendo = window.kendo,
         mobile = kendo.mobile,
         ui = mobile.ui,
-        roleSelector = kendo.roleSelector,
         Widget = ui.Widget;
 
     function createContainer(align, element) {
@@ -58,7 +57,7 @@
         },
 
         title: function(value) {
-            this.element.find(roleSelector("view-title")).text(value);
+            this.element.find(kendo.roleSelector("view-title")).text(value);
             toggleTitle(this.centerElement);
         },
 

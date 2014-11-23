@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -201,7 +201,8 @@
     var PopOver = Widget.extend({
         init: function(element, options) {
             var that = this,
-                popupOptions;
+                popupOptions,
+                paneOptions;
 
             that.initialOpen = false;
 
@@ -219,7 +220,7 @@
                 }
             });
 
-            that.pane = new ui.Pane(that.element, this.options.pane);
+            that.pane = new ui.Pane(that.element, $.extend(this.options.pane, { $angular: this.options.$angular }));
             that.pane.navigateToInitial();
 
             kendo.notify(that, ui);
@@ -243,6 +244,8 @@
                 this.pane.navigate("");
                 this.popup.popup._position();
                 this.initialOpen = true;
+            } else {
+                this.pane.view()._invokeNgController();
             }
         },
 

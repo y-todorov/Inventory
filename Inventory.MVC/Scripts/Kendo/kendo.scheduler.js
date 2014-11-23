@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -7,7 +7,7 @@
 * If you do not own a commercial license, this file shall be governed by the trial license terms.
 */
 (function(f, define){
-    define([ "./kendo.dropdownlist", "./kendo.editable", "./kendo.multiselect", "./kendo.window", "./kendo.datetimepicker", "./kendo.scheduler.recurrence", "./kendo.scheduler.view", "./kendo.scheduler.dayview", "./kendo.scheduler.agendaview", "./kendo.scheduler.monthview", "./kendo.mobile.actionsheet", "./kendo.mobile.pane" ], f);
+    define([ "./kendo.dropdownlist", "./kendo.editable", "./kendo.multiselect", "./kendo.window", "./kendo.datetimepicker", "./kendo.scheduler.recurrence", "./kendo.scheduler.view", "./kendo.scheduler.dayview", "./kendo.scheduler.agendaview", "./kendo.scheduler.monthview", "./kendo.scheduler.timelineview", "./kendo.mobile.actionsheet", "./kendo.mobile.pane", "./kendo.pdf" ], f);
 })(function(){
 
 /*jshint eqnull: true */
@@ -47,10 +47,15 @@
         EDITRECURRING = "Do you want to edit only this event occurrence or the whole series?",
         COMMANDBUTTONTMPL = '<a class="k-button #=className#" #=attr# href="\\#">#=text#</a>',
         TOOLBARTEMPLATE = kendo.template('<div class="k-floatwrap k-header k-scheduler-toolbar">' +
-            '<ul class="k-reset k-header k-scheduler-navigation">' +
-               '<li class="k-state-default k-nav-today"><a role="button" href="\\#" class="k-link">${messages.today}</a></li>' +
-               '<li class="k-state-default k-nav-prev"><a role="button" href="\\#" class="k-link"><span class="k-icon k-i-arrow-w"></span></a></li>' +
-               '<li class="k-state-default k-nav-next"><a role="button" href="\\#" class="k-link"><span class="k-icon k-i-arrow-e"></span></a></li>' +
+           '# if (pdf) { #' +
+           '<ul class="k-reset k-scheduler-tools">' +
+               '<li><a role="button" href="\\#" class="k-button k-pdf"><span class="k-icon k-i-pdf"></span>${messages.pdf}</a></li>' +
+           '</ul>' +
+           '# } #' +
+            '<ul class="k-reset k-scheduler-navigation">' +
+               '<li class="k-state-default k-header k-nav-today"><a role="button" href="\\#" class="k-link">${messages.today}</a></li>' +
+               '<li class="k-state-default k-header k-nav-prev"><a role="button" href="\\#" class="k-link"><span class="k-icon k-i-arrow-w"></span></a></li>' +
+               '<li class="k-state-default k-header k-nav-next"><a role="button" href="\\#" class="k-link"><span class="k-icon k-i-arrow-e"></span></a></li>' +
                '<li class="k-state-default k-nav-current"><a role="button" href="\\#" class="k-link"><span class="k-icon k-i-calendar"></span><span data-#=ns#bind="text: formattedDate"></span></a></li>' +
             '</ul>' +
             '<ul class="k-reset k-header k-scheduler-views">' +
@@ -1263,8 +1268,88 @@
         },
 
         editEvent: function(model) {
-            this.editable = this._createPopupEditor(model);
-            return this.editable;
+            var that = this;
+            var editable = that.options.editable;
+            var html = '<div ' + kendo.attr("uid") + '="' + model.uid + '" class="k-popup-edit-form k-scheduler-edit-form"><div class="k-edit-form-container">';
+            var messages = that.options.messages;
+            var updateText = messages.save;
+            var cancelText = messages.cancel;
+            var deleteText = messages.destroy;
+
+            var fields = this.fields(editors.desktop, model);
+
+            var editableFields = [];
+
+            html += this._buildEditTemplate(model, fields, editableFields);
+
+            var attr;
+            var options = isPlainObject(editable) ? editable.window : {};
+
+            html += '<div class="k-edit-buttons k-state-default">';
+            html += this.createButton({ name: "update", text: updateText, attr: attr }) + this.createButton({ name: "canceledit", text: cancelText, attr: attr });
+
+            if (!model.isNew() && editable.destroy !== false) {
+                html += this.createButton({ name: "delete", text: deleteText, attr: attr });
+            }
+
+            html += '</div></div></div>';
+
+            var container = this.container = $(html)
+                .appendTo(that.element).eq(0)
+                .kendoWindow(extend({
+                    modal: true,
+                    resizable: false,
+                    draggable: true,
+                    title: messages.editor.editorTitle,
+                    visible: false,
+                    close: function(e) {
+                        if (e.userTriggered) {
+                            if (that.trigger(CANCEL, { container: container, model: model })) {
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                }, options));
+
+            that.editable = container.kendoEditable({
+                fields: editableFields,
+                model: model,
+                clearContainer: false,
+                validateOnBlur: true,
+                target: that.options.target
+            }).data("kendoEditable");
+
+            if (!that.trigger(EDIT, { container: container, model: model })) {
+
+                container.data("kendoWindow").center().open();
+
+                container.on(CLICK + NS, "a.k-scheduler-cancel", function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    that.trigger(CANCEL, { container: container, model: model });
+                });
+
+                container.on(CLICK + NS, "a.k-scheduler-update", function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    that.trigger("save", { container: container, model: model });
+                });
+
+                container.on(CLICK + NS, "a.k-scheduler-delete", function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    that.trigger(REMOVE, { container: container, model: model });
+                });
+
+                model.bind("change", that.toggleDateValidationHandler);
+            } else {
+                that.trigger(CANCEL, { container: container, model: model });
+            }
+
+            return that.editable;
         },
 
         close: function() {
@@ -1352,91 +1437,6 @@
                                .getKendoWindow();
 
             popup.center().open();
-        },
-
-        _createPopupEditor: function(model) {
-            var that = this;
-            var editable = that.options.editable;
-            var html = '<div ' + kendo.attr("uid") + '="' + model.uid + '" class="k-popup-edit-form k-scheduler-edit-form"><div class="k-edit-form-container">';
-            var messages = that.options.messages;
-            var updateText = messages.save;
-            var cancelText = messages.cancel;
-            var deleteText = messages.destroy;
-
-            var fields = this.fields(editors.desktop, model);
-
-            var editableFields = [];
-
-            html += this._buildEditTemplate(model, fields, editableFields);
-
-            var attr;
-            var options = isPlainObject(editable) ? editable.window : {};
-
-            html += '<div class="k-edit-buttons k-state-default">';
-            html += this.createButton({ name: "update", text: updateText, attr: attr }) + this.createButton({ name: "canceledit", text: cancelText, attr: attr });
-
-            if (!model.isNew() && editable.destroy !== false) {
-                html += this.createButton({ name: "delete", text: deleteText, attr: attr });
-            }
-
-            html += '</div></div></div>';
-
-            var container = this.container = $(html)
-                .appendTo(that.element).eq(0)
-                .kendoWindow(extend({
-                    modal: true,
-                    resizable: false,
-                    draggable: true,
-                    title: messages.editor.editorTitle,
-                    visible: false,
-                    close: function(e) {
-                        if (e.userTriggered) {
-                            if (that.trigger(CANCEL, { container: container, model: model })) {
-                                e.preventDefault();
-                            }
-                        }
-                    }
-                }, options));
-
-            var editableWidget = container.kendoEditable({
-                fields: editableFields,
-                model: model,
-                clearContainer: false,
-                validateOnBlur: true,
-                target: that.options.target
-            }).data("kendoEditable");
-
-            if (!that.trigger(EDIT, { container: container, model: model })) {
-
-                container.data("kendoWindow").center().open();
-
-                container.on(CLICK + NS, "a.k-scheduler-cancel", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    that.trigger(CANCEL, { container: container, model: model });
-                });
-
-                container.on(CLICK + NS, "a.k-scheduler-update", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    that.trigger("save", { container: container, model: model });
-                });
-
-                container.on(CLICK + NS, "a.k-scheduler-delete", function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    that.trigger(REMOVE, { container: container, model: model });
-                });
-
-                model.bind("change", that.toggleDateValidationHandler);
-            } else {
-                that.trigger(CANCEL, { container: container, model: model });
-            }
-
-            return editableWidget;
         },
 
         _initTimezoneEditor: function(model, activator) {
@@ -1841,10 +1841,16 @@
         _updateSelection: function(dataItem, events) {
             var selection = this._selection;
 
+
             if (dataItem && selection) {
+                var view =  this.view();
+
+                if (dataItem.uid) {
+                    dataItem = view._updateEventForSelection(dataItem);
+                }
+
                 if (this._shiftKey && selection.start && selection.end) {
-                    var backward = dataItem.end < selection.end,
-                        view = this.view();
+                    var backward = dataItem.end < selection.end;
 
                     selection.end = dataItem.endDate ? dataItem.endDate() : dataItem.end;
 
@@ -1882,8 +1888,10 @@
             allDaySlot: true,
             min: new Date(1900, 0, 1),
             max: new Date(2099, 11, 31),
+            toolbar: null,
             messages: {
                 today: "Today",
+                pdf: "Export to PDF",
                 save: "Save",
                 cancel: "Cancel",
                 destroy: "Delete",
@@ -1895,7 +1903,11 @@
                     week: "Week",
                     workWeek: "Work Week",
                     agenda: "Agenda",
-                    month: "Month"
+                    month: "Month",
+                    timeline: "Timeline",
+                    timelineWeek: "Timeline Week",
+                    timelineWorkWeek: "Timeline Work Week",
+                    timelineMonth: "Timeline Month"
                 },
                 recurrenceMessages: {
                     deleteWindowTitle: "Delete Recurring Item",
@@ -2023,6 +2035,7 @@
             var startTime;
             var endTime;
             var event;
+            var clonedEvent;
             var that = this;
 
             var isMobile = that._isMobile();
@@ -2056,9 +2069,13 @@
 
                         event = that.occurrenceByUid(eventElement.attr(kendo.attr("uid")));
 
-                        startSlot = view._slotByPosition(e.x.location, e.y.location);
+                        clonedEvent = event.clone();
 
-                        startTime = startSlot.startOffset(e.x.location, e.y.location, that.options.snap);
+                        view._updateEventForMove(clonedEvent);
+
+                        startSlot = view._slotByPosition(e.x.startLocation, e.y.startLocation);
+
+                        startTime = startSlot.startOffset(e.x.startLocation, e.y.startLocation, that.options.snap);
 
                         endSlot = startSlot;
 
@@ -2079,9 +2096,9 @@
 
                         var distance = endTime - startTime;
 
-                        view._updateMoveHint(event, slot.groupIndex, distance);
+                        view._updateMoveHint(clonedEvent, slot.groupIndex, distance);
 
-                        var range = moveEventRange(event, distance);
+                        var range = moveEventRange(clonedEvent, distance);
 
                         if (!that.trigger("move", {
                             event: event,
@@ -2094,14 +2111,14 @@
                             endSlot = slot;
 
                         } else {
-                            view._updateMoveHint(event, slot.groupIndex, distance);
+                            view._updateMoveHint(clonedEvent, slot.groupIndex, distance);
                         }
                     })
                     .bind("dragend", function(e) {
                         that.view()._removeMoveHint();
 
                         var distance = endTime - startTime;
-                        var range = moveEventRange(event, distance);
+                        var range = moveEventRange(clonedEvent, distance);
 
                         var start = range.start;
                         var end = range.end;
@@ -2117,10 +2134,10 @@
                             resources: endResources
                         });
 
-                        if (!prevented && (event.start.getTime() != start.getTime() ||
-                        event.end.getTime() != end.getTime() || kendo.stringify(endResources) != kendo.stringify(startResources)))  {
-
-                            that._updateEvent(null, event, $.extend({ start: start, end: end }, endResources));
+                        if (!prevented && (clonedEvent.start.getTime() != start.getTime() ||
+                        clonedEvent.end.getTime() != end.getTime() || kendo.stringify(endResources) != kendo.stringify(startResources)))  {
+                            that.view()._updateEventForMove(event);
+                            that._updateEvent(null, event, $.extend({ start: start, end: end}, endResources));
                         }
 
                         e.currentTarget.removeClass("k-event-active");
@@ -2152,6 +2169,7 @@
             var startTime;
             var endTime;
             var event;
+            var clonedEvent;
             var slot;
             var that = this;
 
@@ -2180,17 +2198,23 @@
 
                     var uid = eventElement.attr(kendo.attr("uid"));
 
+                    var view = that.view();
+
                     event = that.occurrenceByUid(uid);
 
-                    slot = that.view()._slotByPosition(e.x.location, e.y.location);
+                    clonedEvent = event.clone();
+
+                    view._updateEventForResize(clonedEvent);
+
+                    slot = view._slotByPosition(e.x.startLocation, e.y.startLocation);
 
                     if (that.trigger("resizeStart", { event: event })) {
                         e.preventDefault();
                     }
 
-                    startTime = kendo.date.toUtcTime(event.start);
+                    startTime = kendo.date.toUtcTime(clonedEvent.start);
 
-                    endTime = kendo.date.toUtcTime(event.end);
+                    endTime = kendo.date.toUtcTime(clonedEvent.end);
                 },
                 drag: function(e) {
                     if (!slot) {
@@ -2216,27 +2240,31 @@
                     var originalEnd = endTime;
 
                     if (dir == "south") {
-                        if (!slot.isDaySlot && slot.end - kendo.date.toUtcTime(event.start) >= view._timeSlotInterval()) {
-                            if (event.isAllDay) {
+                        if (!slot.isDaySlot && slot.end - kendo.date.toUtcTime(clonedEvent.start) >= view._timeSlotInterval()) {
+                            if (clonedEvent.isAllDay) {
                                 endTime = slot.startOffset(e.x.location, e.y.location, that.options.snap);
                             } else {
                                 endTime = slot.endOffset(e.x.location, e.y.location, that.options.snap);
                             }
                         }
                     } else if (dir == "north") {
-                        if (!slot.isDaySlot && kendo.date.toUtcTime(event.end) - slot.start >= view._timeSlotInterval()) {
+                        if (!slot.isDaySlot && kendo.date.toUtcTime(clonedEvent.end) - slot.start >= view._timeSlotInterval()) {
                             startTime = slot.startOffset(e.x.location, e.y.location, that.options.snap);
                         }
                     } else if (dir == "east") {
-                        if (slot.isDaySlot && kendo.date.toUtcTime(kendo.date.getDate(slot.endDate())) >= kendo.date.toUtcTime(kendo.date.getDate(event.start))) {
-                            if (event.isAllDay) {
+                        if (slot.isDaySlot && kendo.date.toUtcTime(kendo.date.getDate(slot.endDate())) >= kendo.date.toUtcTime(kendo.date.getDate(clonedEvent.start))) {
+                            if (clonedEvent.isAllDay) {
                                 endTime = slot.startOffset(e.x.location, e.y.location, that.options.snap);
                             } else {
                                 endTime = slot.endOffset(e.x.location, e.y.location, that.options.snap);
                             }
+                        } else if (!slot.isDaySlot && slot.end - kendo.date.toUtcTime(clonedEvent.start) >= view._timeSlotInterval()) {
+                            endTime = slot.endOffset(e.x.location, e.y.location, that.options.snap);
                         }
                     } else if (dir == "west") {
-                        if (slot.isDaySlot && kendo.date.toUtcTime(kendo.date.getDate(event.end)) >= kendo.date.toUtcTime(kendo.date.getDate(slot.startDate()))) {
+                        if (slot.isDaySlot && kendo.date.toUtcTime(kendo.date.getDate(clonedEvent.end)) >= kendo.date.toUtcTime(kendo.date.getDate(slot.startDate()))) {
+                            startTime = slot.startOffset(e.x.location, e.y.location, that.options.snap);
+                        } else if (!slot.isDaySlot && kendo.date.toUtcTime(clonedEvent.end) - slot.start >= view._timeSlotInterval()) {
                             startTime = slot.startOffset(e.x.location, e.y.location, that.options.snap);
                         }
                     }
@@ -2248,7 +2276,7 @@
                         end: kendo.timezone.toLocalDate(endTime),
                         resources: view._resourceBySlot(slot)
                     })) {
-                        view._updateResizeHint(event, slot.groupIndex, startTime, endTime);
+                        view._updateResizeHint(clonedEvent, slot.groupIndex, startTime, endTime);
                     } else {
                         startTime = originalStart;
                         endTime = originalEnd;
@@ -2256,8 +2284,8 @@
                 },
                 dragend: function(e) {
                     var dragHandle = $(e.currentTarget);
-                    var start = new Date(event.start.getTime());
-                    var end = new Date(event.end.getTime());
+                    var start = new Date(clonedEvent.start.getTime());
+                    var end = new Date(clonedEvent.end.getTime());
                     var dir = direction(dragHandle);
 
                     that.view()._removeResizeHint();
@@ -2267,11 +2295,19 @@
                     } else if (dir == "north") {
                         start = kendo.timezone.toLocalDate(startTime);
                     } else if (dir == "east") {
-                        end = kendo.date.getDate(kendo.timezone.toLocalDate(endTime));
+                        if (slot.isDaySlot) {
+                            end = kendo.date.getDate(kendo.timezone.toLocalDate(endTime));
+                        } else {
+                            end = kendo.timezone.toLocalDate(endTime);
+                        }
                     } else if (dir == "west") {
-                        start = new Date(kendo.timezone.toLocalDate(startTime));
-                        start.setHours(0);
-                        start.setMinutes(0);
+                        if (slot.isDaySlot) {
+                            start = new Date(kendo.timezone.toLocalDate(startTime));
+                            start.setHours(0);
+                            start.setMinutes(0);
+                        } else {
+                            start = kendo.timezone.toLocalDate(startTime);
+                        }
                     }
 
                     var prevented = that.trigger("resizeEnd", {
@@ -2283,7 +2319,8 @@
                     });
 
                     if (!prevented && end.getTime() >= start.getTime()) {
-                        if (event.start.getTime() != start.getTime() || event.end.getTime() != end.getTime()) {
+                        if (clonedEvent.start.getTime() != start.getTime() || clonedEvent.end.getTime() != end.getTime()) {
+                            that.view()._updateEventForResize(event);
                             that._updateEvent(dir, event, { start: start, end: end });
                         }
                     }
@@ -2751,6 +2788,11 @@
         },
 
         _unbindView: function(view) {
+            var that = this;
+            that.angular("cleanup", function(){
+                return { elements: that.items() };
+            });
+
             view.destroy();
         },
 
@@ -2953,6 +2995,7 @@
                 defaultView = defaultViews[name];
 
                 if (defaultView && !hasType) {
+
                     view.type = defaultView.type;
                     defaultView.title = this.options.messages.views[name];
                     if (defaultView.type === "day") {
@@ -3123,9 +3166,18 @@
         _toolbar: function() {
             var that = this;
             var options = that.options;
+            var commands = [];
+
+            if (options.toolbar) {
+                commands = $.isArray(options.toolbar) ? options.toolbar : [options.toolbar];
+            }
+
             var template = this._isMobilePhoneView() ? MOBILETOOLBARTEMPLATE : TOOLBARTEMPLATE;
             var toolbar = $(template({
                     messages: options.messages,
+                    pdf: $.grep(commands, function(item) {
+                            return item == "pdf" || item.name == "pdf";
+                        }).length > 0,
                     ns: kendo.ns,
                     views: that.views
                 }));
@@ -3134,6 +3186,11 @@
             that.toolbar = toolbar;
 
             kendo.bind(that.toolbar, that._model);
+
+            toolbar.on(CLICK + NS, ".k-pdf", function(e) {
+                e.preventDefault();
+                that.saveAsPDF();
+            });
 
             toolbar.on(CLICK + NS, ".k-scheduler-navigation li", function(e) {
                 var li = $(this);
@@ -3292,10 +3349,26 @@
         },
         month: {
             type: "kendo.ui.MonthView"
+        },
+        timeline: {
+            type: "kendo.ui.TimelineView"
+        },
+        timelineWeek: {
+            type: "kendo.ui.TimelineWeekView"
+        },
+        timelineWorkWeek: {
+            type: "kendo.ui.TimelineWorkWeekView"
+        },
+        timelineMonth: {
+            type: "kendo.ui.TimelineMonthView"
         }
     };
 
     ui.plugin(Scheduler);
+
+    if (kendo.PDFMixin) {
+        kendo.PDFMixin.extend(Scheduler.prototype);
+    }
 
     var TimezoneEditor = Widget.extend({
         init: function(element, options) {

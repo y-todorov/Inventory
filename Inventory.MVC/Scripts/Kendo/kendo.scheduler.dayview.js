@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -214,7 +214,8 @@
 
             for(var groupIndex = 0; groupIndex < groupsCount; groupIndex++) {
                 var currentGroup = this.groups[groupIndex];
-                var ranges = currentGroup.timeSlotRanges(currentTime, new Date(currentTime.getTime() + 1));
+                var utcCurrentTime = kendo.date.toUtcTime(currentTime);
+                var ranges = currentGroup.timeSlotRanges(utcCurrentTime, utcCurrentTime + 1);
                 if(ranges.length === 0) {
                     return;
                 }
@@ -224,7 +225,10 @@
                 if(slotElement) {
                     var element = $("<div class='k-current-time'></div>");
                     element.appendTo(this.times).css({
-                        top: Math.round(ranges[0].innerRect(currentTime, new Date(currentTime.getTime() + 1), false).top)
+                        top: Math.round(ranges[0].innerRect(currentTime, new Date(currentTime.getTime() + 1), false).top),
+                        height: "1px",
+                        right: "1px",
+                        left: 0
                     });
                 }
             }
@@ -603,6 +607,7 @@
             majorTick: 60,
             majorTimeHeaderTemplate: "#=kendo.toString(date, 't')#",
             minorTimeHeaderTemplate: "&nbsp;",
+            groupHeaderTemplate: "#=text#",
             slotTemplate: "&nbsp;",
             allDaySlotTemplate: "&nbsp;",
             eventTemplate: DAY_VIEW_EVENT_TEMPLATE,
@@ -641,6 +646,7 @@
             this.dateHeaderTemplate = kendo.template(options.dateHeaderTemplate, settings);
             this.slotTemplate = kendo.template(options.slotTemplate, settings);
             this.allDaySlotTemplate = kendo.template(options.allDaySlotTemplate, settings);
+            this.groupHeaderTemplate = kendo.template(options.groupHeaderTemplate, settings);
         },
 
         _editable: function() {
@@ -791,9 +797,9 @@
 
             if (resources.length) {
                 if (this._groupOrientation() === "vertical") {
-                    rows = this._createRowsLayout(resources, rows);
+                    rows = this._createRowsLayout(resources, rows, this.groupHeaderTemplate);
                 } else {
-                    columns = this._createColumnsLayout(resources, columns);
+                    columns = this._createColumnsLayout(resources, columns, this.groupHeaderTemplate);
                 }
             }
 

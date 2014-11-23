@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -140,23 +140,6 @@
             }]
         },
 
-        _applyDefaults: function(options) {
-            var chart = this,
-                view = dataviz.ViewFactory.current.create({}, options.renderAs);
-
-            if (dataviz.CanvasView && view instanceof dataviz.CanvasView) {
-                deepExtend(options, {
-                    categoryAxis: {
-                        crosshair: {
-                            visible: false
-                        }
-                    }
-                });
-            }
-
-            Chart.fn._applyDefaults.apply(chart, arguments);
-        },
-
         _modelOptions: function() {
             var chart = this,
                 chartOptions = chart.options,
@@ -164,7 +147,10 @@
                 width = chart._initialWidth,
                 stage = chart.stage;
 
-            chart.stage[0].innerHTML = "&nbsp;";
+            chart.stage.children().hide();
+
+            var space = $("<span>&nbsp;</span>");
+            chart.stage.append(space);
 
             options = deepExtend({
                 width: width ? width : chart._autoWidth(),
@@ -179,6 +165,11 @@
                 width: options.width,
                 height: options.height
             });
+
+            space.remove();
+
+            chart.stage.children().show();
+            chart.surface.resize();
 
             return options;
         },
@@ -198,10 +189,8 @@
             return tooltip;
         },
 
-        _renderView: function() {
-            var chart = this;
-            chart.element.empty().append(chart.stage);
-            return chart._view.renderTo(chart.stage[0]);
+        _surfaceWrap: function() {
+            return this.stage;
         },
 
         _autoWidth: function() {
@@ -260,7 +249,9 @@
         },
 
         _hideElement: function() {
-            this.element.hide().remove();
+            if (this.element) {
+                this.element.hide().remove();
+            }
         }
     });
 

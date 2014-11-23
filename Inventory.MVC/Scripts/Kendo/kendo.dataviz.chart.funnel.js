@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -7,7 +7,7 @@
 * If you do not own a commercial license, this file shall be governed by the trial license terms.
 */
 (function(f, define){
-    define([ "./kendo.dataviz.chart" ], f);
+    define([ "./kendo.dataviz.chart", "./kendo.drawing" ], f);
 })(function(){
 
 (function ($, undefined) {
@@ -19,8 +19,13 @@
         isFn = kendo.isFunction,
         template = kendo.template,
 
+        util = kendo.util,
+        append = util.append,
+
+        draw = kendo.drawing,
+        geom = kendo.geometry,
         dataviz = kendo.dataviz,
-        Color = dataviz.Color,
+        Color = kendo.drawing.Color,
         ChartElement = dataviz.ChartElement,
         PieChartMixin = dataviz.PieChartMixin,
         PlotAreaBase = dataviz.PlotAreaBase,
@@ -29,12 +34,10 @@
         Box2D = dataviz.Box2D,
         SeriesBinder = dataviz.SeriesBinder,
         TextBox = dataviz.TextBox,
-        append = dataviz.append,
         autoFormat = dataviz.autoFormat,
         evalOptions = dataviz.evalOptions,
-        limitValue = dataviz.limitValue,
-        seriesTotal = dataviz.seriesTotal,
-        uniqueId = dataviz.uniqueId;
+        limitValue = util.limitValue,
+        seriesTotal = dataviz.seriesTotal;
 
     // Constants ==============================================================
     var CATEGORY = "category",
@@ -96,8 +99,8 @@
             segmentSpacing:0,
             labels: {
                 visible: false,
-                align: "center", //right, left
-                position: "center" // top, bottom
+                align: "center",
+                position: "center"
             }
         },
 
@@ -221,8 +224,7 @@
                 chart.evalSegmentOptions(labels, value, fields);
 
                 textBox = new TextBox(text, deepExtend({
-                        vAlign: labels.position,
-                        id: uniqueId()
+                        vAlign: labels.position
                     }, labels)
                 );
 
@@ -306,10 +308,10 @@
                     offset = (width - lastUpperSide* (nextPercentage / percentage))/2;
                     offset = limitValue(offset, 0, width);
 
-                    points.push(Point2D(box.x1 + previousOffset, box.y1 + previousHeight));
-                    points.push(Point2D(box.x1+width - previousOffset, box.y1 + previousHeight));
-                    points.push(Point2D(box.x1+width - offset, box.y1 + height + previousHeight));
-                    points.push(Point2D(box.x1+ offset,box.y1 + height + previousHeight));
+                    points.push(new geom.Point(box.x1 + previousOffset, box.y1 + previousHeight));
+                    points.push(new geom.Point(box.x1+width - previousOffset, box.y1 + previousHeight));
+                    points.push(new geom.Point(box.x1+width - offset, box.y1 + height + previousHeight));
+                    points.push(new geom.Point(box.x1+ offset,box.y1 + height + previousHeight));
 
                     previousOffset = offset;
                     previousHeight += height + segmentSpacing;
@@ -327,10 +329,10 @@
                     offset = (options.dynamicHeight)? (finalNarrow * percentage): (finalNarrow / count);
                     height = (options.dynamicHeight)? (totalHeight * percentage): (totalHeight / count);
 
-                    points.push(Point2D(box.x1+previousOffset, box.y1 + previousHeight));
-                    points.push(Point2D(box.x1+width - previousOffset, box.y1 + previousHeight));
-                    points.push(Point2D(box.x1+width - previousOffset - offset, box.y1 + height + previousHeight));
-                    points.push(Point2D(box.x1+previousOffset + offset,box.y1 + height + previousHeight));
+                    points.push(new geom.Point(box.x1+previousOffset, box.y1 + previousHeight));
+                    points.push(new geom.Point(box.x1+width - previousOffset, box.y1 + previousHeight));
+                    points.push(new geom.Point(box.x1+width - previousOffset - offset, box.y1 + height + previousHeight));
+                    points.push(new geom.Point(box.x1+previousOffset + offset,box.y1 + height + previousHeight));
                     previousOffset += offset;
                     previousHeight += height + segmentSpacing;
                 }
@@ -351,9 +353,7 @@
             ChartElement.fn.init.call(segment, options);
 
             segment.value = value;
-            segment.id = uniqueId();
             segment.options.index = segmentOptions.index;
-            segment.enableDiscovery();
         },
 
         options: {
@@ -375,27 +375,28 @@
             }
         },
 
-        getViewElements: function(view) {
-            var segment = this,
-                options = segment.options,
-                border = options.border,
-                elements = [];
+        createVisual: function() {
+            ChartElement.fn.createVisual.call(this);
 
-            elements.push(
-                view.createPolyline(segment.points, true, {
-                    id: segment.id,
-                    fill: options.color,
-                    fillOpacity:options.opacity,
-                    stroke: border.color,
-                    strokeOpacity: border.opacity,
-                    strokeWidth: border.width,
-                    data: { modelId: segment.modelId }
-                })
-            );
+            var options = this.options;
+            var border = options.border;
+            var path = draw.Path.fromPoints(this.points, {
+                fill: {
+                    color: options.color,
+                    opacity: options.opacity
+                },
+                stroke: {
+                    color: border.color,
+                    opacity: border.opacity,
+                    width: border.width
+                }
+            }).close();
 
-            append(elements, ChartElement.fn.getViewElements.call(segment, view));
+            this.visual.append(path);
+        },
 
-            return elements;
+        createHighlight: function(style) {
+            return draw.Path.fromPoints(this.points, style);
         },
 
         highlightOverlay: function(view, opt) {
@@ -410,8 +411,7 @@
                 stroke: border.color,
                 strokeOpacity: border.opacity,
                 strokeWidth: border.width,
-                fillOpacity:hlOptions.opacity,
-                data: { modelId: this.modelId }
+                fillOpacity:hlOptions.opacity
             });
             var element = view.createPolyline(this.points,true,calcOptions);
             return element;

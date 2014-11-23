@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -19,8 +19,6 @@
     var kendoTextElement = kendoDom.text;
     var browser = kendo.support.browser;
     var mobileOS = kendo.support.mobileOS;
-    var isIE = browser.msie;
-    var oldIE = isIE && browser.version < 9;
     var ui = kendo.ui;
     var Widget = ui.Widget;
     var extend = $.extend;
@@ -344,11 +342,22 @@
 
         _td: function(options) {
             var children = [];
+            var resourcesField = this.options.resourcesField;
             var listStyles = GanttList.styles;
             var task = options.task;
             var column = options.column;
-            var value = task.get(column.field);
-            var formatedValue = column.format ? kendo.format(column.format, value) : value;
+            var value = task.get(column.field) || [];
+            var formatedValue;
+
+            if (column.field == resourcesField) {
+                formatedValue = [];
+                for (var i = 0; i < value.length; i++) {
+                    formatedValue.push(kendo.format("{0} [{1}]", value[i].get("name"), value[i].get("formatedValue")));
+                }
+                formatedValue = formatedValue.join(", ");
+            } else {
+                formatedValue = column.format ? kendo.format(column.format, value) : value;
+            }
 
             if (column.field === "title") {
                 children = createPlaceholders({ level: options.level, className: listStyles.iconPlaceHolder });
@@ -385,6 +394,7 @@
         },
 
         _sortable: function() {
+            var resourcesField = this.options.resourcesField;
             var columns = this.columns;
             var column;
             var sortableInstance;
@@ -394,7 +404,7 @@
             for (var idx = 0, length = cells.length; idx < length; idx++) {
                 column = columns[idx];
 
-                if (column.sortable) {
+                if (column.sortable && column.field !== resourcesField) {
                     cell = cells.eq(idx);
 
                     sortableInstance = cell.data("kendoColumnSorter");
@@ -480,7 +490,7 @@
                 }
             };
 
-            if (this.options.editable !== true) {
+            if (!this.options.editable) {
                 return;
             }
 
@@ -516,10 +526,12 @@
                             finishEdit();
                             break;
                         case keys.ESC:
-                            cell = that._editableContainer;
-                            model = that._modelFromElement(cell);
-                            if (!that.trigger("cancel", { model: model, cell: cell })) {
-                                that._closeCell(true);
+                            if (that.editable) {
+                                cell = that._editableContainer;
+                                model = that._modelFromElement(cell);
+                                if (!that.trigger("cancel", { model: model, cell: cell })) {
+                                    that._closeCell(true);
+                                }
                             }
                             break;
                     }
@@ -552,6 +564,7 @@
         },
 
         _editCell: function(options) {
+            var resourcesField = this.options.resourcesField;
             var listStyles = GanttList.styles;
             var cell = options.cell;
             var column = options.column;
@@ -568,6 +581,11 @@
             };
             var editor;
 
+            if (column.field === resourcesField) {
+                column.editor(cell, modelCopy);
+                return;
+            }
+
             this._editableContent = cell.children().detach();
             this._editableContainer = cell;
 
@@ -575,6 +593,10 @@
 
             if ((field.type === "date" || $.type(field) === "date") &&
                 /H|m|s|F|g|u/.test(column.format)) {
+                if (column.field === "start") {
+                    delete field.validation.dateCompare;
+                }
+
                 attr[BINDING] = "value:" + column.field;
                 attr[DATATYPE] = "date";
                 editor = function(container, options) {
@@ -597,6 +619,10 @@
 
             if (validation && validation.dateCompare &&
                 isFunction(validation.dateCompare) && validation.message) {
+                $('<span ' + kendo.attr("for") + '="' + column.field + '" class="k-invalid-msg"/>')
+                    .hide()
+                    .appendTo(cell);
+
                 cell.find('[name=' + column.field + ']')
                     .attr(kendo.attr("dateCompare-msg"), validation.message);
             }
@@ -611,10 +637,11 @@
             var cell = this._editableContainer;
             var model = this._modelFromElement(cell);
             var column = this._columnFromElement(cell);
+            var field = column.field;
             var copy = cell.data("modelCopy");
             var taskInfo = {};
 
-            taskInfo[column.field] = copy.get(column.field);
+            taskInfo[field] = copy.get(field);
 
             cell.empty()
                 .removeData("modelCopy")
@@ -628,6 +655,10 @@
             this._editableContent = null;
 
             if (!cancelUpdate) {
+                if (field === "start") {
+                    taskInfo.end = new Date(taskInfo.start.getTime() + model.duration());
+                }
+
                 this.trigger("update", { task: model, updateInfo: taskInfo });
             }
         },
@@ -697,7 +728,7 @@
                             .removeClass(listStyles.dropPositions);
             };
 
-            if (this.options.editable !== true) {
+            if (!this.options.editable) {
                 return;
             }
 

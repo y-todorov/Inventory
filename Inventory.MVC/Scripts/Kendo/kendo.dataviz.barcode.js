@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -7,19 +7,24 @@
 * If you do not own a commercial license, this file shall be governed by the trial license terms.
 */
 (function(f, define){
-    define([ "./kendo.dataviz.core", "./kendo.dataviz.svg", "./kendo.dataviz.canvas" ], f);
+    define([ "./kendo.dataviz.core", "./kendo.drawing" ], f);
 })(function(){
 
 (function ($, undefined) {
     var kendo = window.kendo,
+        Widget = kendo.ui.Widget,
+
         extend = $.extend,
         deepExtend = kendo.deepExtend,
         inArray = $.inArray,
         isPlainObject = $.isPlainObject,
+
+        draw = kendo.drawing,
+        geom = kendo.geometry,
+        util = kendo.util,
+        defined = util.defined,
+        append = util.append,
         dataviz = kendo.dataviz,
-        defined = dataviz.defined,
-        append = dataviz.append,
-        Widget = kendo.ui.Widget,
         Box2D = dataviz.Box2D,
         TextBox = dataviz.TextBox,
         DEFAULT_WIDTH = 300,
@@ -27,7 +32,7 @@
         DEFAULT_QUIETZONE_LENGTH = 10,
         numberRegex = /^\d+$/,
         alphanumericRegex = /^[a-z0-9]+$/i,
-        InvalidCharacterErrorTemplate = "Character '{0}'  is not valid for symbology {1}";
+        InvalidCharacterErrorTemplate = "Character '{0}' is not valid for symbology {1}";
 
     function getNext(value, index, count){
         return value.substring(index, index + count);
@@ -1527,8 +1532,11 @@
              Widget.fn.init.call(that, element, options);
              that.element = $(element);
              that.wrapper = that.element;
-             that.element.addClass("k-barcode");
-             that.view = dataviz.ViewFactory.current.create({}, that.options.renderAs);
+             that.element.addClass("k-barcode").css("display", "block");
+             that.surfaceWrap = $("<div />").css("position", "relative").appendTo(this.element);
+             that.surface = draw.Surface.create(that.surfaceWrap, {
+                 type: that.options.renderAs
+             });
              that.setOptions(options);
         },
 
@@ -1556,44 +1564,15 @@
         },
 
         redraw: function () {
-            var that = this,
-                view = that.view;
+            var size = this._getSize();
+            this.surfaceWrap.css({
+                width: size.width,
+                height: size.height
+            });
+            this.surface.clear();
 
-            that._redraw(view);
-            view.renderTo(that.element[0]);
-        },
-
-        svg: function() {
-            if (dataviz.SVGView) {
-                var view = new dataviz.SVGView();
-
-                this._redraw(view);
-
-                return view.render();
-            } else {
-                throw new Error("Unable to create SVGView. Check that kendo.dataviz.svg.js is loaded.");
-            }
-        },
-
-        imageDataURL: function() {
-            if (dataviz.CanvasView) {
-                if (dataviz.supportsCanvas()) {
-                    var container = document.createElement("div"),
-                        view = new dataviz.CanvasView();
-
-                    this._redraw(view);
-
-                    return view.renderTo(container).toDataURL();
-                } else {
-                    kendo.logToConsole(
-                        "Warning: Unable to generate image. The browser does not support Canvas.\n" +
-                        "User agent: " + navigator.userAgent);
-
-                    return null;
-                }
-            } else {
-                throw new Error("Unable to create CanvasView. Check that kendo.dataviz.canvas.js is loaded.");
-            }
+            this.createVisual();
+            this.surface.draw(this.visual);
         },
 
         getSize: function() {
@@ -1604,7 +1583,11 @@
             this.redraw();
         },
 
-        _redraw: function(view) {
+        createVisual: function() {
+            this.visual = this._render();
+        },
+
+        _render: function() {
             var that = this,
                 options = that.options,
                 value = options.value,
@@ -1618,36 +1601,41 @@
                 result, textToDisplay,
                 textHeight;
 
+            var visual = new draw.Group();
+
             that.contentBox = contentBox;
-            view.children = [];
-            that._renderBackground(view, size);
-
-            if (textOptions.visible) {
-                textHeight = dataviz.measureText(value, { font: textOptions.font }).height;
-                barHeight -= textHeight + textMargin.top + textMargin.bottom;
-            }
-
-            result = encoding.encode(value, contentBox.width(), barHeight);
+            visual.append(that._getBackground(size));
 
             if (textOptions.visible) {
                 textToDisplay = value;
                 if (options.checksum && defined(encoding.checksum)) {
                     textToDisplay += " " + encoding.checksum;
                 }
-                that._renderTextElement(view, textToDisplay);
+
+                var text = that._getText(textToDisplay);
+                textHeight = text.bbox().height();
+                barHeight -= textHeight + textMargin.top + textMargin.bottom;
+
+                visual.append(text);
             }
+
+            result = encoding.encode(value, contentBox.width(), barHeight);
+
             that.barHeight = barHeight;
 
-            view.options.width = size.width;
-            view.options.height = size.height;
+            visual.append(this._getBands(result.pattern, result.baseUnit));
 
-            that._renderElements(view, result.pattern, result.baseUnit);
+            return visual;
+        },
+
+        exportVisual: function() {
+            return this._render();
         },
 
         _getSize: function() {
             var that = this,
                 element = that.element,
-                size = {width:DEFAULT_WIDTH,height:DEFAULT_HEIGHT};
+                size = new geom.Size(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
             if (element.width() > 0) {
                 size.width = element.width();
@@ -1674,52 +1662,66 @@
             that.redraw();
         },
 
-        _renderElements: function (view, pattern, baseUnit) {
+        _getBands: function (pattern, baseUnit) {
             var that = this,
                 contentBox = that.contentBox,
                 position = contentBox.x1,
                 step,
                 item;
 
+            var group = new draw.Group();
             for (var i = 0; i < pattern.length; i++) {
                 item = isPlainObject(pattern[i]) ? pattern[i] : {
-                        width: pattern[i],
-                        y1: 0,
-                        y2: that.barHeight
-                    };
+                    width: pattern[i],
+                    y1: 0,
+                    y2: that.barHeight
+                };
+
                 step = item.width * baseUnit;
+
                 if (i%2) {
-                    view.children.push(view.createRect(
-                        new Box2D(
-                            position,
-                            item.y1 + contentBox.y1,
-                            position + step,
-                            item.y2 + contentBox.y1
-                        ), {
-                            fill: that.options.color
-                        }
-                    ));
+                    var rect = geom.Rect.fromPoints(
+                        new geom.Point(position, item.y1 + contentBox.y1),
+                        new geom.Point(position + step, item.y2 + contentBox.y1)
+                    );
+
+                    var path = draw.Path.fromRect(rect, {
+                        fill: {
+                            color: that.options.color
+                        },
+                        stroke: null
+                    });
+
+                    group.append(path);
                 }
-                position+= step;
+
+                position += step;
             }
+
+            return group;
         },
 
-        _renderBackground: function (view, size) {
+        _getBackground: function (size) {
             var that = this,
                 options = that.options,
-                border = options.border || {},
-                box = Box2D(0,0, size.width, size.height).unpad(border.width / 2),
-                rect = view.createRect(box, {
-                    fill: options.background,
-                    stroke: border.width ? border.color : "",
-                    strokeWidth: border.width,
-                    dashType: border.dashType
-                });
+                border = options.border || {};
 
-            view.children.push(rect);
+            var box = Box2D(0,0, size.width, size.height).unpad(border.width / 2);
+            var path = draw.Path.fromRect(box.toRect(), {
+                fill: {
+                    color: options.background
+                },
+                stroke: {
+                    color: border.width ? border.color : "",
+                    width: border.width,
+                    dashType: border.dashType
+                }
+            });
+
+            return path;
         },
 
-        _renderTextElement: function (view, value) {
+        _getText: function(value) {
             var that = this,
                 textOptions = that.options.text,
                 text = new TextBox(value, {
@@ -1731,7 +1733,9 @@
                 });
 
             text.reflow(that.contentBox);
-            append(view.children, text.getViewElements(view));
+            text.renderVisual();
+
+            return text.visual;
         },
 
         options: {
@@ -1768,13 +1772,14 @@
             }
         }
     });
+    dataviz.ExportMixin.extend(Barcode.fn);
 
-   dataviz.ui.plugin(Barcode);
+    dataviz.ui.plugin(Barcode);
 
-   kendo.deepExtend(dataviz, {
+    kendo.deepExtend(dataviz, {
         encodings: encodings,
         Encoding: Encoding
-   });
+    });
 
 })(window.kendo.jQuery);
 

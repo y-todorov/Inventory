@@ -289,10 +289,6 @@
     <Content Include="Content\images\back.png" />
     <Content Include="Content\images\wp8_icons.png" />
     <Content Include="Content\images\wp8_inverseicons.png" />
-    <Content Include="Content\kendo.blueopal.min.css" />
-    <Content Include="Content\kendo.common.core.min.css" />
-    <Content Include="Content\kendo.common.min.css" />
-    <Content Include="Content\kendo.dataviz.blueopal.min.css" />
     <Content Include="Content\Kendo\dataviz\Black\markers.png" />
     <Content Include="Content\Kendo\dataviz\Black\markers_2x.png" />
     <Content Include="Content\Kendo\dataviz\BlueOpal\markers.png" />
@@ -581,12 +577,6 @@
     <Content Include="Scripts\JQuery\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\JsBundle.js" />
     <Content Include="Scripts\JsBundle.min.js" />
-    <Content Include="Scripts\KendoBETA\jszip.min.js" />
-    <Content Include="Scripts\KendoBETA\kendo.all.min.js" />
-    <Content Include="Scripts\KendoBETA\kendo.aspnetmvc.min.js" />
-    <Content Include="Scripts\KendoBETA\kendo.culture.bg-BG.min.js" />
-    <Content Include="Scripts\KendoBETA\kendo.culture.bg.min.js" />
-    <Content Include="Scripts\KendoBETA\kendo.messages.bg-BG.min.js" />
     <Content Include="Scripts\KendoConsole.js" />
     <Content Include="Scripts\Kendo\cultures\kendo.culture.af-ZA.js" />
     <Content Include="Scripts\Kendo\cultures\kendo.culture.af.js" />
@@ -949,6 +939,7 @@
     <Content Include="Scripts\Kendo\kendo.binder.js" />
     <Content Include="Scripts\Kendo\kendo.button.js" />
     <Content Include="Scripts\Kendo\kendo.calendar.js" />
+    <Content Include="Scripts\Kendo\kendo.color.js" />
     <Content Include="Scripts\Kendo\kendo.colorpicker.js" />
     <Content Include="Scripts\Kendo\kendo.columnmenu.js" />
     <Content Include="Scripts\Kendo\kendo.columnsorter.js" />
@@ -981,9 +972,11 @@
     <Content Include="Scripts\Kendo\kendo.datetimepicker.js" />
     <Content Include="Scripts\Kendo\kendo.dom.js" />
     <Content Include="Scripts\Kendo\kendo.draganddrop.js" />
+    <Content Include="Scripts\Kendo\kendo.drawing.js" />
     <Content Include="Scripts\Kendo\kendo.dropdownlist.js" />
     <Content Include="Scripts\Kendo\kendo.editable.js" />
     <Content Include="Scripts\Kendo\kendo.editor.js" />
+    <Content Include="Scripts\Kendo\kendo.excel.js" />
     <Content Include="Scripts\Kendo\kendo.filebrowser.js" />
     <Content Include="Scripts\Kendo\kendo.filtercell.js" />
     <Content Include="Scripts\Kendo\kendo.filtermenu.js" />
@@ -1020,8 +1013,10 @@
     <Content Include="Scripts\Kendo\kendo.multiselect.js" />
     <Content Include="Scripts\Kendo\kendo.notification.js" />
     <Content Include="Scripts\Kendo\kendo.numerictextbox.js" />
+    <Content Include="Scripts\Kendo\kendo.ooxml.js" />
     <Content Include="Scripts\Kendo\kendo.pager.js" />
     <Content Include="Scripts\Kendo\kendo.panelbar.js" />
+    <Content Include="Scripts\Kendo\kendo.pdf.js" />
     <Content Include="Scripts\Kendo\kendo.pivot.configurator.js" />
     <Content Include="Scripts\Kendo\kendo.pivot.fieldmenu.js" />
     <Content Include="Scripts\Kendo\kendo.pivotgrid.js" />
@@ -1035,6 +1030,7 @@
     <Content Include="Scripts\Kendo\kendo.scheduler.js" />
     <Content Include="Scripts\Kendo\kendo.scheduler.monthview.js" />
     <Content Include="Scripts\Kendo\kendo.scheduler.recurrence.js" />
+    <Content Include="Scripts\Kendo\kendo.scheduler.timelineview.js" />
     <Content Include="Scripts\Kendo\kendo.scheduler.view.js" />
     <Content Include="Scripts\Kendo\kendo.selectable.js" />
     <Content Include="Scripts\Kendo\kendo.slider.js" />
@@ -1046,6 +1042,7 @@
     <Content Include="Scripts\Kendo\kendo.toolbar.js" />
     <Content Include="Scripts\Kendo\kendo.tooltip.js" />
     <Content Include="Scripts\Kendo\kendo.touch.js" />
+    <Content Include="Scripts\Kendo\kendo.treelist.js" />
     <Content Include="Scripts\Kendo\kendo.treeview.js" />
     <Content Include="Scripts\Kendo\kendo.upload.js" />
     <Content Include="Scripts\Kendo\kendo.userevents.js" />

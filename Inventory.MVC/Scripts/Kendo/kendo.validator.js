@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -320,7 +320,15 @@
                 valid = result.valid,
                 className = "." + INVALIDMSG,
                 fieldName = (input.attr(NAME) || ""),
-                lbl = that._findMessageContainer(fieldName).add(input.next(className)).hide(),
+                lbl = that._findMessageContainer(fieldName).add(input.next(className).filter(function() {
+                    var element = $(this);
+                    if (element.filter("[" + kendo.attr("for") + "]").length) {
+                        return element.attr(kendo.attr("for")) === fieldName;
+                    }
+
+                    return true;
+
+                })).hide(),
                 messageText;
 
             input.removeAttr("aria-invalid");

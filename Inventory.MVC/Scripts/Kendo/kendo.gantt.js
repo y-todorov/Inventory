@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -7,7 +7,7 @@
 * If you do not own a commercial license, this file shall be governed by the trial license terms.
 */
 (function(f, define){
-    define([ "./kendo.data", "./kendo.popup", "./kendo.resizable", "./kendo.gantt.list", "./kendo.gantt.timeline" ], f);
+    define([ "./kendo.data", "./kendo.popup", "./kendo.window", "./kendo.resizable", "./kendo.gantt.list", "./kendo.gantt.timeline", "./kendo.grid", "./kendo.pdf" ], f);
 })(function(){
 
 (function($, undefined) {
@@ -17,16 +17,23 @@
     var Observable = kendo.Observable;
     var Widget = kendo.ui.Widget;
     var DataSource = kendo.data.DataSource;
+    var ObservableObject = kendo.data.ObservableObject;
+    var ObservableArray = kendo.data.ObservableArray;
     var Query = kendo.data.Query;
     var isArray = $.isArray;
+    var inArray = $.inArray;
+    var isFunction = kendo.isFunction;
     var proxy = $.proxy;
     var extend = $.extend;
+    var isPlainObject = $.isPlainObject;
     var map = $.map;
     var keys = kendo.keys;
     var NS = ".kendoGantt";
+    var PERCENTAGE_FORMAT = "p0";
     var TABINDEX = "tabIndex";
     var CLICK = "click";
     var WIDTH = "width";
+    var STRING = "string";
     var DIRECTIONS = {
         "down": {
             origin: "bottom center",
@@ -41,18 +48,19 @@
     var ACTIVE_CELL = "gantt_active_cell";
     var ACTIVE_OPTION = "action-option-focused";
     var DOT = ".";
-    var HEADER_TEMPLATE = kendo.template('<div class="#=styles.headerWrapper#">' +
-            '#if (editable == true) {#'+
-                '<div class="#=styles.actions#">' +
-                    '<button class="#=styles.button#" data-action="#=action.data#"><span class="#=styles.iconPlus#"></span>#=action.title#</button>' +
-                '</div>' +
+    var TASK_DELETE_CONFIRM = "Are you sure you want to delete this task?";
+    var DEPENDENCY_DELETE_CONFIRM = "Are you sure you want to delete this dependency?";
+    var BUTTON_TEMPLATE = '<button class="#=styles.button# #=className#" '+
+            '#if (action) {#' +
+                'data-action="#=action#"' +
+            '#}#' + 
+        '><span class="#=iconClass#"></span>#=text#</button>';
+    var COMMAND_BUTTON_TEMPLATE = '<a class="#=className#" #=attr# href="\\#">#=text#</a>';
+    var HEADER_VIEWS_TEMPLATE = kendo.template('<ul class="#=styles.viewsWrapper#">' +
+            '#for(var view in views){#' +
+                '<li class="#=styles.viewButtonDefault# #=styles.viewButton#-#= view.toLowerCase() #" data-#=ns#name="#=view#"><a href="\\#" class="#=styles.link#">#=views[view].title#</a></li>' +
             '#}#' +
-            '<ul class="#=styles.viewsWrapper#">' +
-                '#for(var view in views){#' +
-                    '<li class="#=styles.viewButtonDefault# #=styles.viewButton#-#= view.toLowerCase() #" data-#=ns#name="#=view#"><a href="\\#" class="#=styles.link#">#=views[view].title#</a></li>' +
-                '#}#' +
-            '</ul>' +
-        '</div>');
+        '</ul>');
     var TASK_DROPDOWN_TEMPLATE = kendo.template('<div class="#=styles.popupWrapper#">' +
             '<ul class="#=styles.popupList#" role="listbox">' +
                 '#for(var i = 0, l = actions.length; i < l; i++){#' +
@@ -65,6 +73,32 @@
                     '<button class="#=styles.button#" data-action="#=action.data#"><span class="#=styles.iconPlus#"></span>#=action.title#</button>' +
             '</div>' +
         '</div>');
+
+    var DATERANGEEDITOR = function(container, options) {
+        var attr = { name: options.field };
+        var validationRules = options.model.fields[options.field].validation;
+
+        if (validationRules && isPlainObject(validationRules) && validationRules.message) {
+            attr[kendo.attr("dateCompare-msg")] = validationRules.message;
+        }
+
+        $('<input type="text" required ' +
+                kendo.attr("type") + '="date" ' +
+                kendo.attr("role") + '="datetimepicker" ' +
+                kendo.attr("bind") + '="value:' +
+                options.field +'" ' +
+                kendo.attr("validate") + "='true' />")
+            .attr(attr)
+            .appendTo(container);
+
+        $('<span ' + kendo.attr("for") + '="' + options.field + '" class="k-invalid-msg"/>')
+            .hide()
+            .appendTo(container);
+    };
+
+    var RESOURCESEDITOR = function(container, options) {
+        $('<a href="#" class="' + options.styles.button + '">' + options.messages.assingButton + '</a>').click(options.click).appendTo(container);
+    };
 
     var ganttStyles = {
         wrapper: "k-widget k-gantt",
@@ -81,12 +115,28 @@
         icon: "k-icon",
         item: "k-item",
         line: "k-line",
+        buttonDelete: "k-gantt-delete",
+        buttonCancel: "k-gantt-cancel",
+        buttonSave: "k-gantt-update",
+        primary: "k-primary",
         hovered: "k-state-hover",
         selected: "k-state-selected",
         focused: "k-state-focused",
         gridHeader: "k-grid-header",
         gridHeaderWrap: "k-grid-header-wrap",
         gridContent: "k-grid-content",
+        popup: {
+            form: "k-popup-edit-form",
+            editForm: "k-gantt-edit-form",
+            formContainer: "k-edit-form-container",
+            resourcesFormContainer: "k-resources-form-container",
+            message: "k-popup-message",
+            buttonsContainer: "k-edit-buttons k-state-default",
+            button: "k-button",
+            editField: "k-edit-field",
+            editLabel: "k-edit-label",
+            resourcesField: "k-gantt-resources"
+        },
         toolbar: {
             headerWrapper: "k-floatwrap k-header k-gantt-toolbar",
             footerWrapper: "k-floatwrap k-header k-gantt-toolbar",
@@ -96,9 +146,12 @@
             actions: "k-gantt-actions",
             button: "k-button k-button-icontext",
             iconPlus: "k-icon k-i-plus",
+            iconPdf: "k-icon k-i-pdf",
             viewButtonDefault: "k-state-default",
             viewButton: "k-view",
-            link: "k-link"
+            link: "k-link",
+            pdfButton: "k-gantt-pdf",
+            appendButton: "k-gantt-create"
         }
     };
 
@@ -120,12 +173,20 @@
 
     function dateCompareValidator(input) {
         if (input.filter("[name=end], [name=start]").length) {
-            var container = input.closest("td.k-edit-cell");
-            var editable = container.data("kendoEditable");
             var field = input.attr("name");
             var picker = kendo.widgetInstance(input, kendo.ui);
-            var model = editable ? editable.options.model : null;
             var dates = {};
+            var container = input;
+            var editable;
+            var model;
+
+            while (container !== window && !editable) {
+                container = container.parent();
+
+                editable = container.data("kendoEditable");
+            }
+
+            model = editable ? editable.options.model : null;
 
             if (!model) {
                 return true;
@@ -176,6 +237,20 @@
                 })
                 .add(window);
     }
+
+    var defaultCommands = {
+        append: {
+            text: "Add Task",
+            action: "add",
+            className: ganttStyles.toolbar.appendButton,
+            iconClass: ganttStyles.toolbar.iconPlus
+        },
+        pdf: {
+            text: "Export to PDF",
+            className: ganttStyles.toolbar.pdfButton,
+            iconClass: ganttStyles.toolbar.iconPdf
+        }
+    };
 
     var TaskDropDown = Observable.extend({
         init: function(element, options) {
@@ -251,7 +326,7 @@
             );
 
             this.element
-                .on(CLICK + NS, "button", function(e) {
+                .on(CLICK + NS, DOT + ganttStyles.toolbar.appendButton, function(e) {
                     var target = $(this);
                     var action = target.attr(kendo.attr("action"));
 
@@ -505,9 +580,12 @@
 
         remove: function(task) {
             var parentId = task.get("parentId");
+            var children = this.taskAllChildren(task);
+
+            this._removeItems(children);
 
             task = DataSource.fn.remove.call(this, task);
-            
+
             this._childRemoved(parentId, task.get("orderId"));
 
             return task;
@@ -843,6 +921,459 @@
         GanttDependency: GanttDependency
     });
 
+    var editors = {
+        desktop: {
+            dateRange: DATERANGEEDITOR,
+            resources: RESOURCESEDITOR
+        }
+    };
+
+    var Editor = kendo.Observable.extend({
+        init: function(element, options) {
+            kendo.Observable.fn.init.call(this);
+
+            this.element = element;
+            this.options = extend(true, {}, this.options, options);
+            this.createButton = this.options.createButton;
+        },
+
+        fields: function(editors, model) {
+            var that = this;
+            var messages = this.options.messages.editor;
+            var resources = this.options.resources;
+
+            var click = function(e) {
+                e.preventDefault();
+                resources.editor(that.container.find(DOT + Gantt.styles.popup.resourcesField), model);
+            };
+
+            var fields = [
+                { field: "title", title: messages.title },
+                { field: "start", title: messages.start, editor: editors.dateRange },
+                { field: "end", title: messages.end, editor: editors.dateRange },
+                { field: "percentComplete", title: messages.percentComplete, format: PERCENTAGE_FORMAT }
+            ];
+
+            if (model.get(resources.field)) {
+                fields.push({ field: resources.field, title: messages.resources, messages: messages, editor: editors.resources, click: click, styles: Gantt.styles.popup });
+            }
+
+            return fields;
+        },
+
+        _buildEditTemplate: function(model, fields, editableFields) {
+            var resources = this.options.resources;
+            var template = this.options.editable.template;
+            var settings = extend({}, kendo.Template, this.options.templateSettings);
+            var paramName = settings.paramName;
+            var popupStyles = Gantt.styles.popup;
+            var html = "";
+
+            if (template) {
+                if (typeof template === STRING) {
+                    template = window.unescape(template);
+                }
+
+                html += (kendo.template(template, settings))(model);
+            } else {
+                for (var i = 0, length = fields.length; i < length; i++) {
+                    var field = fields[i];
+
+                    html += '<div class="' + popupStyles.editLabel + '"><label for="' + field.field + '">' + (field.title || field.field || "") + '</label></div>';
+
+                    if (field.field === resources.field) {
+                        html += '<div class="' + popupStyles.resourcesField + '" style="display:none"></div>';
+                    }
+
+                    if ((!model.editable || model.editable(field.field))) {
+                        editableFields.push(field);
+                        html += '<div ' + kendo.attr("container-for") + '="' + field.field + '" class="' + popupStyles.editField + '"></div>';
+                    } else {
+                        var tmpl = "#:";
+
+                        if (field.field) {
+                            field = kendo.expr(field.field, paramName);
+                            tmpl += field + "==null?'':" + field;
+                        } else {
+                            tmpl += "''";
+                        }
+
+                        tmpl += "#";
+
+                        tmpl = kendo.template(tmpl, settings);
+
+                        html += '<div class="' + popupStyles.editField + '">' + tmpl(model) + '</div>';
+                    }
+                }
+            }
+
+            return html;
+        }
+    });
+
+    var PopupEditor = Editor.extend({
+        destroy: function() {
+            this.close();
+            this.unbind();
+        },
+
+        editTask: function(task) {
+            this.editable = this._createPopupEditor(task);
+        },
+
+        close: function() {
+            var that = this;
+
+            var destroy = function() {
+                if (that.editable) {
+                    that.editable.destroy();
+                    that.editable = null;
+                    that.container = null;
+                }
+
+                if (that.popup) {
+                    that.popup.destroy();
+                    that.popup = null;
+                }
+            };
+
+            if (this.editable && this.container.is(":visible")) {
+                this.container.data("kendoWindow").bind("deactivate", destroy).close();
+            } else {
+                destroy();
+            }
+        },
+
+        showDialog: function(options) {
+            var buttons = options.buttons;
+            var popupStyles = Gantt.styles.popup;
+
+            var html = kendo.format('<div class="{0}"><div class="{1}"><p class="{2}">{3}</p><div class="{4}">',
+                popupStyles.form, popupStyles.formContainer, popupStyles.message, options.text, popupStyles.buttonsContainer);
+
+            for (var i = 0, length = buttons.length; i < length; i++) {
+                html += this.createButton(buttons[i]);
+            }
+
+            html += '</div></div></div>';
+
+            var wrapper = this.element;
+
+            if (this.popup) {
+                this.popup.destroy();
+            }
+
+            var popup = this.popup = $(html).appendTo(wrapper)
+                .eq(0)
+                .on("click", DOT + popupStyles.button, function(e) {
+                    e.preventDefault();
+
+                    popup.close();
+
+                    var buttonIndex = $(e.currentTarget).index();
+
+                    buttons[buttonIndex].click();
+                })
+                .kendoWindow({
+                    modal: true,
+                    resizable: false,
+                    draggable: false,
+                    title: options.title,
+                    visible: false,
+                    close: function() {
+                        this.destroy();
+                        wrapper.focus();
+                    }
+                })
+                .getKendoWindow();
+
+            popup.center().open();
+        },
+
+        _createPopupEditor: function(task) {
+            var that = this;
+            var options = {};
+            var messages = this.options.messages;
+            var ganttStyles = Gantt.styles;
+            var popupStyles = ganttStyles.popup;
+
+            var html = kendo.format('<div {0}="{1}" class="{2} {3}"><div class="{4}">', 
+                kendo.attr("uid"), task.uid, popupStyles.form, popupStyles.editForm, popupStyles.formContainer);
+
+            var fields = this.fields(editors.desktop, task);
+            var editableFields = [];
+
+            html += this._buildEditTemplate(task, fields, editableFields);
+
+            html += '<div class="' + popupStyles.buttonsContainer + '">';
+            html += this.createButton({ name: "update", text: messages.save, className: Gantt.styles.primary });
+            html += this.createButton({ name: "cancel", text: messages.cancel });
+            html += this.createButton({ name: "delete", text: messages.destroy });
+
+            html += '</div></div></div>';
+
+            var container = this.container = $(html).appendTo(this.element)
+                .eq(0)
+                .kendoWindow(extend({
+                    modal: true,
+                    resizable: false,
+                    draggable: true,
+                    title: messages.editor.editorTitle,
+                    visible: false,
+                    close: function(e) {
+                        if (e.userTriggered) {
+                            if (that.trigger("cancel", { container: container, model: task })) {
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                }, options));
+
+            var editableWidget = container
+                .kendoEditable({
+                    fields: editableFields,
+                    model: task,
+                    clearContainer: false,
+                    validateOnBlur: true,
+                    target: that.options.target
+                })
+                .data("kendoEditable");
+
+            if (!this.trigger("edit", { container: container, model: task })) {
+                container.data("kendoWindow").center().open();
+
+                container.on(CLICK + NS, DOT + ganttStyles.buttonCancel, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    that.trigger("cancel", { container: container, model: task });
+                });
+
+                container.on(CLICK + NS, DOT + ganttStyles.buttonSave, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var fields = that.fields(editors.desktop, task);
+                    var updateInfo = {};
+                    var field;
+
+                    for (var i = 0, length = fields.length; i < length; i++) {
+                        field = fields[i].field;
+                        updateInfo[field] = task.get(field);
+                    }
+
+                    that.trigger("save", { container: container, model: task, updateInfo: updateInfo });
+                });
+
+                container.on(CLICK + NS, DOT + ganttStyles.buttonDelete, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    that.trigger("remove", { container: container, model: task });
+                });
+            } else {
+                that.trigger("cancel", { container: container, model: task });
+            }
+
+            return editableWidget;
+        }
+    });
+
+    var ResourceEditor = Widget.extend({
+        init: function(element, options) {
+            Widget.fn.init.call(this, element, options);
+
+            this.wrapper = this.element;
+            this.model = this.options.model;
+            this.resourcesField = this.options.resourcesField;
+            this.createButton = this.options.createButton;
+
+            this._initContainer();
+            this._attachHandlers();
+        },
+
+        events: [
+            "save"
+        ],
+
+        open: function() {
+            this.window.center().open();
+            this.grid.resize(true);
+        },
+
+        close: function() {
+            this.window.bind("deactivate", proxy(this.destroy, this)).close();
+        },
+
+        destroy: function() {
+            this._dettachHandlers();
+
+            this.grid.destroy();
+            this.grid = null;
+
+            this.window.destroy();
+            this.window = null;
+
+            Widget.fn.destroy.call(this);
+
+            kendo.destroy(this.wrapper);
+
+            this.element = this.wrapper = null;
+        },
+
+        _attachHandlers: function() {
+            var ganttStyles = Gantt.styles;
+            var grid = this.grid;
+
+            var closeHandler = this._cancelProxy = proxy(this._cancel, this);
+            this.container.on(CLICK + NS, DOT + ganttStyles.buttonCancel, this._cancelProxy);
+
+            this._saveProxy = proxy(this._save, this);
+            this.container.on(CLICK + NS, DOT + ganttStyles.buttonSave, this._saveProxy);
+
+            this.window.bind("close", function(e) {
+                if (e.userTriggered) {
+                    closeHandler(e);
+                }
+            });
+
+            grid.wrapper.on(CLICK + NS, "input[type='checkbox']", function(e) {
+                var element = $(this);
+                var row = $(element).closest("tr");
+                var model = grid.dataSource.getByUid(row.attr(kendo.attr("uid")));
+                var value = $(element).is(":checked") ? 1 : "";
+
+                model.set("value", value);
+            });
+        },
+
+        _dettachHandlers: function() {
+            this._cancelProxy = null;
+            this._saveProxy = null;
+            this.container.off(NS);
+            this.grid.wrapper.off();
+        },
+
+        _cancel: function(e) {
+            e.preventDefault();
+            this.close();
+        },
+
+        _save: function(e) {
+            e.preventDefault();
+
+            this._updateModel();
+
+            if (!this.wrapper.is(DOT + Gantt.styles.popup.resourcesField)) {
+                this.trigger("save", { container: this.wrapper, model: this.model });
+            }
+
+            this.close();
+        },
+
+        _initContainer: function() {
+            var popupStyles = Gantt.styles.popup;
+            var dom = kendo.format('<div class="{0} {1}"><div class="{2} {3}"/></div>"',
+                popupStyles.form, popupStyles.editForm, popupStyles.formContainer, popupStyles.resourcesFormContainer);
+
+            dom = $(dom);
+
+            this.container = dom.find(DOT + popupStyles.resourcesFormContainer);
+
+            this.window = dom.kendoWindow({
+                modal: true,
+                resizable: false,
+                draggable: true,
+                visible: false,
+                title: this.options.messages.resourcesEditorTitle
+            }).data("kendoWindow");
+
+            this._resourceGrid();
+            this._createButtons();
+        },
+
+        _resourceGrid: function() {
+            var that = this;
+            var messages = this.options.messages;
+            var element = $('<div id="resources-grid"/>').appendTo(this.container);
+
+            this.grid = new kendo.ui.Grid(element, {
+                columns: [
+                    {
+                        field: "name",
+                        title: messages.resourcesHeader,
+                        template:
+                            "<label><input type='checkbox' value='#=name#'" +
+                                "# if (value > 0 && value !== null) {#" +
+                                       "checked='checked'" +
+                                "# } #" +
+                            "/>#=name#</labe>"
+                    },
+                    {
+                        field: "value",
+                        title: messages.unitsHeader,
+                        template: function(dataItem) {
+                            var valueFormat = dataItem.format;
+                            var value = dataItem.value !== null ? dataItem.value : "";
+
+                            return valueFormat ? kendo.toString(value, valueFormat) : value;
+                        }
+                    }
+                ],
+                height: 280,
+                sortable: true,
+                editable: true,
+                filterable: true,
+                dataSource: {
+                    data: that.options.data,
+                    schema: {
+                        model: {
+                            id: "id",
+                            fields: {
+                                id: { from: "id", type: "number" },
+                                name: { from: "name", type: "string", editable: false},
+                                value: { from: "value", type: "number", defaultValue: "" },
+                                format: { from: "format", type: "string" }
+                            }
+                        }
+                    }
+                },
+                save: function(e) {
+                    var value = !!e.values.value;
+                    e.container.parent().find("input[type='checkbox']").prop("checked", value);
+                }
+            });
+        },
+
+        _createButtons: function() {
+            var buttons = this.options.buttons;
+            var html = '<div class="' + Gantt.styles.popup.buttonsContainer + '">';
+
+            for (var i = 0, length = buttons.length; i < length; i++) {
+                html += this.createButton(buttons[i]);
+            }
+
+            html += "</div>";
+
+            this.container.append(html);
+        },
+
+        _updateModel: function() {
+            var resources = [];
+            var value;
+            var data = this.grid.dataSource.data();
+
+            for (var i = 0, length = data.length; i < length; i++) {
+                value = data[i].get("value");
+                if (value !== null && value > 0) {
+                    resources.push(data[i]);
+                }
+            }
+
+            this.model[this.resourcesField] = resources;
+        }
+    });
+
     var Gantt = Widget.extend({
         init: function(element, options) {
             if (isArray(options)) {
@@ -852,6 +1383,8 @@
             Widget.fn.init.call(this, element, options);
 
             this._wrapper();
+
+            this._resources();
 
             this._timeline();
 
@@ -870,6 +1403,8 @@
 
             this._dataSource();
 
+            this._assignments();
+
             this._dropDowns();
 
             this._list();
@@ -883,6 +1418,8 @@
             this._dataBind();
 
             this._attachEvents();
+
+            this._createEditor();
 
             kendo.notify(this);
         },
@@ -915,17 +1452,38 @@
             views: [],
             dataSource: {},
             dependencies: {},
+            resources: {},
+            assignments: {},
             messages: {
+                save: "Save",
+                cancel: "Cancel",
+                destroy: "Delete",
+                deleteTaskWindowTitle: "Delete task",
+                deleteDependencyWindowTitle: "Delete dependency",
                 views: {
                     day: "Day",
                     week: "Week",
-                    month: "Month"
+                    month: "Month",
+                    year: "Year"
                 },
                 actions: {
                     append: "Add Task",
                     addChild: "Add Child",
                     insertBefore: "Add Above",
-                    insertAfter: "Add Below"
+                    insertAfter: "Add Below",
+                    pdf: "Export to PDF"
+                },
+                editor: {
+                    editorTitle: "Task",
+                    resourcesEditorTitle: "Resources",
+                    title: "Title",
+                    start: "Start",
+                    end: "End",
+                    percentComplete: "Complete",
+                    resources: "Resources",
+                    assingButton: "Assign",
+                    resourcesHeader: "Resources",
+                    unitsHeader: "Units"
                 }
             },
             showWorkHours: true,
@@ -958,6 +1516,17 @@
 
         destroy: function() {
             Widget.fn.destroy.call(this);
+            
+            if (this.dataSource) {
+                this.dataSource.unbind("change", this._refreshHandler);
+                this.dataSource.unbind("progress", this._progressHandler);
+                this.dataSource.unbind("error", this._errorHandler);
+            }
+
+            if (this.dependencies) {
+                this.dependencies.unbind("change", this._dependencyRefreshHandler);
+                this.dependencies.unbind("error", this._dependencyErrorHandler);
+            }
 
             if (this.timeline) {
                 this.timeline.unbind();
@@ -975,6 +1544,10 @@
 
             if (this.headerDropDown) {
                 this.headerDropDown.destroy();
+            }
+
+            if (this._editor) {
+                this._editor.destroy();
             }
 
             if (this._resizeDraggable) {
@@ -1023,17 +1596,29 @@
             var that = this;
             var ganttStyles = Gantt.styles;
             var viewsSelector = DOT + ganttStyles.toolbar.views + " > li";
+            var pdfSelector = DOT + ganttStyles.toolbar.pdfButton;
             var hoveredClassName = ganttStyles.hovered;
-            var toolbar = $(HEADER_TEMPLATE({
+            var actions = this.options.toolbar;
+            var actionsWrap = $("<div class='" + ganttStyles.toolbar.actions + "'>");
+            var toolbar;
+            var views;
+
+            if (!isFunction(actions)) {
+                actions = (typeof actions === STRING ? actions : this._actions(actions));
+                actions = proxy(kendo.template(actions), this);
+            }
+
+            views = $(HEADER_VIEWS_TEMPLATE({
                 ns: kendo.ns,
                 views: this.timeline.views,
-                styles: Gantt.styles.toolbar,
-                action: {
-                    data: "add",
-                    title: this.options.messages.actions.append
-                },
-                editable: this.options.editable
+                styles: ganttStyles.toolbar
             }));
+
+            actionsWrap.append(actions({}));
+
+            toolbar = $("<div class='" + ganttStyles.toolbar.headerWrapper + "'>")
+                .append(actionsWrap)
+                .append(views);
 
             this.wrapper.prepend(toolbar);
             this.toolbar = toolbar;
@@ -1047,6 +1632,9 @@
                     if (!that.trigger("navigate", { view: name })) {
                         that.view(name);
                     }
+                })
+                .on(CLICK + NS, pdfSelector, function(e) {
+                    that.saveAsPDF();
                 });
 
             this.wrapper
@@ -1058,8 +1646,28 @@
                 });
         },
 
+        _actions: function() {
+            var options = this.options;
+            var actions = options.toolbar;
+            var html = "";
+
+            if (!isArray(actions)) {
+                if (options.editable) {
+                    actions = ["append"];
+                } else {
+                    return html;
+                }
+            }
+
+            for (var i = 0, length = actions.length; i < length; i++) {
+                html += this._createButton(actions[i]);
+            }
+
+            return html;
+        },
+
         _footer: function() {
-            if (this.options.editable !== true) {
+            if (!this.options.editable) {
                 return;
             }
 
@@ -1073,6 +1681,36 @@
 
             this.wrapper.append(footer);
             this.footer = footer;
+        },
+
+        _createButton: function(command) {
+            var template = command.template || BUTTON_TEMPLATE;
+            var messages = this.options.messages.actions;
+            var commandName = typeof command === STRING ? command : command.name || command.text;
+            var className = defaultCommands[commandName] ? defaultCommands[commandName].className : "k-gantt-" + (commandName || "").replace(/\s/g, "");
+            var options = { 
+                iconClass: "",
+                action: "",
+                text: commandName,
+                className: className,
+                styles: Gantt.styles.toolbar
+            };
+
+            if (!commandName && !(isPlainObject(command) && command.template))  {
+                throw new Error("Custom commands should have name specified");
+            }
+
+            options = extend(true, options, defaultCommands[commandName], { text: messages[commandName] });
+
+            if (isPlainObject(command)) {
+                if (command.className && inArray(options.className, command.className.split(" ")) < 0) {
+                    command.className += " " + options.className;
+                }
+
+                options = extend(true, options, command);
+            }
+
+            return kendo.template(template)(options);
         },
 
         _adjustDimensions: function() {
@@ -1143,7 +1781,7 @@
                 that._createTask(task, orderId);
             };
 
-            if (this.options.editable !== true) {
+            if (!this.options.editable) {
                 return;
             }
 
@@ -1183,8 +1821,11 @@
                 dataSource: this.dataSource,
                 selectable: this.options.selectable,
                 editable: this.options.editable,
-                listWidth: listWrapper.outerWidth()
+                listWidth: listWrapper.outerWidth(),
+                resourcesField: this.resources.field
             };
+            var columns = options.columns;
+            var column;
             var restoreFocus = function() {
                 if (navigatable) {
                     that._current(that._cachedCurrent);
@@ -1194,6 +1835,14 @@
 
                 delete that._cachedCurrent;
             };
+
+            for (var i = 0; i < columns.length; i++) {
+                column = columns[i];
+
+                if (column.field === this.resources.field && typeof column.editor !== "function") {
+                    column.editor = proxy(this._createResourceEditor, this);
+                }
+            }
 
             this.list = new kendo.ui.GanttList(element, options);
 
@@ -1236,7 +1885,7 @@
         _timeline: function() {
             var that = this;
             var ganttStyles = Gantt.styles;
-            var options = trimOptions(extend(true, {}, this.options));
+            var options = trimOptions(extend(true, { resourcesField: this.resources.field }, this.options));
             var element = this.wrapper.find(DOT + ganttStyles.timeline + " > div");
 
             this.timeline = new kendo.ui.GanttTimeline(element, options);
@@ -1317,6 +1966,9 @@
                 .bind("select", function(e) {
                     that.select("[data-uid='" + e.uid + "']");
                 })
+                .bind("editTask", function(e) {
+                    that.editTask(e.uid);
+                })
                 .bind("clear", function(e) {
                     that.clearSelection();
                 })
@@ -1369,6 +2021,136 @@
                 .bind("error", this._dependencyErrorHandler);
         },
 
+        _resources: function() {
+            var resources = this.options.resources;
+            var dataSource = resources.dataSource || {};
+
+            this.resources = {
+                field: "resources",
+                dataTextField: "name",
+                dataColorField: "color",
+                dataFormatField: "format"
+            };
+
+            extend(this.resources, resources);
+
+            this.resources.dataSource = kendo.data.DataSource.create(dataSource);
+        },
+
+        _assignments: function() {
+            var assignments = this.options.assignments;
+            var dataSource = assignments.dataSource || { };
+
+            if (this.assignments) {
+                this.assignments.dataSource
+                    .unbind("change", this._assignmentsRefreshHandler);
+            } else {
+                this._assignmentsRefreshHandler = proxy(this.refresh, this);
+            }
+
+            this.assignments = {
+                dataTaskIdField: "taskId",
+                dataResourceIdField: "resourceId",
+                dataValueField: "value"
+            };
+
+            extend(this.assignments, assignments);
+
+            this.assignments.dataSource = kendo.data.DataSource.create(dataSource);
+
+            this.assignments.dataSource.
+                bind("change", this._assignmentsRefreshHandler);
+        },
+
+        _createEditor: function(command) {
+            var that = this;
+
+            var editor = this._editor = new PopupEditor(this.wrapper, extend({}, this.options, {
+                target: this,
+                resources: {
+                    field: this.resources.field,
+                    editor: proxy(this._createResourceEditor, this)
+                },
+                createButton: proxy(this._createPopupButton, this)
+            }));
+
+            editor
+                .bind("cancel", function(e) {
+                    var task = that.dataSource.getByUid(e.model.uid);
+
+                    if (that.trigger("cancel", { container: e.container, task: task })) {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    that.cancelTask();
+                })
+                .bind("edit", function(e) {
+                    var task = that.dataSource.getByUid(e.model.uid);
+
+                    if (that.trigger("edit", { container: e.container, task: task })) {
+                        e.preventDefault();
+                    }
+                })
+                .bind("save", function(e) {
+                    var task = that.dataSource.getByUid(e.model.uid);
+
+                    that.saveTask(task, e.updateInfo);
+                })
+                .bind("remove", function(e) {
+                    that.removeTask(e.model.uid);
+                });
+
+        },
+
+        _createResourceEditor: function(container, options) {
+            var that = this;
+            var model = options instanceof ObservableObject ? options : options.model;
+            var id = model.get("id");
+            var messages = this.options.messages;
+            var resourcesField = that.resources.field;
+
+            var editor = this._resourceEditor = new ResourceEditor(container, {
+                resourcesField: resourcesField,
+                data: this._wrapResourceData(id),
+                model: model,
+                messages: extend({}, messages.editor),
+                buttons: [
+                    { name: "update", text: messages.save, className: Gantt.styles.primary },
+                    { name: "cancel", text: messages.cancel }
+                ],
+                createButton: proxy(this._createPopupButton, this),
+                save: function(e) {
+                    that._updateAssignments(e.model.get("id"), e.model.get(resourcesField));
+                }
+            });
+
+            editor.open();
+        },
+
+        _createPopupButton: function(command) {
+            var commandName = command.name || command.text;
+            var options = { 
+                className: Gantt.styles.popup.button + " k-gantt-" + (commandName || "").replace(/\s/g, ""),
+                text: commandName,
+                attr: ""
+            };
+
+            if (!commandName && !(isPlainObject(command) && command.template))  {
+                throw new Error("Custom commands should have name specified");
+            }
+
+            if (isPlainObject(command)) {
+                if (command.className) {
+                    command.className += " " + options.className;
+                }
+
+                options = extend(true, options, command);
+            }
+
+            return kendo.template(COMMAND_BUTTON_TEMPLATE)(options);
+        },
+
         view: function(type) {
             return this.timeline.view(type);
         },
@@ -1410,39 +2192,125 @@
             return this.wrapper.children(".k-task");
         },
 
-        _updateTask: function(task, updateInfo) {
-            if (!this.trigger("save", { task: task, values: updateInfo })) {
-                this._preventRefresh = true;
+        _updateAssignments: function(id, resources) {
+            var dataSource = this.assignments.dataSource;
+            var taskId = this.assignments.dataTaskIdField;
+            var resourceId = this.assignments.dataResourceIdField;
+            var resourceValue = this.assignments.dataValueField;
+            var hasMatch = false;
+            var assignments = new Query(dataSource.view())
+                .filter({
+                    field: taskId,
+                    operator: "eq",
+                    value: id
+                }).toArray();
+            var assignment;
+            var resource;
+            var value;
 
-                this.dataSource.update(task, updateInfo);
+            while (assignments.length) {
+                assignment = assignments[0];
 
-                this._syncDataSource();
+                for (var i = 0, length = resources.length; i < length; i++) {
+                    resource = resources[i];
+
+                    if (assignment.get(resourceId) === resource.get("id")) {
+                        value = resources[i].get("value");
+                        assignment.set(resourceValue, value);
+                        resources.splice(i, 1);
+                        hasMatch = true;
+                        break;
+                    }
+                }
+
+                if (!hasMatch) {
+                    dataSource.remove(assignment);
+                }
+
+                hasMatch = false;
+
+                assignments.shift();
+            }
+
+            for (var j = 0, newLength = resources.length; j < newLength; j++) {
+                resource = resources[j];
+                assignment = dataSource._createNewModel();
+                assignment[taskId] = id;
+                assignment[resourceId] = resource.get("id");
+                assignment[resourceValue] = resource.get("value");
+                dataSource.add(assignment);
+            }
+
+            dataSource.sync();
+        },
+
+        cancelTask: function() {
+            var editor = this._editor;
+            var container = editor.container;
+
+            if (container) {
+                editor.close();
             }
         },
 
-        removeTask: function(uid) {
+        editTask: function(uid) {
             var task = typeof uid === "string" ? this.dataSource.getByUid(uid) : uid;
 
             if (!task) {
                 return;
             }
 
-            var dependencies = this.dependencies.dependencies(task.id);
+            var taskCopy = this.dataSource._createNewModel(task.toJSON());
+            taskCopy.uid = task.uid;
 
-            if (!this.trigger("remove", {
-                task: task,
-                dependencies: dependencies
-            })) {
-                this._removeTaskDependencies(task, dependencies);
+            this.cancelTask();
 
+            this._editTask(taskCopy);
+        },
+
+        _editTask: function(task) {
+            this._editor.editTask(task);
+        },
+
+        saveTask: function(task, updateInfo) {
+            var editor = this._editor;
+            var container = editor.container;
+            var editable = editor.editable;
+
+            if (container && editable && editable.end()) {
+                this._updateTask(task, updateInfo);
+            }
+        },
+
+        _updateTask: function(task, updateInfo) {
+            var resourcesField = this.resources.field;
+
+            if (!this.trigger("save", { task: task, values: updateInfo })) {
                 this._preventRefresh = true;
 
-                if (this.dataSource.remove(task)) {
-                    this._syncDataSource();
+                this.dataSource.update(task, updateInfo);
+
+                if (updateInfo[resourcesField]) {
+                    this._updateAssignments(task.get("id"), updateInfo[resourcesField]);
                 }
 
-                this._preventRefresh = false;
+                this._syncDataSource();
             }
+        },
+
+        removeTask: function(uid) {
+            var that = this;
+            var task = typeof uid === "string" ? this.dataSource.getByUid(uid) : uid;
+
+            if (!task) {
+                return;
+            }
+
+            this._taskConfirm(function(cancel) {
+                if (!cancel) {
+                    that._removeTask(task);
+                }
+            }, task);
         },
 
         _createTask: function(task, index) {
@@ -1482,16 +2350,18 @@
         },
 
         removeDependency: function(uid) {
+            var that = this;
             var dependency = typeof uid === "string" ? this.dependencies.getByUid(uid) : uid;
 
-            if (!this.trigger("remove", {
-                task: null,
-                dependencies: [dependency]
-            })) {
-                if (this.dependencies.remove(dependency)) {
-                    this.dependencies.sync();
-                }
+            if (!dependency) {
+                return;
             }
+
+            this._dependencyConfirm(function(cancel) {
+                if (!cancel) {
+                    that._removeDependency(dependency);
+                }
+            }, dependency);
         },
 
         _removeTaskDependencies: function(task, dependencies) {
@@ -1504,6 +2374,97 @@
             this._preventDependencyRefresh = false;
 
             this.dependencies.sync();
+        },
+
+        _removeResourceAssignments: function(task) {
+            var dataSource = this.assignments.dataSource;
+            var assignments = dataSource.view();
+            var filter = {
+                field: this.assignments.dataTaskIdField,
+                operator: "eq",
+                value: task.get("id")
+            };
+
+            assignments = new Query(assignments).filter(filter).toArray();
+
+            this._preventRefresh = true;
+
+            for (var i = 0, length = assignments.length; i < length; i++) {
+                dataSource.remove(assignments[i]);
+            }
+
+            this._preventRefresh = false;
+
+            dataSource.sync();
+        },
+
+        _removeTask: function(task) {
+            var dependencies = this.dependencies.dependencies(task.id);
+
+            if (!this.trigger("remove", {
+                task: task,
+                dependencies: dependencies
+            })) {
+                this._removeTaskDependencies(task, dependencies);
+                this._removeResourceAssignments(task);
+
+                this._preventRefresh = true;
+
+                if (this.dataSource.remove(task)) {
+                    this._syncDataSource();
+                }
+
+                this._preventRefresh = false;
+            }
+        },
+
+        _removeDependency: function(dependency) {
+            if (!this.trigger("remove", {
+                task: null,
+                dependencies: [dependency]
+            })) {
+                if (this.dependencies.remove(dependency)) {
+                    this.dependencies.sync();
+                }
+            }
+        },
+
+        _taskConfirm: function(callback, task) {
+            this._confirm(callback, {
+                model: task,
+                text: TASK_DELETE_CONFIRM,
+                title: this.options.messages.deleteTaskWindowTitle
+            });
+        },
+
+        _dependencyConfirm: function(callback, dependency) {
+            this._confirm(callback, {
+                model: dependency,
+                text: DEPENDENCY_DELETE_CONFIRM,
+                title: this.options.messages.deleteDependencyWindowTitle
+            });
+        },
+
+        _confirm: function(callback, options) {
+            var editable = this.options.editable;
+            var messages;
+            var buttons;
+
+            if (editable === true || editable.confirmation !== false) {
+                messages = this.options.messages;
+                buttons = [
+                    { name: "delete", text: messages.destroy, className: Gantt.styles.primary, click: function() { callback(); } },
+                    { name: "cancel", text: messages.cancel, click: function() { callback(true); } }
+                ];
+
+                this.showDialog(extend(true, {}, options, { buttons: buttons }));
+            } else {
+                callback();
+            }
+        },
+
+        showDialog: function(options) {
+            this._editor.showDialog(options);
         },
 
         refresh: function(e) {
@@ -1527,6 +2488,14 @@
 
             if (this.trigger("dataBinding")) {
                 return;
+            }
+
+            if (this.resources.dataSource.data().length !== 0) {
+                this._assignResources(taskTree);
+            }
+
+            if (this._editor) {
+                this._editor.close();
             }
 
             this.clearSelection();
@@ -1563,6 +2532,94 @@
             this.timeline._renderDependencies(this.dependencies.view());
 
             this.trigger("dataBound");
+        },
+
+        _assignResources: function(taskTree) {
+            var that = this;
+            var resources = this.resources;
+            var assignments = this.assignments;
+            var groupAssigments = function() {
+                var data = assignments.dataSource.view();
+                var group = {
+                    field: assignments.dataTaskIdField
+                };
+
+                data = new Query(data).group(group).toArray();
+
+                return data;
+            };
+            var assigments = groupAssigments();
+            var applyTaskResource = function(task, action) {
+                var taskId = task.get("id");
+
+                kendo.setter(resources.field)(task, new ObservableArray([]));
+
+                for (var i = 0, length = assigments.length; i < length; i++) {
+                    if (assigments[i].value === taskId) {
+                        action(task, assigments[i].items);
+                    }
+                }
+            };
+            var wrapTask = function(task, items) {
+                for (var j = 0, length = items.length; j < length; j++) {
+                    var item = items[j];
+                    var resource = resources.dataSource.get(item.get(assignments.dataResourceIdField));
+                    var resourceValue = item.get(assignments.dataValueField);
+                    var resourcedId = item.get(assignments.dataResourceIdField);
+                    var valueFormat = resource.get(resources.dataFormatField) || PERCENTAGE_FORMAT;
+                    var formatedValue = kendo.toString(resourceValue, valueFormat);
+
+                    task[resources.field].push(new ObservableObject({
+                        id: resourcedId,
+                        name: resource.get(resources.dataTextField),
+                        color: resource.get(resources.dataColorField),
+                        value: resourceValue,
+                        formatedValue: formatedValue
+                    }));
+                }
+            };
+
+            for (var i = 0, length = taskTree.length; i < length; i++) {
+                applyTaskResource(taskTree[i], wrapTask);
+            }
+        },
+
+        _wrapResourceData: function(id) {
+            var that = this;
+            var result = [];
+            var resource;
+            var resources = this.resources.dataSource.view();
+            var assignments = this.assignments.dataSource.view();
+            var taskAssignments = new Query(assignments).filter({
+                field: that.assignments.dataTaskIdField,
+                operator: "eq",
+                value: id
+            }).toArray();
+            var valuePerResource = function(id) {
+                var resourceValue = null;
+
+                new Query(taskAssignments).filter({
+                    field: that.assignments.dataResourceIdField,
+                    operator: "eq",
+                    value: id
+                }).select(function(assignment) {
+                    resourceValue += assignment.get(that.assignments.dataValueField);
+                });
+
+                return resourceValue;
+            };
+
+            for (var i = 0, length = resources.length; i < length; i++) {
+                resource = resources[i];
+                result.push({
+                    id: resource.get("id"),
+                    name: resource.get(that.resources.dataTextField),
+                    format: resource.get(that.resources.dataFormatField) || PERCENTAGE_FORMAT,
+                    value: valuePerResource(resource.id)
+                });
+            }
+
+            return result;
         },
 
         _syncDataSource: function() {
@@ -1891,7 +2948,13 @@
                 this._preventRefresh = true;
                 this._preventDependencyRefresh = true;
 
-                var promises = $.map([this.dataSource, this.dependencies], function(dataSource) {
+                var promises = $.map([
+                    this.dataSource,
+                    this.dependencies,
+                    this.resources.dataSource,
+                    this.assignments.dataSource
+                ],
+                function(dataSource) {
                     return dataSource.fetch();
                 });
 
@@ -1910,6 +2973,10 @@
             this.list._adjustHeight();
         }
     });
+    
+    if (kendo.PDFMixin) {
+        kendo.PDFMixin.extend(Gantt.prototype);
+    }
 
     kendo.ui.plugin(Gantt);
 

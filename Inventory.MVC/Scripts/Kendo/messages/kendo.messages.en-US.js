@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -129,6 +129,19 @@ $.extend(true, kendo.ui.FileBrowser.prototype.options.messages,{
   "overwriteFile": "A file with name \"{0}\" already exists in the current directory. Do you want to overwrite it?",
   "dropFilesHere": "drop file here to upload",
   "search": "Search"
+});
+}
+
+/* FilterCell messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.messages =
+$.extend(true, kendo.ui.FilterCell.prototype.options.messages,{
+  "isTrue": "is true",
+  "isFalse": "is false",
+  "filter": "Filter",
+  "clear": "Clear",
+  "operator": "Operator"
 });
 }
 

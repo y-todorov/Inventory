@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -54,6 +54,11 @@
             that.relatedTarget = that.options.relatedTarget;
 
             multiple = that.options.multiple;
+
+            if (this.options.aria && multiple) {
+                that.element.attr("aria-multiselectable", true);
+            }
+
             that.userEvents = new kendo.UserEvents(that.element, {
                 global: true,
                 allowSelection: true,
@@ -160,6 +165,8 @@
                 currentElement = target.closest(that.element);
                 that._items = currentElement.find(that.options.filter);
             }
+
+            e.sender.capture();
 
             that._marquee
                 .appendTo(document.body)
@@ -381,6 +388,15 @@
             that._marquee = that._lastActive = that.element = that.userEvents = null;
         }
     });
+
+    Selectable.parseOptions = function(selectable) {
+        var asLowerString = typeof selectable === "string" && selectable.toLowerCase();
+
+        return {
+            multiple: asLowerString && asLowerString.indexOf("multiple") > -1,
+            cell: asLowerString && asLowerString.indexOf("cell") > -1
+        };
+    };
 
     function collision(element, position) {
         var elementPosition = kendo.getOffset(element),

@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -7,14 +7,10 @@
 * If you do not own a commercial license, this file shall be governed by the trial license terms.
 */
 (function(f, define){
-    define([ "./kendo.data", "./kendo.userevents", "./kendo.tooltip", "./kendo.dataviz.core", "./kendo.mobile.scroller", "./kendo.dataviz.drawing", "./kendo.core", "./kendo.draganddrop" ], f);
+    define([ "./kendo.data", "./kendo.userevents", "./kendo.tooltip", "./kendo.mobile.scroller", "./kendo.drawing", "./kendo.core", "./kendo.draganddrop" ], f);
 })(function(){
 
-(function () {
-
-    // TODO
-    // Remove duplicate functions from core, chart, map
-
+(function ($) {
     // Imports ================================================================
     var math = Math,
         kendo = window.kendo,
@@ -25,7 +21,14 @@
     var DEG_TO_RAD = math.PI / 180,
         MAX_NUM = Number.MAX_VALUE,
         MIN_NUM = -Number.MAX_VALUE,
-        UNDEFINED = "undefined";
+        UNDEFINED = "undefined",
+        inArray = $.inArray,
+        push = [].push,
+        pop = [].pop,
+        splice = [].splice,
+        shift = [].shift,
+        slice = [].slice,
+        unshift = [].unshift;
 
     // Generic utility functions ==============================================
     function defined(value) {
@@ -56,10 +59,6 @@
 
     function deg(radians) {
         return radians / DEG_TO_RAD;
-    }
-
-    function alignToPixel(coord) {
-        return math.round(coord) + 0.5;
     }
 
     function isNumber(val) {
@@ -101,6 +100,13 @@
 
     function hashObject(object) {
         return hashKey(objectKey(object));
+    }
+
+    var now = Date.now;
+    if (!now) {
+        now = function() {
+            return new Date().getTime();
+        }
     }
 
     // Array helpers ==========================================================
@@ -167,6 +173,10 @@
     }
 
     // Template helpers =======================================================
+    function renderTemplate(text) {
+        return kendo.template(text, { useWithBlock: false, paramName: "d" });
+    }
+
     function renderAttr(name, value) {
         return (defined(value) && value !== null) ? " " + name + "='" + value + "' " : "";
     }
@@ -216,24 +226,16 @@
         return result.join(" ");
     }
 
-    // Mixins =================================================================
-    function geometryChange() {
-        if (this.observer) {
-            this.observer.geometryChange();
-        }
+    function isTransparent(color) {
+        return color === "" || color === null || color === "none" || color === "transparent" || !defined(color);
     }
 
     // Exports ================================================================
-    deepExtend(dataviz, {
+    deepExtend(kendo, {
         util: {
             MAX_NUM: MAX_NUM,
             MIN_NUM: MIN_NUM,
 
-            mixins: {
-                geometryChange: geometryChange
-            },
-
-            alignToPixel: alignToPixel,
             append: append,
             arrayLimits: arrayLimits,
             arrayMin: arrayMin,
@@ -243,8 +245,10 @@
             hashKey: hashKey,
             hashObject: hashObject,
             isNumber: isNumber,
+            isTransparent: isTransparent,
             last: last,
             limitValue: limitValue,
+            now: now,
             objectKey: objectKey,
             round: round,
             rad: rad,
@@ -253,6 +257,7 @@
             renderPos: renderPos,
             renderSize: renderSize,
             renderStyle: renderStyle,
+            renderTemplate: renderTemplate,
             sparseArrayLimits: sparseArrayLimits,
             sparseArrayMin: sparseArrayMin,
             sparseArrayMax: sparseArrayMax,
@@ -261,7 +266,11 @@
         }
     });
 
+    kendo.dataviz.util = kendo.util;
+
 })(window.kendo.jQuery);
+
+
 
 (function ($, undefined) {
     // Imports ================================================================
@@ -281,7 +290,7 @@
         dataviz = kendo.dataviz,
         deepExtend = kendo.deepExtend,
 
-        util = dataviz.util,
+        util = kendo.util,
         defined = util.defined,
         deg = util.deg,
         rad = util.rad,
@@ -533,7 +542,7 @@
                 se = this.se;
 
             return {nw: this.nw, ne: new Location(nw.lat, se.lng),
-                    se: this.se, sw: new Location(nw.lng, se.lat)};
+                    se: this.se, sw: new Location(se.lat, nw.lng)};
         },
 
         toArray: function() {
@@ -541,7 +550,7 @@
                 se = this.se;
 
             return [nw, new Location(nw.lat, se.lng),
-                    se, new Location(nw.lng, se.lat)];
+                    se, new Location(se.lat, nw.lng)];
         },
 
         overlaps: function(extent) {
@@ -572,14 +581,14 @@
 
 })(window.kendo.jQuery);
 
-(function() {
+(function($) {
     var kendo = window.kendo,
         Widget = kendo.ui.Widget,
         template = kendo.template,
 
         dataviz = kendo.dataviz,
-        valueOrDefault = dataviz.util.valueOrDefault,
-        defined = dataviz.util.defined;
+        valueOrDefault = kendo.util.valueOrDefault,
+        defined = kendo.util.defined;
 
     var Attribution = Widget.extend({
         init: function(element, options) {
@@ -688,7 +697,7 @@
     });
 
     kendo.dataviz.ui.plugin(Attribution);
-})(jQuery);
+})(window.kendo.jQuery);
 
 (function ($) {
     var kendo = window.kendo;
@@ -792,7 +801,7 @@
     // Exports ================================================================
     kendo.dataviz.ui.plugin(Navigator);
 
-})(jQuery);
+})(window.kendo.jQuery);
 
 (function ($) {
     var kendo = window.kendo;
@@ -881,7 +890,7 @@
     // Exports ================================================================
     kendo.dataviz.ui.plugin(ZoomControl);
 
-})(jQuery);
+})(window.kendo.jQuery);
 
 (function ($, undefined) {
     // Imports ================================================================
@@ -897,16 +906,15 @@
         Class = kendo.Class,
 
         dataviz = kendo.dataviz,
-        Matrix = dataviz.Matrix,
         deepExtend = kendo.deepExtend,
 
-        g = dataviz.geometry,
+        g = kendo.geometry,
         Point = g.Point,
 
         map = dataviz.map,
         Location = map.Location,
 
-        util = dataviz.util,
+        util = kendo.util,
         rad = util.rad,
         deg = util.deg,
         limit = util.limitValue;
@@ -1052,10 +1060,10 @@
             var c = this.c = 2 * PI * proj.options.datum.a;
 
             // Scale circumference to 1, mirror Y and shift origin to top left
-            this._tm = Matrix.translate(0.5, 0.5).times(Matrix.scale(1/c, -1/c));
+            this._tm = g.transform().translate(0.5, 0.5).scale(1/c, -1/c);
 
             // Inverse transform matrix
-            this._itm = Matrix.scale(c, -c).times(Matrix.translate(-0.5, -0.5));
+            this._itm = g.transform().scale(c, -c).translate(-0.5, -0.5);
         },
 
         // Location <-> Point (screen coordinates for a given scale)
@@ -1137,11 +1145,11 @@
 
         dataviz = kendo.dataviz,
         deepExtend = kendo.deepExtend,
-        defined = dataviz.defined,
 
         Extent = dataviz.map.Extent,
 
-        util = dataviz.util,
+        util = kendo.util,
+        defined = util.defined,
         valueOrDefault = util.valueOrDefault;
 
     // Implementation =========================================================
@@ -1251,18 +1259,104 @@
 
 })(window.kendo.jQuery);
 
-(function () {
-
+(function ($) {
     // Imports ================================================================
     var math = Math,
+        kendo = window.kendo,
+        deepExtend = kendo.deepExtend,
+        inArray = $.inArray;
+
+    // Mixins =================================================================
+    var ObserversMixin = {
+        observers: function() {
+            this._observers = this._observers || [];
+            return this._observers;
+        },
+
+        addObserver: function(element) {
+            if (!this._observers)  {
+                this._observers = [element];
+            } else {
+                this._observers.push(element);
+            }
+            return this;
+        },
+
+        removeObserver: function(element) {
+            var observers = this.observers();
+            var index = inArray(element, observers);
+            if (index != -1) {
+                observers.splice(index, 1);
+            }
+            return this;
+        },
+
+        trigger: function(methodName, event) {
+            var observers = this._observers;
+            var observer;
+            var idx;
+
+            if (observers && !this._suspended) {
+                for (idx = 0; idx < observers.length; idx++) {
+                    observer = observers[idx];
+                    if (observer[methodName]) {
+                        observer[methodName](event);
+                    }
+                }
+            }
+            return this;
+        },
+
+        optionsChange: function(e) {
+            this.trigger("optionsChange", e);
+        },
+
+        geometryChange: function(e) {
+            this.trigger("geometryChange", e);
+        },
+
+        suspend: function() {
+            this._suspended = (this._suspended || 0) + 1;
+            return this;
+        },
+
+        resume: function() {
+            this._suspended = math.max((this._suspended || 0) - 1, 0);
+            return this;
+        },
+
+        _observerField: function(field, value) {
+            if (this[field]) {
+                this[field].removeObserver(this);
+            }
+            this[field] = value;
+            value.addObserver(this);
+        }
+    };
+
+    // Exports ================================================================
+    deepExtend(kendo, {
+        mixins: {
+            ObserversMixin: ObserversMixin
+        }
+    });
+
+})(window.kendo.jQuery);
+
+
+
+(function ($) {
+    // Imports ================================================================
+    var math = Math,
+        pow = math.pow,
         inArray = $.inArray,
 
         kendo = window.kendo,
         Class = kendo.Class,
         deepExtend = kendo.deepExtend,
+        ObserversMixin = kendo.mixins.ObserversMixin,
 
-        dataviz = kendo.dataviz,
-        util = dataviz.util,
+        util = kendo.util,
         defined = util.defined,
         rad = util.rad,
         deg = util.deg,
@@ -1278,8 +1372,6 @@
             this.x = x || 0;
             this.y = y || 0;
         },
-
-        geometryChange: util.mixins.geometryChange,
 
         equals: function(other) {
             return other && other.x === this.x && other.y === this.y;
@@ -1378,6 +1470,7 @@
         }
     });
     defineAccessors(Point.fn, ["x", "y"]);
+    deepExtend(Point.fn, ObserversMixin);
 
     // IE < 9 doesn't allow to override toString on definition
     Point.fn.toString = function(digits, separator) {
@@ -1447,17 +1540,24 @@
             this.height = height || 0;
         },
 
-        geometryChange: util.mixins.geometryChange,
-
         equals: function(other) {
             return other && other.width === this.width && other.height === this.height;
         },
 
         clone: function() {
             return new Size(this.width, this.height);
+        },
+
+        toArray: function(digits) {
+            var doRound = defined(digits);
+            var width = doRound ? round(this.width, digits) : this.width;
+            var height = doRound ? round(this.height, digits) : this.height;
+
+            return [width, height];
         }
     });
     defineAccessors(Size.fn, ["width", "height"]);
+    deepExtend(Size.fn, ObserversMixin);
 
     Size.create = function(arg0, arg1) {
         if (defined(arg0)) {
@@ -1479,8 +1579,6 @@
             this.setSize(size || new Size());
         },
 
-        geometryChange: util.mixins.geometryChange,
-
         clone: function() {
             return new Rect(
                 this.origin.clone(),
@@ -1495,8 +1593,7 @@
         },
 
         setOrigin: function(value) {
-            this.origin = Point.create(value);
-            this.origin.observer = this;
+            this._observerField("origin", Point.create(value));
             this.geometryChange();
             return this;
         },
@@ -1506,8 +1603,7 @@
         },
 
         setSize: function(value) {
-            this.size = Size.create(value);
-            this.size.observer = this;
+            this._observerField("size", Size.create(value));
             this.geometryChange();
             return this;
         },
@@ -1554,6 +1650,8 @@
         }
     });
 
+    deepExtend(Rect.fn, ObserversMixin);
+
     Rect.fromPoints = function() {
         var topLeft = Point.min.apply(this, arguments);
         var bottomRight = Point.max.apply(this, arguments);
@@ -1572,6 +1670,29 @@
         );
     };
 
+    Rect.intersect = function(a, b) {
+        a = { left   : a.topLeft().x,
+              top    : a.topLeft().y,
+              right  : a.bottomRight().x,
+              bottom : a.bottomRight().y };
+
+        b = { left   : b.topLeft().x,
+              top    : b.topLeft().y,
+              right  : b.bottomRight().x,
+              bottom : b.bottomRight().y };
+
+        if (a.left <= b.right &&
+            b.left <= a.right &&
+            a.top <= b.bottom &&
+            b.top <= a.bottom)
+        {
+            return Rect.fromPoints(
+                new Point(math.max(a.left, b.left), math.max(a.top, b.top)),
+                new Point(math.min(a.right, b.right), math.min(a.bottom, b.bottom))
+            );
+        }
+    };
+
     var Circle = Class.extend({
         init: function(center, radius) {
             this.setCenter(center || new Point());
@@ -1579,8 +1700,7 @@
         },
 
         setCenter: function(value) {
-            this.center = Point.create(value);
-            this.center.observer = this;
+            this._observerField("center", Point.create(value));
             this.geometryChange();
             return this;
         },
@@ -1588,8 +1708,6 @@
         getCenter: function() {
             return this.center;
         },
-
-        geometryChange: util.mixins.geometryChange,
 
         equals: function(other) {
             return  other &&
@@ -1634,6 +1752,7 @@
         }
     });
     defineAccessors(Circle.fn, ["radius"]);
+    deepExtend(Circle.fn, ObserversMixin);
 
     var Arc = Class.extend({
         init: function(center, options) {
@@ -1648,10 +1767,18 @@
         },
 
         // TODO: clone, equals
+        clone: function() {
+            return new Arc(this.center, {
+                radiusX: this.radiusX,
+                radiusY: this.radiusY,
+                startAngle: this.startAngle,
+                endAngle: this.endAngle,
+                anticlockwise: this.anticlockwise
+            });
+        },
 
         setCenter: function(value) {
-            this.center = Point.create(value);
-            this.center.observer = this;
+            this._observerField("center", Point.create(value));
             this.geometryChange();
             return this;
         },
@@ -1660,9 +1787,7 @@
             return this.center;
         },
 
-        MAX_INTERVAL: 90,
-
-        geometryChange: util.mixins.geometryChange,
+        MAX_INTERVAL: 45,
 
         pointAt: function(angle) {
             var center = this.center;
@@ -1781,6 +1906,18 @@
         }
     });
     defineAccessors(Arc.fn, ["radiusX", "radiusY", "startAngle", "endAngle", "anticlockwise"]);
+    deepExtend(Arc.fn, ObserversMixin);
+
+    Arc.fromPoints = function(start, end, rx, ry, largeArc, swipe) {
+        var arcParameters = normalizeArcParameters(start.x, start.y, end.x, end.y, rx, ry, largeArc, swipe);
+        return new Arc(arcParameters.center, {
+            startAngle: arcParameters.startAngle,
+            endAngle: arcParameters.endAngle,
+            radiusX: rx,
+            radiusY: ry,
+            anticlockwise: swipe === 0
+        });
+    };
 
     var Matrix = Class.extend({
         init: function (a, b, c, d, e, f) {
@@ -1887,14 +2024,11 @@
                    other._matrix.equals(this._matrix);
         },
 
-
         _optionsChange: function() {
-            if (this.observer) {
-                this.observer.optionsChange({
-                    field: "transform",
-                    value: this
-                });
-            }
+            this.optionsChange({
+                field: "transform",
+                value: this
+            });
         },
 
         translate: function(x, y) {
@@ -1946,6 +2080,8 @@
             return this._matrix;
         }
     });
+
+    deepExtend(Transformation.fn, ObserversMixin);
 
     function transform(matrix) {
         if (matrix === null) {
@@ -2021,8 +2157,81 @@
         };
     }
 
+
+    function elipseAngle(start, end, swipe) {
+        if (start > end) {
+            end += 360;
+        }
+
+        var alpha = math.abs(end - start);
+        if (!swipe) {
+            alpha = 360 - alpha;
+        }
+
+        return alpha;
+    }
+
+    function calculateAngle(cx, cy, rx, ry, x, y) {
+        var cos = round((x - cx) / rx, 3);
+        var sin = round((y - cy) / ry, 3);
+
+        return round(deg(math.atan2(sin, cos)));
+    }
+
+    function normalizeArcParameters(x1, y1, x2, y2, rx, ry, largeArc, swipe) {
+        var cx, cy;
+        var cx1, cy1;
+        var a, b, c, sqrt;
+
+        if  (y1 !== y2) {
+            var x21 = x2 - x1;
+            var y21 = y2 - y1;
+            var rx2 = pow(rx, 2), ry2 = pow(ry, 2);
+            var k = (ry2 * x21 * (x1 + x2) + rx2 * y21 * (y1 + y2)) / (2 * rx2 * y21);
+            var yk2 = k - y2;
+            var l = -(x21 * ry2) / (rx2 * y21);
+
+            a = 1 / rx2 + pow(l, 2) / ry2;
+            b = 2 * ((l * yk2) / ry2 - x2 / rx2);
+            c = pow(x2, 2) / rx2 + pow(yk2, 2) / ry2 - 1;
+            sqrt = math.sqrt(pow(b, 2) - 4 * a * c);
+
+            cx = (-b - sqrt) / (2 * a);
+            cy = k + l * cx;
+            cx1 = (-b + sqrt) / (2 * a);
+            cy1 = k + l * cx1;
+        } else if (x1 !== x2) {
+            b = - 2 * y2;
+            c = pow(((x2 - x1) * ry) / (2 * rx), 2) + pow(y2, 2) - pow(ry, 2);
+            sqrt = math.sqrt(pow(b, 2) - 4 * c);
+
+            cx = cx1 = (x1 + x2) / 2;
+            cy = (-b - sqrt) / 2;
+            cy1 = (-b + sqrt) / 2;
+        } else {
+            return false;
+        }
+
+        var start = calculateAngle(cx, cy, rx, ry, x1, y1);
+        var end = calculateAngle(cx, cy, rx, ry, x2, y2);
+        var alpha = elipseAngle(start, end, swipe);
+
+        if ((largeArc && alpha <= 180) || (!largeArc && alpha > 180)) {
+           cx = cx1; cy = cy1;
+           start = calculateAngle(cx, cy, rx, ry, x1, y1);
+           end = calculateAngle(cx, cy, rx, ry, x2, y2);
+        }
+
+        return {
+            center: new Point(cx, cy),
+            startAngle: start,
+            endAngle: end
+        };
+    }
+
+
     // Exports ================================================================
-    deepExtend(dataviz, {
+    deepExtend(kendo, {
         geometry: {
             Arc: Arc,
             Circle: Circle,
@@ -2036,7 +2245,11 @@
         }
     });
 
+    kendo.dataviz.geometry = kendo.geometry;
+
 })(window.kendo.jQuery);
+
+
 
 (function ($, undefined) {
     // Imports ================================================================
@@ -2048,12 +2261,12 @@
 
         dataviz = kendo.dataviz,
         deepExtend = kendo.deepExtend,
-        last = dataviz.last,
-        defined = dataviz.util.defined,
+        last = kendo.util.last,
+        defined = kendo.util.defined,
 
-        g = dataviz.geometry,
+        g = kendo.geometry,
 
-        d = dataviz.drawing,
+        d = kendo.drawing,
         Group = d.Group,
 
         map = dataviz.map,
@@ -2412,12 +2625,12 @@
         dataviz = kendo.dataviz,
         deepExtend = kendo.deepExtend,
 
-        util = dataviz.util,
+        util = kendo.util,
         defined = util.defined,
         isNumber = util.isNumber,
 
-        g = dataviz.geometry,
-        d = dataviz.drawing,
+        g = kendo.geometry,
+        d = kendo.drawing,
 
         map = dataviz.map,
         Location = map.Location,
@@ -2576,17 +2789,19 @@
         template = kendo.template,
 
         dataviz = kendo.dataviz,
-        round = dataviz.round,
         deepExtend = kendo.deepExtend,
 
-        g = dataviz.geometry,
+        g = kendo.geometry,
         Point = g.Point,
 
         Layer = dataviz.map.layers.Layer,
 
-        util = dataviz.util,
+        util = kendo.util,
+        round = util.round,
         renderSize = util.renderSize,
         limit = util.limitValue;
+
+    var PAN_DELAY = 100;
 
     // Image tile layer =============================================================
     var TileLayer = Layer.extend({
@@ -2624,7 +2839,10 @@
 
             if (!kendo.support.mobileOS) {
                 if (!this._pan) {
-                    this._pan = proxy(this._throttleRender, this);
+                    this._pan = kendo.throttle(
+                        proxy(this._render, this),
+                        100
+                    );
                 }
 
                 this.map.bind("pan", this._pan);
@@ -2655,17 +2873,6 @@
 
         _resize: function() {
             this._render();
-        },
-
-        _throttleRender: function() {
-            var layer = this,
-                now = new Date(),
-                timestamp = layer._renderTimestamp;
-
-            if (!timestamp || now - timestamp > 100) {
-                this._render();
-                layer._renderTimestamp = now;
-            }
         },
 
         _panEnd: function(e) {
@@ -3029,7 +3236,7 @@
 
         dataviz = kendo.dataviz,
         deepExtend = kendo.deepExtend,
-        defined = dataviz.defined,
+        defined = kendo.util.defined,
 
         Extent = dataviz.map.Extent,
         Location = dataviz.map.Location,
@@ -3488,9 +3695,8 @@
 
         dataviz = kendo.dataviz,
         ui = dataviz.ui,
-        defined = dataviz.defined,
 
-        g = dataviz.geometry,
+        g = kendo.geometry,
         Point = g.Point,
 
         map = dataviz.map,
@@ -3498,7 +3704,8 @@
         Location = map.Location,
         EPSG3857 = map.crs.EPSG3857,
 
-        util = dataviz.util,
+        util = kendo.util,
+        defined = util.defined,
         limit = util.limitValue,
         renderPos = util.renderPos,
         valueOrDefault = util.valueOrDefault;

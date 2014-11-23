@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -7,7 +7,7 @@
 * If you do not own a commercial license, this file shall be governed by the trial license terms.
 */
 (function(f, define){
-    define([ "./kendo.data", "./kendo.userevents", "./kendo.dataviz.core", "./kendo.dataviz.svg", "./kendo.dataviz.themes" ], f);
+    define([ "./kendo.data", "./kendo.userevents", "./kendo.dataviz.core", "./kendo.drawing", "./kendo.dataviz.themes" ], f);
 })(function(){
 
 (function ($, undefined) {
@@ -16,6 +16,7 @@
         isArray = $.isArray,
         map = $.map,
         math = Math,
+        noop = $.noop,
         extend = $.extend,
         proxy = $.proxy,
 
@@ -32,13 +33,11 @@
         dataviz = kendo.dataviz,
         Axis = dataviz.Axis,
         AxisLabel = dataviz.AxisLabel,
-        BarAnimation = dataviz.BarAnimation,
         Box2D = dataviz.Box2D,
         BoxElement = dataviz.BoxElement,
         ChartElement = dataviz.ChartElement,
-        Color = dataviz.Color,
+        Color = kendo.drawing.Color,
         CurveProcessor = dataviz.CurveProcessor,
-        ElementAnimation = dataviz.ElementAnimation,
         FloatElement = dataviz.FloatElement,
         Note = dataviz.Note,
         LogarithmicAxis = dataviz.LogarithmicAxis,
@@ -47,25 +46,32 @@
         RootElement = dataviz.RootElement,
         Ring = dataviz.Ring,
         ShapeElement = dataviz.ShapeElement,
+        ShapeBuilder = dataviz.ShapeBuilder,
         Text = dataviz.Text,
         TextBox = dataviz.TextBox,
         Title = dataviz.Title,
-        animationDecorator = dataviz.animationDecorator,
-        append = dataviz.append,
+        alignPathToPixel = dataviz.alignPathToPixel,
         autoFormat = dataviz.autoFormat,
-        defined = dataviz.defined,
         dateComparer = dataviz.dateComparer,
-        getElement = dataviz.getElement,
         getSpacing = dataviz.getSpacing,
         inArray = dataviz.inArray,
-        interpolateValue = dataviz.interpolateValue,
-        last = dataviz.last,
-        limitValue = dataviz.limitValue,
+        interpolate = dataviz.interpolateValue,
         mwDelta = dataviz.mwDelta,
         round = dataviz.round,
-        renderTemplate = dataviz.renderTemplate,
-        uniqueId = dataviz.uniqueId,
-        valueOrDefault = dataviz.valueOrDefault;
+
+        util = kendo.util,
+        append = util.append,
+        defined = util.defined,
+        last = util.last,
+        limitValue = util.limitValue,
+        sparseArrayLimits = util.sparseArrayLimits,
+        sparseArrayMin = util.sparseArrayMin,
+        sparseArrayMax = util.sparseArrayMax,
+        renderTemplate = util.renderTemplate,
+        valueOrDefault = util.valueOrDefault,
+
+        geom = dataviz.geometry,
+        draw = dataviz.drawing;
 
     // Constants ==============================================================
     var NS = ".kendoChart",
@@ -132,6 +138,7 @@
         LEGEND_ITEM_HOVER = "legendItemHover",
         LINE = "line",
         LINE_MARKER_SIZE = 8,
+        LINEAR = "linear",
         LOGARITHMIC = "log",
         MAX = "max",
         MAX_EXPAND_DEPTH = 5,
@@ -145,7 +152,7 @@
         MOUSEOVER_NS = "mouseover" + NS,
         MOUSEOUT_NS = "mouseout" + NS,
         MOUSEMOVE_NS = "mousemove" + NS,
-        MOUSEMOVE_THROTTLE = 20,
+        MOUSEMOVE_DELAY = 20,
         MOUSEWHEEL_DELAY = 150,
         MOUSEWHEEL_NS = "DOMMouseScroll" + NS + " mousewheel" + NS,
         NOTE_CLICK = dataviz.NOTE_CLICK,
@@ -161,6 +168,7 @@
         POINTER = "pointer",
         RANGE_BAR = "rangeBar",
         RANGE_COLUMN = "rangeColumn",
+        RENDER = "render",
         RIGHT = "right",
         ROUNDED_BEVEL = "roundedBevel",
         ROUNDED_GLASS = "roundedGlass",
@@ -258,6 +266,8 @@
             chart._originalOptions = deepExtend({}, options);
             chart._initTheme(options);
 
+            chart._initSurface();
+
             chart.bind(chart.events, chart.options);
 
             chart.wrapper = chart.element;
@@ -310,11 +320,14 @@
 
             chart._bindCategories();
 
+            if (dataSource) {
+                chart._hasDataSource = true;
+            }
+
             chart._redraw();
             chart._attachEvents();
 
             if (dataSource) {
-                chart._hasDataSource = true;
                 if (chart.options.autoBind) {
                     chart.dataSource.fetch();
                 }
@@ -325,8 +338,9 @@
             var chart = this;
 
             chart.dataSource.unbind(CHANGE, chart._dataChangeHandler);
-            chart.dataSource = dataSource;
+            chart.dataSource = dataSource = DataSource.create(dataSource);
             chart._hasDataSource = true;
+            chart._hasData = false;
 
             dataSource.bind(CHANGE, chart._dataChangeHandler);
 
@@ -353,7 +367,8 @@
             SELECT,
             SELECT_END,
             NOTE_CLICK,
-            NOTE_HOVER
+            NOTE_HOVER,
+            RENDER
         ],
 
         items: function() {
@@ -440,6 +455,34 @@
             }
         },
 
+        _initSurface: function() {
+            var surface = this.surface;
+            var wrap = this._surfaceWrap();
+            if (!surface || surface.options.type !== this.options.renderAs) {
+                if (surface) {
+                    surface.destroy();
+                }
+
+                this.surface = draw.Surface.create(wrap, {
+                    type: this.options.renderAs
+                });
+            } else {
+                this.surface.clear();
+            }
+
+            var chartArea = this.options.chartArea;
+            if (chartArea.width) {
+                wrap.css("width", chartArea.width);
+            }
+            if (chartArea.height) {
+                wrap.css("height", chartArea.height);
+            }
+        },
+
+        _surfaceWrap: function() {
+            return this.element;
+        },
+
         _redraw: function() {
             var chart = this,
                 model = chart._getModel(),
@@ -450,16 +493,41 @@
             chart._model = model;
             chart._plotArea = model._plotArea;
 
-            view = chart._view =
-                dataviz.ViewFactory.current.create(model.options, chart.options.renderAs);
+            model.renderVisual();
 
-            if (view) {
-                view.load(model);
-                chart._viewElement = chart._renderView(view);
-                chart._tooltip = chart._createTooltip();
-                chart._highlight = new Highlight(view, chart._viewElement);
-                chart._setupSelection();
+            if (this.options.transitions !== false) {
+                model.traverse(function(element) {
+                    if (element.animation) {
+                        element.animation.setup();
+                    }
+                });
             }
+
+            chart._initSurface();
+            chart.surface.draw(model.visual);
+
+            if (this.options.transitions !== false) {
+                model.traverse(function(element) {
+                    if (element.animation) {
+                        element.animation.play();
+                    }
+                });
+            }
+
+            chart._tooltip = chart._createTooltip();
+            chart._highlight = new Highlight(view);
+            chart._setupSelection();
+
+            if (!chart._hasDataSource || chart._hasData || !chart.options.autoBind) {
+                chart.trigger(RENDER);
+            }
+        },
+
+        exportVisual: function() {
+            var model = this._getModel();
+            model.renderVisual();
+
+            return model.visual;
         },
 
         _sharedTooltip: function() {
@@ -484,11 +552,6 @@
             return tooltip;
         },
 
-        _renderView: function() {
-            var chart = this;
-            return chart._view.renderTo(chart.element[0]);
-        },
-
         _applyDefaults: function(options, themeOptions) {
             applyAxisDefaults(options, themeOptions);
             applySeriesDefaults(options, themeOptions);
@@ -500,7 +563,7 @@
                 model = new RootElement(chart._modelOptions()),
                 plotArea;
 
-            model.parent = chart;
+            model.chart = chart;
 
             Title.buildTitle(options.title, model);
 
@@ -530,11 +593,11 @@
             }, options.chartArea);
         },
 
-        _createPlotArea: function() {
+        _createPlotArea: function(skipSeries) {
             var chart = this,
                 options = chart.options;
 
-            return PlotAreaFactory.current.create(options.series, options);
+            return PlotAreaFactory.current.create(skipSeries ? [] : options.series, options);
         },
 
         _setupSelection: function() {
@@ -605,8 +668,14 @@
             element.on(MOUSEOUT_NS, proxy(chart._mouseout, chart));
             element.on(MOUSEWHEEL_NS, proxy(chart._mousewheel, chart));
             element.on(MOUSELEAVE_NS, proxy(chart._mouseleave, chart));
+
+            chart._mousemove = kendo.throttle(
+                proxy(chart._mousemove, chart),
+                MOUSEMOVE_DELAY
+            );
+
             if (chart._shouldAttachMouseMove()) {
-                element.on(MOUSEMOVE_NS, proxy(chart._mousemove, chart));
+                element.on(MOUSEMOVE_NS, chart._mousemove);
             }
 
             if (kendo.UserEvents) {
@@ -783,22 +852,29 @@
             }
         },
 
-        _getChartElement: function(e) {
-            var chart = this,
-                target = $(e.target),
-                modelId = target.data("modelId") || target.parent().data("modelId"),
-                model = chart._model,
-                element;
-
-            if (modelId) {
-                element = model.modelMap[modelId];
+        _getChartElement: function(e, match) {
+            var element = this.surface.eventTarget(e);
+            if (!element) {
+                return;
             }
 
-            if (element && element.aliasFor) {
-                element = element.aliasFor(e, chart._eventCoordinates(e));
+            var chartElement;
+            while (element && !chartElement) {
+                chartElement = element.chartElement;
+                element = element.parent;
             }
 
-            return element;
+            if (chartElement) {
+                if (chartElement.aliasFor) {
+                    chartElement = chartElement.aliasFor(e, this._eventCoordinates(e));
+                }
+
+                if (match) {
+                    chartElement = chartElement.closest(match);
+                }
+
+                return chartElement;
+            }
         },
 
         _eventCoordinates: function(e) {
@@ -853,29 +929,31 @@
 
         _startHover: function(e) {
             var chart = this,
+                element = chart._getChartElement(e),
                 tooltip = chart._tooltip,
                 highlight = chart._highlight,
                 tooltipOptions = chart.options.tooltip,
                 point;
 
-            if (chart._suppressHover || !highlight || highlight.isOverlay(e.target) || chart._sharedTooltip()) {
+            if (chart._suppressHover || !highlight || highlight.isHighlighted(element) || chart._sharedTooltip()) {
                 return;
             }
 
-            point = chart._getChartElement(e);
-            if (point && point.hover) {
-                if (!point.hover(chart, e)) {
-                    chart._activePoint = point;
+            point = chart._getChartElement(e, function(element) {
+                return element.hover;
+            });
 
-                    tooltipOptions = deepExtend({}, tooltipOptions, point.options.tooltip);
-                    if (tooltipOptions.visible) {
-                        tooltip.show(point);
-                    }
+            if (point && !point.hover(chart, e)) {
+                chart._activePoint = point;
 
-                    highlight.show(point);
-
-                    return true;
+                tooltipOptions = deepExtend({}, tooltipOptions, point.options.tooltip);
+                if (tooltipOptions.visible) {
+                    tooltip.show(point);
                 }
+
+                highlight.show(point);
+
+                return true;
             }
         },
 
@@ -897,9 +975,8 @@
                 tooltipOptions, owner, seriesPoint;
 
             if (chart._plotArea.box.containsPoint(coords)) {
-                if (point && point.tooltipTracking && point.series) {
-                    owner = point.parent;
-                    seriesPoint = owner.getNearestPoint(coords.x, coords.y, point.seriesIx);
+                if (point && point.tooltipTracking && point.series && point.parent.getNearestPoint) {
+                    seriesPoint = point.parent.getNearestPoint(coords.x, coords.y, point.seriesIx);
                     if (seriesPoint && seriesPoint != point) {
                         seriesPoint.hover(chart, e);
                         chart._activePoint = seriesPoint;
@@ -919,20 +996,12 @@
         },
 
         _mousemove: function(e) {
-            var chart = this,
-                now = new Date(),
-                timestamp = chart._mousemove_ts;
+            var coords = this._eventCoordinates(e);
 
-            if (!timestamp || now - timestamp > MOUSEMOVE_THROTTLE) {
-                var coords = chart._eventCoordinates(e);
+            this._trackCrosshairs(coords);
 
-                chart._trackCrosshairs(coords);
-
-                if (chart._sharedTooltip()) {
-                    chart._trackSharedTooltip(coords);
-                }
-
-                chart._mousemove_ts = now;
+            if (this._sharedTooltip()) {
+                this._trackSharedTooltip(coords);
             }
         },
 
@@ -1051,9 +1120,35 @@
 
             chart._bindSeries();
             chart._bindCategories();
+            chart._hasData = true;
 
-            chart.trigger(DATABOUND);
-            chart._redraw();
+            chart._deferRedraw();
+        },
+
+        _deferRedraw: function() {
+            var chart = this;
+
+            if (kendo.support.vml) {
+                chart._clearRedrawTimeout();
+                chart._redrawTimeout = setTimeout(function() {
+                    if (!chart.surface) {
+                        return;
+                    }
+
+                    chart.trigger(DATABOUND);
+                    chart._redraw();
+                }, 0);
+            } else {
+                chart.trigger(DATABOUND);
+                chart._redraw();
+            }
+        },
+
+        _clearRedrawTimeout: function() {
+            if (this._redrawTimeout) {
+                clearInterval(this._redrawTimeout);
+                this._redrawTimeout = null;
+            }
         },
 
         _bindSeries: function() {
@@ -1277,13 +1372,11 @@
             chart._initTheme(chart.options);
 
             if (dataSource) {
-                chart.setDataSource(
-                    DataSource.create(dataSource)
-                );
+                chart.setDataSource(dataSource);
             }
 
             if (chart._shouldAttachMouseMove()) {
-                chart.element.on(MOUSEMOVE_NS, proxy(chart._mousemove, chart));
+                chart.element.on(MOUSEMOVE_NS, chart._mousemove);
             }
 
             if (chart._hasDataSource) {
@@ -1307,23 +1400,22 @@
 
             chart._destroyView();
 
+            chart.surface.destroy();
+            chart.surface = null;
+
+            chart._clearRedrawTimeout();
+
             Widget.fn.destroy.call(chart);
         },
 
         _destroyView: function() {
             var chart = this,
                 model = chart._model,
-                view = chart._view,
                 selections = chart._selections;
 
             if (model) {
                 model.destroy();
                 chart._model = null;
-            }
-
-            if (view) {
-                view.destroy();
-                chart._view = null;
             }
 
             if (selections) {
@@ -1332,12 +1424,23 @@
                 }
             }
 
+            chart._unsetActivePoint();
+
             if (chart._tooltip) {
                 chart._tooltip.destroy();
             }
+
+            if (chart._highlight) {
+                chart._highlight.destroy();
+            }
         }
     });
-    deepExtend(Chart.fn, dataviz.ExportMixin);
+
+    dataviz.ExportMixin.extend(Chart.fn);
+
+    if (kendo.PDFMixin) {
+        kendo.PDFMixin.extend(Chart.fn);
+    }
 
     var PlotAreaFactory = Class.extend({
         init: function() {
@@ -1527,7 +1630,8 @@
             var barLabel = this;
             ChartElement.fn.init.call(barLabel, options);
 
-            barLabel.append(new TextBox(content, barLabel.options));
+            this.textBox = new TextBox(content, barLabel.options);
+            barLabel.append(this.textBox);
         },
 
         options: {
@@ -1546,7 +1650,11 @@
                 type: FADEIN,
                 delay: INITIAL_ANIMATION_DURATION
             },
-            zIndex: 1
+            zIndex: 2
+        },
+
+        createVisual: function() {
+            this.textBox.options.noclip = this.options.noclip;
         },
 
         reflow: function(targetBox) {
@@ -1629,29 +1737,16 @@
                 start = field + "1",
                 end = field + "2",
                 text = barLabel.children[0],
-                box = text.paddingBox,
-                difference;
+                parentBox = barLabel.parent.box,
+                targetBox;
 
-            if (box[end] < clipBox[start]) {
-                difference = clipBox[start] - box[end];
-            } else if (clipBox[end] < box[start]) {
-                difference = clipBox[end] - box[start];
-            }
+            if (parentBox[start] < clipBox[start] || clipBox[end] < parentBox[end]) {
+                targetBox = text.paddingBox.clone();
+                targetBox[start] = math.max(parentBox[start], clipBox[start]);
+                targetBox[end] = math.min(parentBox[end], clipBox[end]);
 
-            if (defined(difference)) {
-                box[start] += difference;
-                box[end] += difference;
-                text.reflow(box);
+                this.reflow(targetBox);
             }
-        },
-
-        getViewElements: function(view) {
-            var barLabel = this,
-                elements = [];
-            if (barLabel.options.visible !== false) {
-                elements = ChartElement.fn.getViewElements.call(barLabel, view);
-            }
-            return elements;
         }
     });
 
@@ -1664,8 +1759,6 @@
             item.createContainer();
             item.createMarker();
             item.createLabel();
-
-            item.enableDiscovery();
         },
 
         createContainer: function() {
@@ -1693,30 +1786,25 @@
         createLabel: function() {
             var item = this,
                 options = item.options,
-                labelOptions = deepExtend({}, options.labels, {
-                        id: uniqueId()
-                    }
-                );
+                labelOptions = deepExtend({}, options.labels);
 
             item.container.append(new TextBox(options.text, labelOptions));
         },
 
-        getViewElements: function(view) {
-            var item = this,
-                options = item.options,
-                overlayRect = view.createRect(item.container.box, {
-                    data: { modelId: item.modelId },
-                    zIndex: options.zIndex,
-                    cursor: options.cursor,
-                    fill: "#fff",
-                    fillOpacity: 0
-                }),
-                elements = [];
+        renderComplete: function() {
+            ChartElement.fn.renderComplete.call(this);
 
-            append(elements, ChartElement.fn.getViewElements.call(this,  view));
-            elements.push(overlayRect);
+            var cursor = this.options.cursor || {};
+            var eventSink = draw.Path.fromRect(this.container.box.toRect(), {
+                fill: {
+                    color: WHITE,
+                    opacity: 0
+                },
+                stroke: null,
+                cursor: cursor.style
+            });
 
-            return elements;
+            this.visual.append(eventSink);
         },
 
         click: function(widget, e) {
@@ -1778,8 +1866,7 @@
             labels: {
                 margin: {
                     left: 6
-                },
-                zIndex: 1
+                }
             },
             offsetX: 0,
             offsetY: 0,
@@ -1943,21 +2030,6 @@
                 offsetX, offsetY,
                 offsetX + containerBox.width(), offsetY + containerBox.height()
             ));
-        },
-
-        getViewElements: function(view) {
-            var legend = this,
-                elements = [],
-                group;
-
-            if (legend.hasItems()) {
-                group = view.createGroup({ zIndex: legend.options.zIndex });
-                append(group.children, ChartElement.fn.getViewElements.call(legend, view));
-
-                elements.push(group);
-            }
-
-            return elements;
         }
     });
 
@@ -1982,7 +2054,9 @@
                 width: 1,
                 color: BLACK
             },
-            zIndex: 1,
+            labels: {
+                zIndex: 1
+            },
             justified: false
         },
 
@@ -2835,7 +2909,9 @@
 
                 position += slotSize;
             }
-        }
+        },
+
+        createVisual: noop
     });
 
     var StackWrap = ChartElement.extend({
@@ -2873,7 +2949,9 @@
                     box.wrap(childBox);
                 }
             }
-        }
+        },
+
+        createVisual: noop
     });
 
     var PointEventsMixin = {
@@ -2940,8 +3018,6 @@
             bar.color = options.color || WHITE;
             bar.aboveAxis = valueOrDefault(bar.options.aboveAxis, true);
             bar.value = value;
-            bar.id = uniqueId();
-            bar.enableDiscovery();
         },
 
         defaults: {
@@ -3004,8 +3080,7 @@
 
                 this.label = new BarLabel(labelText,
                         deepExtend({
-                            vertical: options.vertical,
-                            id: uniqueId()
+                            vertical: options.vertical
                         },
                         options.labels
                     ));
@@ -3042,52 +3117,64 @@
             }
         },
 
-        getViewElements: function(view) {
-            var bar = this,
-                options = bar.options,
-                vertical = options.vertical,
-                border = options.border.width > 0 ? {
-                    stroke: bar.getBorderColor(),
-                    strokeWidth: options.border.width,
-                    strokeOpacity: options.border.opacity,
-                    dashType: options.border.dashType
-                } : {},
-                box = bar.box,
-                rectStyle = deepExtend({
-                    id: bar.id,
-                    fill: bar.color,
-                    fillOpacity: options.opacity,
-                    strokeOpacity: options.opacity,
-                    vertical: options.vertical,
-                    aboveAxis: bar.aboveAxis,
-                    stackBase: options.stackBase,
-                    animation: options.animation,
-                    data: { modelId: bar.modelId }
-                }, border),
-                elements = [];
-            if (bar.visible !== false) {
+        createVisual: function() {
+            var box = this.box;
+            if (this.visible !== false) {
+                ChartElement.fn.createVisual.call(this);
                 if (box.width() > 0 && box.height() > 0) {
-                    if (options.overlay) {
-                        rectStyle.overlay = deepExtend({
-                            rotation: vertical ? 0 : 90
-                        }, options.overlay);
-                    }
-
-                    elements.push(view.createRect(box, rectStyle));
+                    this.createRect();
                 }
-
-                append(elements, ChartElement.fn.getViewElements.call(bar, view));
             }
-
-            return elements;
         },
 
-        highlightOverlay: function(view, options) {
-            var bar = this,
-                box = bar.box;
+        createRect: function(view) {
+            var options = this.options;
+            var border = options.border;
+            var strokeOpacity = defined(border.opacity) ? border.opacity : options.opacity;
+            var rect = draw.Path.fromRect(this.box.toRect(), {
+                fill: {
+                    color: this.color,
+                    opacity: options.opacity
+                },
+                stroke: {
+                    color: this.getBorderColor(),
+                    width: border.width,
+                    opacity: strokeOpacity,
+                    dashType: border.dashType
+                }
+            });
 
-            options = deepExtend({ data: { modelId: bar.modelId } }, options);
-            return view.createRect(box, options);
+            alignPathToPixel(rect);
+            this.visual.append(rect);
+
+            if (hasGradientOverlay(options)) {
+                this.visual.append(this.createGradientOverlay(rect, {
+                        baseColor: this.color
+                    }, deepExtend({
+                         end: !options.vertical ? [0, 1] : undefined
+                    }, options.overlay)
+                ));
+            }
+        },
+
+        createAnimation: function() {
+            var options = this.options;
+
+            deepExtend(options, {
+                animation: {
+                    aboveAxis: this.aboveAxis,
+                    vertical: options.vertical,
+                    stackBase: options.stackBase
+                }
+            });
+
+            ChartElement.fn.createAnimation.call(this);
+        },
+
+        createHighlight: function(style) {
+            var highlight = draw.Path.fromRect(this.box.toRect(), style);
+
+            return alignPathToPixel(highlight);
         },
 
         getBorderColor: function() {
@@ -3136,6 +3223,68 @@
     });
     deepExtend(Bar.fn, PointEventsMixin);
     deepExtend(Bar.fn, NoteMixin);
+
+    var BarAnimation = draw.Animation.extend({
+        options: {
+            duration: INITIAL_ANIMATION_DURATION
+        },
+
+        setup: function() {
+            var element = this.element;
+            var options = this.options;
+
+            var bbox = element.bbox();
+            if (bbox) {
+                var origin = this.origin = options.aboveAxis ?
+                    bbox.bottomLeft() : bbox.topRight();
+
+                var axis = options.vertical ? Y : X;
+                var stackBase = options.stackBase;
+                var fromOffset = this.fromOffset = new geom.Point();
+                fromOffset[axis] = valueOrDefault(stackBase, origin[axis]) - origin[axis];
+
+                var fromScale = this.fromScale = new geom.Point(1, 1);
+                fromScale[axis] = 0;
+
+                element.transform(geom.transform()
+                    .scale(fromScale.x, fromScale.y)
+                );
+            } else {
+                this.abort();
+            }
+        },
+
+        step: function(pos) {
+            var scaleX = interpolate(this.fromScale.x, 1, pos);
+            var scaleY = interpolate(this.fromScale.y, 1, pos);
+            var translateX = interpolate(this.fromOffset.x, 0, pos);
+            var translateY = interpolate(this.fromOffset.y, 0, pos);
+
+            this.element.transform(geom.transform()
+                .translate(translateX, translateY)
+                .scale(scaleX, scaleY, this.origin)
+            );
+        }
+    });
+    draw.AnimationFactory.current.register(BAR, BarAnimation);
+
+    var FadeInAnimation = draw.Animation.extend({
+        options: {
+            duration: 200,
+            easing: LINEAR
+        },
+
+        setup: function() {
+            this.fadeTo = this.element.opacity();
+            this.element.opacity(0);
+        },
+
+        step: function(pos) {
+            this.element.opacity(pos * this.fadeTo);
+        }
+    });
+    draw.AnimationFactory.current.register(FADEIN, FadeInAnimation);
+
 
     var ErrorRangeCalculator = function(errorValue, series, field) {
         var that = this;
@@ -3271,7 +3420,6 @@
             var chart = this;
 
             ChartElement.fn.init.call(chart, options);
-            chart.id = uniqueId();
 
             chart.plotArea = plotArea;
             chart.categoryAxis = plotArea.seriesCategoryAxis(options.series[0]);
@@ -3325,15 +3473,17 @@
 
                 for (var i = 0; i < categoryPts.length; i++) {
                     var other = categoryPts[i];
-                    var stack = point.series.stack;
-                    var otherStack = other.series.stack;
+                    if (other) {
+                        var stack = point.series.stack;
+                        var otherStack = other.series.stack;
 
-                    if ((stack && otherStack) && stack.group !== otherStack.group) {
-                        continue;
-                    }
+                        if ((stack && otherStack) && stack.group !== otherStack.group) {
+                            continue;
+                        }
 
-                    if (isNumber(other.value)) {
-                        categorySum += math.abs(other.value);
+                        if (isNumber(other.value)) {
+                            categorySum += math.abs(other.value);
+                        }
                     }
                 }
 
@@ -3423,24 +3573,33 @@
         },
 
         updateStackRange: function() {
-            var chart = this,
-                isStacked = chart.options.isStacked,
-                limits;
+            var chart = this;
+            var chartSeries = chart.options.series;
+            var isStacked = chart.options.isStacked;
+            var limits;
+            var limitsCache = {};
 
             if (isStacked) {
-                for (var i = 0; i < chart.options.series.length; i++) {
-                    var series = chart.options.series[i];
+                for (var i = 0; i < chartSeries.length; i++) {
+                    var series = chartSeries[i];
                     var axisName = series.axis;
-                    var errorTotals = chart.errorTotals;
+                    var key = axisName + series.stack;
 
-                    limits = chart.stackLimits(axisName, series.stack);
-                    if (errorTotals) {
-                        if (errorTotals.negative.length) {
-                            limits.min = math.min(limits.min, sparseArrayMin(errorTotals.negative));
+                    limits = limitsCache[key];
+                    if (!limits) {
+                        limits = chart.stackLimits(axisName, series.stack);
+
+                        var errorTotals = chart.errorTotals;
+                        if (errorTotals) {
+                            if (errorTotals.negative.length) {
+                                limits.min = math.min(limits.min, sparseArrayMin(errorTotals.negative));
+                            }
+                            if (errorTotals.positive.length) {
+                                limits.max = math.max(limits.max, sparseArrayMax(errorTotals.positive));
+                            }
                         }
-                        if (errorTotals.positive.length) {
-                            limits.max = math.max(limits.max, sparseArrayMax(errorTotals.positive));
-                        }
+
+                        limitsCache[key] = limits;
                     }
 
                     chart.valueAxisRanges[axisName] = limits;
@@ -3556,7 +3715,7 @@
         },
 
         evalPointOptions: function(options, value, category, categoryIx, series, seriesIx) {
-            var state = { defaults: series._defaults, excluded: ["data", "aggregate", "_events", "tooltip"] };
+            var state = { defaults: series._defaults, excluded: ["data", "aggregate", "_events", "tooltip", "template"] };
 
             var doEval = this._evalSeries[seriesIx];
             if (!defined(doEval)) {
@@ -3751,16 +3910,7 @@
             return data.valueFields.value;
         },
 
-        getViewElements: function(view) {
-            var chart = this,
-                elements = ChartElement.fn.getViewElements.call(chart, view),
-                highlightGroup = view.createGroup({
-                    id: chart.id
-                });
-
-            highlightGroup.children = elements;
-            return [highlightGroup];
-        }
+        createVisual: noop
     });
 
     var BarChart = CategoricalChart.extend({
@@ -3958,8 +4108,7 @@
 
             return new BarLabel(labelText,
                 deepExtend({
-                    vertical: this.options.vertical,
-                    id: uniqueId()
+                    vertical: this.options.vertical
                 },
                 options
             ));
@@ -4165,8 +4314,6 @@
 
             bullet.value = value;
             bullet.aboveAxis = bullet.options.aboveAxis;
-            bullet.id = uniqueId();
-            bullet.enableDiscovery();
         },
 
         options: {
@@ -4211,7 +4358,6 @@
                         vAlign: TOP,
                         align: RIGHT
                     });
-                    bullet.target.id = bullet.id;
 
                     bullet.append(bullet.target);
                 }
@@ -4252,41 +4398,42 @@
             bullet.box = box;
         },
 
-        getViewElements: function(view) {
-            var bullet = this,
-                options = bullet.options,
-                vertical = options.vertical,
-                border = options.border.width > 0 ? {
-                    stroke: options.border.color || options.color,
-                    strokeWidth: options.border.width,
-                    dashType: options.border.dashType
-                } : {},
-                box = bullet.box,
-                rectStyle = deepExtend({
-                    id: bullet.id,
-                    fill: options.color,
-                    fillOpacity: options.opacity,
-                    strokeOpacity: options.opacity,
-                    vertical: options.vertical,
-                    aboveAxis: bullet.aboveAxis,
-                    animation: options.animation,
-                    data: { modelId: bullet.modelId }
-                }, border),
-                elements = [];
+        createVisual: function() {
+            ChartElement.fn.createVisual.call(this);
 
-            if (box.width() > 0 && box.height() > 0) {
-                if (options.overlay) {
-                    rectStyle.overlay = deepExtend({
-                        rotation: vertical ? 0 : 90
-                    }, options.overlay);
-                }
+            var options = this.options;
+            var body = draw.Path.fromRect(this.box.toRect(), {
+                fill: {
+                    color: options.color,
+                    opacity: options.opacity
+                },
+                stroke: null
+            });
 
-                elements.push(view.createRect(box, rectStyle));
+            if (options.border.width > 0) {
+                body.options.set("stroke", {
+                    color: options.border.color || options.color,
+                    width: options.border.width,
+                    dashType: options.border.dashType,
+                    opacity: valueOrDefault(options.border.opacity, options.opacity)
+                });
             }
 
-            append(elements, ChartElement.fn.getViewElements.call(bullet, view));
+            alignPathToPixel(body);
+            this.visual.append(body);
+        },
 
-            return elements;
+        createAnimation: function() {
+            var options = this.options;
+
+            deepExtend(options, {
+                animation: {
+                    aboveAxis: this.aboveAxis,
+                    vertical: options.vertical
+                }
+            });
+
+            ChartElement.fn.createAnimation.call(this);
         },
 
         tooltipAnchor: function(tooltipWidth, tooltipHeight) {
@@ -4313,13 +4460,8 @@
             return new Point2D(x, y);
         },
 
-        highlightOverlay: function(view, options){
-            var bullet = this,
-                box = bullet.box;
-
-            options = deepExtend({ data: { modelId: bullet.modelId } }, options);
-
-            return view.createRect(box, options);
+        createHighlight: function(style) {
+            return draw.Path.fromRect(this.box.toRect(), style);
         },
 
         formatValue: function(format) {
@@ -4344,6 +4486,18 @@
             errorBar.series = series;
 
             ChartElement.fn.init.call(errorBar, options);
+        },
+
+        options: {
+            animation: {
+                type: FADEIN,
+                delay: INITIAL_ANIMATION_DURATION
+            },
+            endCaps: true,
+            line: {
+                width: 1
+            },
+            zIndex: 1
         },
 
         getAxis: function(){},
@@ -4395,39 +4549,27 @@
             return capsWidth;
         },
 
-        getViewElements: function(view) {
+        createVisual: function() {
             var errorBar = this,
                 options = errorBar.options,
                 parent = errorBar.parent,
-                line = options.line,
                 lineOptions = {
-                    stroke: options.color,
-                    strokeWidth: line.width,
-                    zIndex: line.zIndex,
-                    align: false,
-                    dashType: line.dashType
+                    stroke: {
+                        color: options.color,
+                        width: options.line.width,
+                        dashType: options.line.dashType
+                    }
                 },
-                linePoints = errorBar.linePoints,
-                elements = [],
-                idx;
+                linePoints = errorBar.linePoints;
 
-            for (idx = 0; idx < linePoints.length; idx+=2) {
-                elements.push(view.createLine(linePoints[idx].x, linePoints[idx].y,
-                    linePoints[idx + 1].x, linePoints[idx + 1].y, lineOptions));
-            }
+            ChartElement.fn.createVisual.call(this);
 
-            return elements;
-        },
+            for (var idx = 0; idx < linePoints.length; idx+=2) {
+                var line = new draw.Path(lineOptions)
+                    .moveTo(linePoints[idx].x, linePoints[idx].y)
+                    .lineTo(linePoints[idx + 1].x, linePoints[idx + 1].y);
 
-        options: {
-            animation: {
-                type: FADEIN,
-                delay: INITIAL_ANIMATION_DURATION
-            },
-            endCaps: true,
-            line: {
-                width: 1,
-                zIndex: 1
+                this.visual.append(line);
             }
         }
     });
@@ -4462,12 +4604,8 @@
 
             point.value = value;
             point.options = options;
-            point.color = options.color;
             point.aboveAxis = valueOrDefault(point.options.aboveAxis, true);
-            point.id = uniqueId();
             point.tooltipTracking = true;
-
-            point.enableDiscovery();
         },
 
         defaults: {
@@ -4517,7 +4655,6 @@
 
             if (markers.visible && markers.size) {
                 point.marker = point.createMarker();
-                point.marker.id = point.id;
                 point.append(point.marker);
             }
 
@@ -4536,13 +4673,13 @@
                 }
                 point.label = new TextBox(labelText,
                     deepExtend({
-                        id: uniqueId(),
                         align: CENTER,
                         vAlign: CENTER,
                         margin: {
                             left: 5,
                             right: 5
-                        }
+                        },
+                        zIndex: this.series.zIndex
                     }, labels)
                 );
                 point.append(point.label);
@@ -4568,6 +4705,8 @@
             return border;
         },
 
+        createVisual: noop,
+
         createMarker: function() {
             var options = this.options.markers;
             var marker = new ShapeElement({
@@ -4578,7 +4717,7 @@
                 background: options.background,
                 border: this.markerBorder(),
                 opacity: options.opacity,
-                zIndex: options.zIndex,
+                zIndex: this.series.zIndex,
                 animation: options.animation
             });
 
@@ -4661,28 +4800,28 @@
             }
         },
 
-        highlightOverlay: function(view, options) {
-            var element = this,
-                highlight = element.options.highlight,
-                markers = highlight.markers,
-                defaultColor = element.markerBorder().color;
+        createHighlight: function() {
+            var highlight = this.options.highlight;
+            var markers = highlight.markers;
+            var defaultColor = this.markerBorder().color;
+            var options = this.options.markers;
 
-            options = deepExtend({ data: { modelId: element.modelId } }, options, {
-                fill: markers.color || defaultColor,
-                stroke: markers.border.color,
-                strokeWidth: markers.border.width,
-                strokeOpacity: markers.border.opacity || 0,
-                fillOpacity: markers.opacity || 1,
-                visible: markers.visible
+            var shadow = new ShapeElement({
+                type: options.type,
+                width: options.size,
+                height: options.size,
+                rotation: options.rotation,
+                background: markers.color || defaultColor,
+                border: {
+                    color: markers.border.color,
+                    width: markers.border.width,
+                    opacity: markers.border.opacity || 0
+                },
+                fillOpacity: markers.opacity || 1
             });
+            shadow.reflow(this._childBox);
 
-            var marker = this.marker;
-            if (!marker) {
-                marker = this.createMarker();
-                marker.reflow(this._childBox);
-            }
-
-            return marker.getViewElements(view, options)[0];
+            return shadow.getElement();
         },
 
         tooltipAnchor: function(tooltipWidth, tooltipHeight) {
@@ -4713,9 +4852,7 @@
         init: function(value, options) {
             var point = this;
 
-            LinePoint.fn.init.call(point, value,
-               deepExtend({}, this.defaults, options)
-            );
+            LinePoint.fn.init.call(point, value, options);
 
             point.category = value.category;
         },
@@ -4733,38 +4870,26 @@
             }
         },
 
-        highlightOverlay: function(view) {
-            var element = this,
-                options = element.options,
-                highlight = options.highlight,
-                borderWidth = highlight.border.width,
-                markers = options.markers,
-                center = element.box.center(),
-                radius = markers.size / 2 - borderWidth / 2,
-                borderColor =
-                    highlight.border.color ||
-                    new Color(markers.background).brightness(BAR_BORDER_BRIGHTNESS).toHex();
-
-            return view.createCircle(center, radius, {
-                id: null,
-                data: { modelId: element.modelId },
-                stroke: borderColor,
-                strokeWidth: borderWidth,
-                strokeOpacity: highlight.border.opacity
+        createHighlight: function() {
+            var highlight = this.options.highlight;
+            var border = highlight.border;
+            var markers = this.options.markers;
+            var center = this.box.center();
+            var radius = markers.size / 2 - border.width / 2;
+            var overlay = new draw.Circle(new geom.Circle([center.x, center.y], radius), {
+                stroke: {
+                    color: border.color ||
+                        new Color(markers.background).brightness(BAR_BORDER_BRIGHTNESS).toHex(),
+                    width: border.width,
+                    opacity: border.opacity
+                },
+                fill: {
+                    color: markers.background,
+                    opacity: highlight.opacity
+                }
             });
-        },
 
-        toggleHighlight: function(view) {
-            var element = this,
-                opacity = element.options.highlight.opacity;
-
-            element.highlighted = !element.highlighted;
-
-            var marker = element.marker.getViewElements(view, {
-                fillOpacity: element.highlighted ? opacity : undefined
-            })[0];
-
-            marker.refresh(getElement(this.id));
+            return overlay;
         }
     });
 
@@ -4777,9 +4902,6 @@
             segment.linePoints = linePoints;
             segment.series = series;
             segment.seriesIx = seriesIx;
-            segment.id = uniqueId();
-
-            segment.enableDiscovery();
         },
 
         options: {
@@ -4789,43 +4911,42 @@
         points: function(visualPoints) {
             var segment = this,
                 linePoints = segment.linePoints.concat(visualPoints || []),
-                points = new Array(linePoints.length);
+                points = [];
 
             for (var i = 0, length = linePoints.length; i < length; i++) {
                 if (linePoints[i].visible !== false) {
-                    points[i] = linePoints[i]._childBox.center();
+                    points.push(linePoints[i]._childBox.toRect().center());
                 }
             }
 
             return points;
         },
 
-        getViewElements: function(view) {
-            var segment = this,
-                options = segment.options,
-                series = segment.series,
-                defaults = series._defaults,
-                color = series.color;
-
-            ChartElement.fn.getViewElements.call(segment, view);
+        createVisual: function() {
+            var options = this.options;
+            var series = this.series;
+            var defaults = series._defaults;
+            var color = series.color;
 
             if (isFn(color) && defaults) {
                 color = defaults.color;
             }
 
-            return [
-                view.createPolyline(segment.points(), options.closed, {
-                    id: segment.id,
-                    stroke: color,
-                    strokeWidth: series.width,
-                    strokeOpacity: series.opacity,
-                    fill: "",
-                    dashType: series.dashType,
-                    data: { modelId: segment.modelId },
-                    zIndex: -1,
-                    align: false
-                })
-            ];
+            var line = draw.Path.fromPoints(this.points(), {
+                stroke: {
+                    color: color,
+                    width: series.width,
+                    opacity: series.opacity,
+                    dashType: series.dashType
+                },
+                zIndex: series.zIndex
+            });
+
+            if (options.closed) {
+                line.close();
+            }
+
+            this.visual = line;
         },
 
         aliasFor: function(e, coords) {
@@ -4846,7 +4967,9 @@
                 seriesCount = seriesPoints.length,
                 sortedPoints, linePoints,
                 point, pointIx, pointCount,
-                segments = [];
+                lastSegment;
+
+            this._segments = [];
 
             for (seriesIx = 0; seriesIx < seriesCount; seriesIx++) {
                 currentSeries = series[seriesIx];
@@ -4860,27 +4983,28 @@
                         linePoints.push(point);
                     } else if (chart.seriesMissingValues(currentSeries) !== INTERPOLATE) {
                         if (linePoints.length > 1) {
-                            segments.push(
-                                chart.createSegment(
-                                    linePoints, currentSeries, seriesIx, last(segments)
-                                )
+                            lastSegment = chart.createSegment(
+                                linePoints, currentSeries, seriesIx, lastSegment
                             );
+                            this._addSegment(lastSegment);
                         }
                         linePoints = [];
                     }
                 }
 
                 if (linePoints.length > 1) {
-                    segments.push(
-                        chart.createSegment(
-                            linePoints, currentSeries, seriesIx, last(segments)
-                        )
+                    lastSegment = chart.createSegment(
+                        linePoints, currentSeries, seriesIx, lastSegment
                     );
+                    this._addSegment(lastSegment);
                 }
             }
+        },
 
-            chart._segments = segments;
-            chart.append.apply(chart, segments);
+        _addSegment: function(segment) {
+            this._segments.push(segment);
+            this.children.unshift(segment);
+            segment.parent = this;
         },
 
         sortPoints: function(points) {
@@ -4919,14 +5043,6 @@
     };
 
     var LineChart = CategoricalChart.extend({
-        init: function(plotArea, options) {
-            var chart = this;
-
-            chart.enableDiscovery();
-
-            CategoricalChart.fn.init.call(chart, plotArea, options);
-        },
-
         render: function() {
             var chart = this;
 
@@ -5017,24 +5133,6 @@
             }
 
             return new pointType(linePoints, currentSeries, seriesIx);
-        },
-
-        getViewElements: function(view) {
-            var chart = this,
-                elements = CategoricalChart.fn.getViewElements.call(chart, view),
-                group = view.createGroup({
-                    animation: {
-                        type: CLIP
-                    }
-                }),
-                highlightGroup = view.createGroup({
-                    id: chart.id
-                });
-
-            group.children = elements;
-            highlightGroup.children = [group];
-
-            return [highlightGroup];
         }
     });
     deepExtend(LineChart.fn, LineChartMixin);
@@ -5074,30 +5172,30 @@
                 prevMarkerBoxCenter = prevPoint.markerBox().center();
                 markerBoxCenter = point.markerBox().center();
                 if (categoryAxis.options.justified) {
-                    result.push(Point2D(prevMarkerBoxCenter.x, prevMarkerBoxCenter.y));
+                    result.push(new geom.Point(prevMarkerBoxCenter.x, prevMarkerBoxCenter.y));
                     if (vertical) {
-                        result.push(Point2D(prevMarkerBoxCenter.x, markerBoxCenter.y));
+                        result.push(new geom.Point(prevMarkerBoxCenter.x, markerBoxCenter.y));
                     } else {
-                        result.push(Point2D(markerBoxCenter.x, prevMarkerBoxCenter.y));
+                        result.push(new geom.Point(markerBoxCenter.x, prevMarkerBoxCenter.y));
                     }
-                    result.push(Point2D(markerBoxCenter.x, markerBoxCenter.y));
+                    result.push(new geom.Point(markerBoxCenter.x, markerBoxCenter.y));
                 } else {
                     if (vertical) {
-                        result.push(Point2D(prevMarkerBoxCenter.x, prevPoint.box[Y + dir]));
-                        result.push(Point2D(prevMarkerBoxCenter.x, prevPoint.box[Y + revDir]));
+                        result.push(new geom.Point(prevMarkerBoxCenter.x, prevPoint.box[Y + dir]));
+                        result.push(new geom.Point(prevMarkerBoxCenter.x, prevPoint.box[Y + revDir]));
                         if (isInterpolate) {
-                            result.push(Point2D(prevMarkerBoxCenter.x, point.box[Y + dir]));
+                            result.push(new geom.Point(prevMarkerBoxCenter.x, point.box[Y + dir]));
                         }
-                        result.push(Point2D(markerBoxCenter.x, point.box[Y + dir]));
-                        result.push(Point2D(markerBoxCenter.x, point.box[Y + revDir]));
+                        result.push(new geom.Point(markerBoxCenter.x, point.box[Y + dir]));
+                        result.push(new geom.Point(markerBoxCenter.x, point.box[Y + revDir]));
                     } else {
-                        result.push(Point2D(prevPoint.box[X + dir], prevMarkerBoxCenter.y));
-                        result.push(Point2D(prevPoint.box[X + revDir], prevMarkerBoxCenter.y));
+                        result.push(new geom.Point(prevPoint.box[X + dir], prevMarkerBoxCenter.y));
+                        result.push(new geom.Point(prevPoint.box[X + revDir], prevMarkerBoxCenter.y));
                         if (isInterpolate) {
-                            result.push(Point2D(point.box[X + dir], prevMarkerBoxCenter.y));
+                            result.push(new geom.Point(point.box[X + dir], prevMarkerBoxCenter.y));
                         }
-                        result.push(Point2D(point.box[X + dir], markerBoxCenter.y));
-                        result.push(Point2D(point.box[X + revDir], markerBoxCenter.y));
+                        result.push(new geom.Point(point.box[X + dir], markerBoxCenter.y));
+                        result.push(new geom.Point(point.box[X + revDir], markerBoxCenter.y));
                     }
                 }
             }
@@ -5107,37 +5205,31 @@
     });
 
     var SplineSegment = LineSegment.extend({
-        points: function(){
-            var segment = this,
-                curveProcessor = new CurveProcessor(segment.options.closed),
-                points = LineSegment.fn.points.call(this);
-
-            return curveProcessor.process(points);
-        },
-        getViewElements: function(view) {
-            var segment = this,
-                series = segment.series,
-                defaults = series._defaults,
-                color = series.color;
-
-            ChartElement.fn.getViewElements.call(segment, view);
+        createVisual: function() {
+            var options = this.options;
+            var series = this.series;
+            var defaults = series._defaults;
+            var color = series.color;
 
             if (isFn(color) && defaults) {
                 color = defaults.color;
             }
 
-            return [
-                view.createCubicCurve(segment.points(), {
-                    id: segment.id,
-                    stroke: color,
-                    strokeWidth: series.width,
-                    strokeOpacity: series.opacity,
-                    fill: "",
-                    dashType: series.dashType,
-                    data: { modelId: segment.modelId },
-                    zIndex: -1
-                })
-            ];
+            var curveProcessor = new CurveProcessor(this.options.closed);
+            var segments = curveProcessor.process(this.points());
+            var curve = new draw.Path({
+                stroke: {
+                    color: color,
+                    width: series.width,
+                    opacity: series.opacity,
+                    dashType: series.dashType
+                },
+                zIndex: series.zIndex
+            });
+
+            curve.segments.push.apply(curve.segments, segments);
+
+            this.visual = curve;
         }
     });
 
@@ -5163,78 +5255,70 @@
                 lastPoint = last(points);
 
                 if (invertAxes) {
-                    points.unshift(Point2D(end, firstPoint.y));
-                    points.push(Point2D(end, lastPoint.y));
+                    points.unshift(new geom.Point(end, firstPoint.y));
+                    points.push(new geom.Point(end, lastPoint.y));
                 } else {
-                    points.unshift(Point2D(firstPoint.x, end));
-                    points.push(Point2D(lastPoint.x, end));
+                    points.unshift(new geom.Point(firstPoint.x, end));
+                    points.push(new geom.Point(lastPoint.x, end));
                 }
             }
 
             return points;
         },
 
-        getViewElements: function(view) {
-            var segment = this,
-                series = segment.series,
-                defaults = series._defaults,
-                color = series.color,
-                elements = [],
-                line;
-
-            ChartElement.fn.getViewElements.call(segment, view);
+        createVisual: function() {
+            var options = this.options;
+            var series = this.series;
+            var defaults = series._defaults;
+            var color = series.color;
 
             if (isFn(color) && defaults) {
                 color = defaults.color;
             }
 
-            elements.push(this.createArea(view, color));
-            line = this.createLine(view, color);
-            if (line) {
-                elements.push(line);
-            }
+            this.visual = new draw.Group({
+                zIndex: series.zIndex
+            });
 
-            return elements;
+            this.createArea(color);
+            this.createLine(color);
         },
 
-        createLine: function(view, color) {
-            var segment = this,
-                series = segment.series,
-                lineOptions = deepExtend({
+        createLine: function(color) {
+            var series = this.series;
+            var lineOptions = deepExtend({
                         color: color,
                         opacity: series.opacity
                     }, series.line
-                ),
-                element;
+                );
 
             if (lineOptions.visible !== false && lineOptions.width > 0) {
-                element = view.createPolyline(segment._linePoints(), false, {
-                    stroke: lineOptions.color,
-                    strokeWidth: lineOptions.width,
-                    strokeOpacity: lineOptions.opacity,
-                    dashType: lineOptions.dashType,
-                    data: { modelId: segment.modelId },
-                    strokeLineCap: "butt",
-                    zIndex: -1,
-                    align: false
+                var line = draw.Path.fromPoints(this._linePoints(), {
+                    stroke: {
+                        color: lineOptions.color,
+                        width: lineOptions.width,
+                        opacity: lineOptions.opacity,
+                        dashType: lineOptions.dashType,
+                        lineCap: "butt"
+                    }
                 });
-            }
 
-            return element;
+                this.visual.append(line);
+            }
         },
 
-        createArea: function(view, color) {
-            var segment = this,
-                series = segment.series;
+        createArea: function(color) {
+            var series = this.series;
 
-            return view.createPolyline(segment.points(), false, {
-                id: segment.id,
-                fillOpacity: series.opacity,
-                fill: color,
-                stack: series.stack,
-                data: { modelId: segment.modelId },
-                zIndex: -1
+            var area = draw.Path.fromPoints(this.points(), {
+                fill: {
+                    color: color,
+                    opacity: series.opacity
+                },
+                stroke: null
             });
+
+            this.visual.append(area);
         }
     };
 
@@ -5293,32 +5377,88 @@
             LineSegment.fn.init.call(segment, linePoints, currentSeries, seriesIx);
         },
 
-        points: function() {
-            var segment = this,
-                prevSegment = segment.prevSegment,
-                curveProcessor = new CurveProcessor(segment.options.closed),
-                linePoints = LineSegment.fn.points.call(this),
-                curvePoints = curveProcessor.process(linePoints),
-                previousPoints,
-                points;
+        strokeSegments: function() {
+            var segments = this._strokeSegments;
 
-            segment.curvePoints = curvePoints;
-
-            if (segment.isStacked && prevSegment) {
-                points = curvePoints.slice(0);
-                points.push(last(curvePoints));
-                previousPoints = prevSegment.curvePoints.slice(0).reverse();
-                previousPoints.unshift(previousPoints[0]);
-                points = points.concat(previousPoints);
-                points.push(last(previousPoints), points[0], points[0]);
-            } else {
-                points = segment.curvePoints;
+            if (!segments) {
+                var curveProcessor = new CurveProcessor(this.options.closed);
+                var linePoints = LineSegment.fn.points.call(this);
+                segments = this._strokeSegments = curveProcessor.process(linePoints);
             }
 
-            return points;
+            return segments;
         },
 
-        areaPoints: function(points) {
+        createVisual: function() {
+            var options = this.options;
+            var series = this.series;
+            var defaults = series._defaults;
+            var color = series.color;
+
+            if (isFn(color) && defaults) {
+                color = defaults.color;
+            }
+
+            this.visual = new draw.Group();
+
+            this.createFill({
+                fill: {
+                    color: color,
+                    opacity: series.opacity
+                },
+                stroke: null
+            });
+
+            this.createStroke({
+                stroke: deepExtend({
+                    color: color,
+                    opacity: series.opacity,
+                    lineCap: "butt"
+                }, series.line)
+            });
+        },
+
+        createFill: function(style) {
+            var strokeSegments = this.strokeSegments();
+            var fillSegments = strokeSegments.slice(0);
+            var prevSegment = this.prevSegment;
+
+            if (this.isStacked && prevSegment) {
+                var prevStrokeSegments = prevSegment.strokeSegments();
+                var prevAnchor = last(prevStrokeSegments).anchor();
+
+                fillSegments.push(new draw.Segment(
+                    prevAnchor,
+                    prevAnchor,
+                    last(strokeSegments).anchor()
+                ));
+
+                var stackSegments = $.map(prevStrokeSegments, function(segment) {
+                    return new draw.Segment(
+                        segment.anchor(),
+                        segment.controlOut(),
+                        segment.controlIn()
+                    );
+                }).reverse();
+
+                append(fillSegments, stackSegments);
+
+                var firstAnchor = fillSegments[0].anchor();
+                fillSegments.push(new draw.Segment(
+                    firstAnchor,
+                    firstAnchor,
+                    last(stackSegments).anchor()
+                ));
+            }
+
+            var fill = new draw.Path(style);
+            fill.segments.push.apply(fill.segments, fillSegments);
+            this.closeFill(fill);
+
+            this.visual.append(fill);
+        },
+
+        closeFill: function(fillPath) {
             var segment = this,
                 chart = segment.parent,
                 prevSegment = segment.prevSegment,
@@ -5330,69 +5470,29 @@
                 categoryAxisLineBox = categoryAxis.lineBox(),
                 end = invertAxes ? categoryAxisLineBox.x1 : categoryAxisLineBox.y1,
                 pos = invertAxes ? X : Y,
-                firstPoint = points[0],
-                lastPoint = last(points),
-                areaPoints = [];
+                segments = segment.strokeSegments(),
+                firstPoint = segments[0].anchor(),
+                lastPoint = last(segments).anchor();
 
             end = limitValue(end, valueAxisLineBox[pos + 1], valueAxisLineBox[pos + 2]);
-            if (!(chart.options.isStacked && prevSegment) && points.length > 1) {
-
+            if (!(chart.options.isStacked && prevSegment) && segments.length > 1) {
                 if (invertAxes) {
-                    areaPoints.push(Point2D(end, firstPoint.y));
-                    areaPoints.unshift(Point2D(end, lastPoint.y));
+                    fillPath.lineTo(end, lastPoint.y)
+                            .lineTo(end, firstPoint.y);
                 } else {
-                    areaPoints.push(Point2D(firstPoint.x, end));
-                    areaPoints.unshift(Point2D(lastPoint.x, end));
+                    fillPath.lineTo(lastPoint.x, end)
+                            .lineTo(firstPoint.x, end);
                 }
             }
-
-            return areaPoints;
         },
 
-        getViewElements: function(view) {
-            var segment = this,
-                series = segment.series,
-                defaults = series._defaults,
-                color = series.color,
-                lineOptions,
-                curvePoints = segment.points(),
-                areaPoints = segment.areaPoints(curvePoints),
-                viewElements = [];
+        createStroke: function(style) {
+            if (style.stroke.width > 0) {
+                var stroke = new draw.Path(style);
+                stroke.segments.push.apply(stroke.segments, this.strokeSegments());
 
-            ChartElement.fn.getViewElements.call(segment, view);
-
-            if (isFn(color) && defaults) {
-                color = defaults.color;
+                this.visual.append(stroke);
             }
-
-            lineOptions = deepExtend({
-                    color: color,
-                    opacity: series.opacity
-                }, series.line
-            );
-
-           viewElements.push(view.createCubicCurve(curvePoints,{
-                    id: segment.id,
-                    fillOpacity: series.opacity,
-                    fill: color,
-                    stack: series.stack,
-                    data: { modelId: segment.modelId },
-                    zIndex: -1
-                }, areaPoints));
-
-            if (lineOptions.width > 0) {
-                viewElements.push(view.createCubicCurve(segment.curvePoints, {
-                    stroke: lineOptions.color,
-                    strokeWidth: lineOptions.width,
-                    strokeOpacity: lineOptions.opacity,
-                    dashType: lineOptions.dashType,
-                    data: { modelId: segment.modelId },
-                    strokeLineCap: "butt",
-                    zIndex: -1
-                }));
-            }
-
-            return viewElements;
         }
     });
 
@@ -5414,7 +5514,6 @@
             var chart = this;
 
             ChartElement.fn.init.call(chart, options);
-            chart.id = uniqueId();
 
             chart.plotArea = plotArea;
 
@@ -5425,6 +5524,8 @@
 
             chart.points = [];
             chart.seriesPoints = [];
+            chart.seriesOptions = [];
+            chart._evalSeries = [];
 
             chart.render();
         },
@@ -5561,37 +5662,66 @@
 
         evalPointOptions: function(options, value, fields) {
             var series = fields.series;
+            var seriesIx = fields.seriesIx;
+            var state = { defaults: series._defaults, excluded: ["data", "tooltip", "tempate"] };
 
-            evalOptions(options, {
-                value: value,
-                series: series,
-                dataItem: fields.dataItem
-            }, { defaults: series._defaults, excluded: ["data", "tooltip"] });
+            var doEval = this._evalSeries[seriesIx];
+            if (!defined(doEval)) {
+                this._evalSeries[seriesIx] = doEval = evalOptions(options, {}, state, true);
+            }
+
+            if (doEval) {
+                options = deepExtend({}, options);
+                evalOptions(options, {
+                    value: value,
+                    series: series,
+                    dataItem: fields.dataItem
+                }, state);
+            }
+
+            return options;
+        },
+
+        pointType: function() {
+            return LinePoint;
+        },
+
+        pointOptions: function(series, seriesIx) {
+            var options = this.seriesOptions[seriesIx];
+            if (!options) {
+                var defaults = this.pointType().fn.defaults;
+                this.seriesOptions[seriesIx] = options = deepExtend({}, defaults, {
+                    markers: {
+                        opacity: series.opacity
+                    },
+                    tooltip: {
+                        format: this.options.tooltip.format
+                    },
+                    labels: {
+                        format: this.options.labels.format
+                    }
+                }, series);
+            }
+
+            return options;
         },
 
         createPoint: function(value, fields) {
             var chart = this,
                 series = fields.series,
-                point,
-                pointOptions;
+                point;
 
-            pointOptions = deepExtend({}, LinePoint.fn.defaults, {
-                markers: {
-                    opacity: series.opacity
-                },
-                tooltip: {
-                    format: chart.options.tooltip.format
-                },
-                labels: {
-                    format: chart.options.labels.format
-                }
-            }, series, {
-                color: fields.color
-            });
+            var pointOptions = this.pointOptions(series, fields.seriesIx);
+            var color = fields.color || series.color;
 
-            chart.evalPointOptions(pointOptions, value, fields);
+            pointOptions = chart.evalPointOptions(pointOptions, value, fields);
+
+            if (kendo.isFunction(series.color)) {
+                color = pointOptions.color;
+            }
 
             point = new LinePoint(value, pointOptions);
+            point.color = color;
 
             chart.append(point);
 
@@ -5657,23 +5787,6 @@
             return new Box2D(slotX.x1, slotY.y1, slotX.x2, slotY.y2);
         },
 
-        getViewElements: function(view) {
-            var chart = this,
-                elements = ChartElement.fn.getViewElements.call(chart, view),
-                group = view.createGroup({
-                    animation: {
-                        type: CLIP
-                    }
-                }),
-                highlightGroup = view.createGroup({
-                    id: chart.id
-                });
-
-            group.children = elements;
-            highlightGroup.children = [group];
-            return [highlightGroup];
-        },
-
         traverseDataPoints: function(callback) {
             var chart = this,
                 options = chart.options,
@@ -5715,7 +5828,9 @@
         formatPointValue: function(point, format) {
             var value = point.value;
             return autoFormat(format, value.x, value.y);
-        }
+        },
+
+        createVisual: noop
     });
 
     var ScatterLineChart = ScatterChart.extend({
@@ -5765,6 +5880,10 @@
             ScatterChart.fn.reflow.call(chart, box);
         },
 
+        pointType: function() {
+            return Bubble;
+        },
+
         createPoint: function(value, fields) {
             var chart = this,
                 series = fields.series,
@@ -5776,27 +5895,23 @@
                     duration: INITIAL_ANIMATION_DURATION - delay,
                     type: BUBBLE
                 },
-                color, point, pointOptions;
+                point, pointOptions;
 
-            if (kendo.isFunction(series.color)) {
-                color = series.color;
-            } else if (fields.color) {
-                color = fields.color;
-            } else {
-                color = series.color;
+            var color = fields.color || series.color;
+            if (value.size < 0 && series.negativeValues.visible) {
+                color = valueOrDefault(
+                    series.negativeValues.color, color
+                );
             }
 
             pointOptions = deepExtend({
-                tooltip: {
-                    format: chart.options.tooltip.format
-                },
                 labels: {
-                    format: chart.options.labels.format,
-                    animation: animationOptions
+                    animation: {
+                        delay: delay,
+                        duration: INITIAL_ANIMATION_DURATION - delay
+                    }
                 }
-            },
-            series, {
-                color: color,
+            }, this.pointOptions(series, fields.seriesIx), {
                 markers: {
                     type: CIRCLE,
                     border: series.border,
@@ -5805,19 +5920,15 @@
                 }
             });
 
-            chart.evalPointOptions(pointOptions, value, fields);
-
-            if (value.size < 0 && series.negativeValues.visible && !kendo.isFunction(series.color)) {
-                pointOptions.color = valueOrDefault(series.negativeValues.color, pointOptions.color);
+            pointOptions = chart.evalPointOptions(pointOptions, value, fields);
+            if (kendo.isFunction(series.color)) {
+                color = pointOptions.color;
             }
 
-            pointOptions.markers.background = valueOrDefault(
-                pointOptions.markers.background,
-                pointOptions.color
-            );
+            pointOptions.markers.background = color;
 
             point = new Bubble(value, pointOptions);
-            point.color = pointOptions.color;
+            point.color = color;
 
             chart.append(point);
 
@@ -5877,17 +5988,6 @@
             return max;
         },
 
-        getViewElements: function(view) {
-            var chart = this,
-                elements = ChartElement.fn.getViewElements.call(chart, view),
-                group = view.createGroup({
-                     id: chart.id
-                });
-
-            group.children = elements;
-            return [group];
-        },
-
         formatPointValue: function(point, format) {
             var value = point.value;
             return autoFormat(format, value.x, value.y, value.size, point.category);
@@ -5896,12 +5996,8 @@
 
     var Candlestick = ChartElement.extend({
         init: function(value, options) {
-            var point = this;
-
-            ChartElement.fn.init.call(point, options);
-            point.value = value;
-            point.id = uniqueId();
-            point.enableDiscovery();
+            ChartElement.fn.init.call(this, options);
+            this.value = value;
         },
 
         options: {
@@ -5957,10 +6053,10 @@
             point.realBody = ocSlot;
 
             mid = lhSlot.center().x;
-            points.push([ Point2D(mid, lhSlot.y1), Point2D(mid, ocSlot.y1) ]);
-            points.push([ Point2D(mid, ocSlot.y2), Point2D(mid, lhSlot.y2) ]);
+            points.push([ [mid, lhSlot.y1], [mid, ocSlot.y1] ]);
+            points.push([ [mid, ocSlot.y2], [mid, lhSlot.y2] ]);
 
-            point.lowHighLinePoints = points;
+            point.lines = points;
 
             point.box = lhSlot.clone().wrap(ocSlot);
 
@@ -5980,44 +6076,75 @@
             }
         },
 
-        getViewElements: function(view) {
-            var point = this,
-                options = point.options,
-                elements = [],
-                border = options.border.width > 0 ? {
-                    stroke: point.getBorderColor(),
-                    strokeWidth: options.border.width,
-                    dashType: options.border.dashType,
-                    strokeOpacity: valueOrDefault(options.border.opacity, options.opacity)
-                } : {},
-                rectStyle = deepExtend({
-                    fill: options.color,
-                    fillOpacity: options.opacity
-                }, border),
-                lineStyle = {
-                    strokeOpacity: valueOrDefault(options.line.opacity, options.opacity),
-                    strokeWidth: options.line.width,
-                    stroke: options.line.color || options.color,
-                    dashType: options.line.dashType,
-                    strokeLineCap: "butt"
-                };
+        createVisual: function() {
+            ChartElement.fn.createVisual.call(this);
 
-            if (options.overlay) {
-                rectStyle.overlay = deepExtend({
-                    rotation: 0
-                }, options.overlay);
-            }
-
-            elements.push(view.createRect(point.realBody, rectStyle));
-            elements.push(view.createPolyline(point.lowHighLinePoints[0], false, lineStyle));
-            elements.push(view.createPolyline(point.lowHighLinePoints[1], false, lineStyle));
-            elements.push(point.createOverlayRect(view, options));
-
-            append(elements,
-                ChartElement.fn.getViewElements.call(point, view)
+            this.visual.append(
+                this.mainVisual(this.options)
             );
 
-            return elements;
+            this.createOverlay();
+        },
+
+        mainVisual: function(options) {
+            var group = new draw.Group();
+
+            this.createBody(group, options);
+            this.createLines(group, options);
+
+            return group;
+        },
+
+        createBody: function(container, options) {
+            var body = draw.Path.fromRect(this.realBody.toRect(), {
+                fill: {
+                    color: this.color,
+                    opacity: options.opacity
+                },
+                stroke: null
+            });
+
+            if (options.border.width > 0) {
+                body.options.set("stroke", {
+                    color: this.getBorderColor(),
+                    width: options.border.width,
+                    dashType: options.border.dashType,
+                    opacity: valueOrDefault(options.border.opacity, options.opacity)
+                });
+            }
+
+            alignPathToPixel(body);
+            container.append(body);
+
+            if (hasGradientOverlay(options)) {
+                container.append(this.createGradientOverlay(body, {
+                        baseColor: this.color
+                    },
+                    deepExtend({}, options.overlay)
+                ));
+            }
+        },
+
+        createLines: function(container, options) {
+            this.drawLines(container, options, this.lines, options.line);
+        },
+
+        drawLines: function(container, options, lines, lineOptions) {
+            var lineStyle = {
+                stroke: {
+                    color: lineOptions.color || this.color,
+                    opacity: valueOrDefault(lineOptions.opacity, options.opacity),
+                    width: lineOptions.width,
+                    dashType: lineOptions.dashType,
+                    lineCap: "butt"
+                }
+            };
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = draw.Path.fromPoints(lines[i], lineStyle);
+                alignPathToPixel(line);
+                container.append(line);
+            }
         },
 
         getBorderColor: function() {
@@ -6028,48 +6155,39 @@
 
             if (!defined(borderColor)) {
                 borderColor =
-                    new Color(options.color).brightness(border._brightness).toHex();
+                    new Color(point.color).brightness(border._brightness).toHex();
             }
 
             return borderColor;
         },
 
-        createOverlayRect: function(view) {
-            var point = this;
-            return view.createRect(point.box, {
-                data: { modelId: point.modelId },
-                fill: "#fff",
-                id: point.id,
-                fillOpacity: 0
+        createOverlay: function() {
+            var overlay = draw.Path.fromRect(this.box.toRect(), {
+                fill: {
+                    color: WHITE,
+                    opacity: 0
+                },
+                stroke: null
             });
+
+            this.visual.append(overlay);
         },
 
-        highlightOverlay: function(view, options) {
-            var point = this,
-                pointOptions = point.options,
-                highlight = pointOptions.highlight,
-                border = highlight.border,
-                borderColor = point.getBorderColor(),
-                line = highlight.line,
-                data = { data: { modelId: point.modelId } },
-                rectStyle = deepExtend({}, data, options, {
-                    stroke: borderColor,
-                    strokeOpacity: border.opacity,
-                    strokeWidth: border.width
-                }),
-                lineStyle = deepExtend({}, data, {
-                    stroke: line.color || borderColor,
-                    strokeWidth: line.width,
-                    strokeOpacity: line.opacity,
-                    strokeLineCap: "butt"
-                }),
-                group = view.createGroup();
+        createHighlight: function() {
+            var highlight = this.options.highlight;
+            var normalColor = this.color;
 
-            group.children.push(view.createRect(point.realBody, rectStyle));
-            group.children.push(view.createPolyline(point.lowHighLinePoints[0], false, lineStyle));
-            group.children.push(view.createPolyline(point.lowHighLinePoints[1], false, lineStyle));
+            this.color = highlight.color || this.color;
+            var overlay = this.mainVisual(
+                deepExtend({}, this.options, {
+                    line: {
+                        color: this.getBorderColor()
+                    }
+                }, highlight)
+            );
+            this.color = normalColor;
 
-            return group;
+            return overlay;
         },
 
         tooltipAnchor: function() {
@@ -6111,7 +6229,6 @@
             var options = chart.options;
             var value = data.valueFields;
             var children = chart.children;
-            var pointColor = data.fields.color || series.color;
             var valueParts = chart.splitValue(value);
             var hasValue = areNumbers(valueParts);
             var categoryPoints = chart.categoryPoints[categoryIx];
@@ -6123,15 +6240,7 @@
             }
 
             if (hasValue) {
-                if (series.type == CANDLESTICK) {
-                    if (value.open > value.close) {
-                        pointColor = data.fields.downColor || series.downColor || series.color;
-                    }
-                }
-
-                point = chart.createPoint(
-                    data, deepExtend(fields, { series: { color: pointColor } })
-                );
+                point = chart.createPoint(data, fields);
             }
 
             cluster = children[categoryIx];
@@ -6175,12 +6284,26 @@
             var value = data.valueFields;
             var pointOptions = deepExtend({}, series);
             var pointType = chart.pointType();
+            var color = data.fields.color || series.color;
 
             pointOptions = chart.evalPointOptions(
                 pointOptions, value, category, categoryIx, series, seriesIx
             );
 
-            return new pointType(value, pointOptions);
+            if (series.type == CANDLESTICK) {
+                if (value.open > value.close) {
+                    color = data.fields.downColor || series.downColor || series.color;
+                }
+            }
+
+            if (kendo.isFunction(series.color)) {
+                color = pointOptions.color;
+            }
+
+            var point = new pointType(value, pointOptions);
+            point.color = color;
+
+            return point;
         },
 
         splitValue: function(value) {
@@ -6209,24 +6332,6 @@
                 value.open, value.high,
                 value.low, value.close, point.category
             );
-        },
-
-        getViewElements: function(view) {
-            var chart = this,
-                elements = ChartElement.fn.getViewElements.call(chart, view),
-                group = view.createGroup({
-                    animation: {
-                        type: CLIP
-                    }
-                }),
-            highlightGroup = view.createGroup({
-                id: chart.id
-            });
-
-            group.children = elements;
-            highlightGroup.children = [group];
-
-            return [highlightGroup];
         }
     });
 
@@ -6249,65 +6354,23 @@
 
             mid = lhSlot.center().x;
 
-            oPoints.push(Point2D(oSlot.x1, oSlot.y1));
-            oPoints.push(Point2D(mid, oSlot.y1));
-            cPoints.push(Point2D(mid, cSlot.y1));
-            cPoints.push(Point2D(cSlot.x2, cSlot.y1));
-            lhPoints.push(Point2D(mid, lhSlot.y1));
-            lhPoints.push(Point2D(mid, lhSlot.y2));
+            oPoints.push([oSlot.x1, oSlot.y1]);
+            oPoints.push([mid, oSlot.y1]);
+            cPoints.push([mid, cSlot.y1]);
+            cPoints.push([cSlot.x2, cSlot.y1]);
+            lhPoints.push([mid, lhSlot.y1]);
+            lhPoints.push([mid, lhSlot.y2]);
 
-            point.oPoints = oPoints;
-            point.cPoints = cPoints;
-            point.lhPoints = lhPoints;
+            point.lines = [
+                oPoints, cPoints, lhPoints
+            ];
 
             point.box = lhSlot.clone().wrap(oSlot.clone().wrap(cSlot));
 
             point.reflowNote();
         },
 
-        getViewElements: function(view) {
-            var point = this,
-                options = point.options,
-                elements = [],
-                lineOptions = options.line,
-                lineStyle = {
-                    strokeOpacity: lineOptions.opacity || options.opacity,
-                    zIndex: -1,
-                    strokeWidth: lineOptions.width,
-                    stroke: options.color || lineOptions.color,
-                    dashType: lineOptions.dashType
-                };
-
-            elements.push(point.createOverlayRect(view, options));
-            elements.push(view.createPolyline(point.oPoints, true, lineStyle));
-            elements.push(view.createPolyline(point.cPoints, true, lineStyle));
-            elements.push(view.createPolyline(point.lhPoints, true, lineStyle));
-
-            append(elements,
-                ChartElement.fn.getViewElements.call(point, view)
-            );
-
-            return elements;
-        },
-
-        highlightOverlay: function(view) {
-            var point = this,
-                pointOptions = point.options,
-                highlight = pointOptions.highlight,
-                data = { data: { modelId: pointOptions.modelId } },
-                lineStyle = deepExtend(data, {
-                    strokeWidth: highlight.line.width,
-                    strokeOpacity: highlight.line.opacity,
-                    stroke: highlight.line.color || point.color
-                }),
-                group = view.createGroup();
-
-            group.children.push(view.createPolyline(point.oPoints, true, lineStyle));
-            group.children.push(view.createPolyline(point.cPoints, true, lineStyle));
-            group.children.push(view.createPolyline(point.lhPoints, true, lineStyle));
-
-            return group;
-        }
+        createBody: $.noop
     });
 
     var OHLCChart = CandlestickChart.extend({
@@ -6325,7 +6388,6 @@
             var seriesIx = fields.seriesIx;
             var options = chart.options;
             var children = chart.children;
-            var pointColor = data.fields.color || series.color;
             var value = data.valueFields;
             var valueParts = chart.splitValue(value);
             var hasValue = areNumbers(valueParts);
@@ -6338,9 +6400,7 @@
             }
 
             if (hasValue) {
-                point = chart.createPoint(
-                    data, deepExtend(fields, { series: { color: pointColor } })
-                );
+                point = chart.createPoint(data, fields);
             }
 
             cluster = children[categoryIx];
@@ -6432,8 +6492,6 @@
 
             ChartElement.fn.init.call(point, options);
             point.value = value;
-            point.id = uniqueId();
-            point.enableDiscovery();
 
             point.createNote();
         },
@@ -6508,7 +6566,7 @@
                 chart = point.owner,
                 value = point.value,
                 valueAxis = chart.seriesValueAxis(options),
-                points = [], mid, whiskerSlot, boxSlot, medianSlot, meanSlot;
+                mid, whiskerSlot, boxSlot, medianSlot, meanSlot;
 
             boxSlot = valueAxis.getSlot(value.q1, value.q3);
             point.boxSlot = boxSlot;
@@ -6519,42 +6577,43 @@
             boxSlot.x1 = whiskerSlot.x1 = box.x1;
             boxSlot.x2 = whiskerSlot.x2 = box.x2;
 
+            point.realBody = boxSlot;
+
             if (value.mean) {
                 meanSlot = valueAxis.getSlot(value.mean);
-                point.meanPoints = [ Point2D(box.x1, meanSlot.y1), Point2D(box.x2, meanSlot.y1) ];
+                point.meanPoints = [
+                    [[box.x1, meanSlot.y1], [box.x2, meanSlot.y1]]
+                ];
             }
 
             mid = whiskerSlot.center().x;
-            points.push([
-                [ Point2D(mid - 5, whiskerSlot.y1), Point2D(mid + 5, whiskerSlot.y1) ],
-                [ Point2D(mid, whiskerSlot.y1), Point2D(mid, boxSlot.y1) ]
-            ]);
-            points.push([
-                [ Point2D(mid - 5, whiskerSlot.y2), Point2D(mid + 5, whiskerSlot.y2) ],
-                [ Point2D(mid, boxSlot.y2), Point2D(mid, whiskerSlot.y2) ]
-            ]);
+            point.whiskerPoints = [[
+                [mid - 5, whiskerSlot.y1], [mid + 5, whiskerSlot.y1],
+                [mid, whiskerSlot.y1], [mid, boxSlot.y1]
+            ], [
+                [mid - 5, whiskerSlot.y2], [mid + 5, whiskerSlot.y2],
+                [mid, whiskerSlot.y2], [mid, boxSlot.y2]
+            ]];
 
-            point.whiskerPoints = points;
-
-            point.medianPoints = [ Point2D(box.x1, medianSlot.y1), Point2D(box.x2, medianSlot.y1) ];
+            point.medianPoints = [
+                [[box.x1, medianSlot.y1], [box.x2, medianSlot.y1]]
+            ];
 
             point.box = whiskerSlot.clone().wrap(boxSlot);
-            point.createOutliers();
 
             point.reflowNote();
         },
 
-        createOutliers: function() {
+        renderOutliers: function(options) {
             var point = this,
-                options = point.options,
                 markers = options.markers || {},
                 value = point.value,
                 outliers = value.outliers || [],
                 valueAxis = point.owner.seriesValueAxis(options),
                 outerFence = math.abs(value.q3 - value.q1) * 3,
-                markersBorder, markerBox, element, outlierValue, i;
+                markersBorder, markerBox, shape, outlierValue, i;
 
-            point.outliers = [];
+            var elements = [];
 
             for (i = 0; i < outliers.length; i++) {
                 outlierValue = outliers[i];
@@ -6566,16 +6625,15 @@
                 markersBorder = deepExtend({}, markers.border);
 
                 if (!defined(markersBorder.color)) {
-                    if (defined(point.options.color)) {
-                        markersBorder.color = point.options.color;
+                    if (defined(point.color)) {
+                        markersBorder.color = point.color;
                     } else {
                         markersBorder.color =
                             new Color(markers.background).brightness(BAR_BORDER_BRIGHTNESS).toHex();
                     }
                 }
 
-                element = new ShapeElement({
-                    id: point.id,
+                shape = new ShapeElement({
                     type: markers.type,
                     width: markers.size,
                     height: markers.size,
@@ -6585,128 +6643,54 @@
                     opacity: markers.opacity
                 });
 
-                markerBox = valueAxis.getSlot(outlierValue).move(point.box.center().x);
-                point.box = point.box.wrap(markerBox);
-                element.reflow(markerBox);
-                point.outliers.push(element);
-            }
-        },
+                shape.value = outlierValue;
 
-        getViewElements: function(view) {
-            var point = this,
-                group = view.createGroup({
-                    animation: {
-                        type: CLIP
-                    }
-                }),
-                elements = point.render(view, point.options);
-
-            append(elements,
-                ChartElement.fn.getViewElements.call(point, view)
-            );
-
-            group.children = elements;
-
-            return [ group ];
-        },
-
-        render: function(view, renderOptions) {
-            var point = this,
-                elements = [],
-                i, element;
-
-            elements.push(point.createBody(view, renderOptions));
-            elements.push(point.createWhisker(view, point.whiskerPoints[0], renderOptions));
-            elements.push(point.createWhisker(view, point.whiskerPoints[1], renderOptions));
-            elements.push(point.createMedian(view, renderOptions));
-            if (point.meanPoints) {
-                elements.push(point.createMean(view, renderOptions));
-            }
-            elements.push(point.createOverlayRect(view, renderOptions));
-            if (point.outliers.length) {
-                for (i = 0; i < point.outliers.length; i++) {
-                    element = point.outliers[i];
-                    elements.push(element.getViewElements(view)[0]);
-                }
+                elements.push(shape);
             }
 
+            this.reflowOutliers(elements);
             return elements;
         },
 
-        createWhisker: function(view, points, options) {
-            return view.createMultiLine(points, {
-                    strokeOpacity: valueOrDefault(options.line.opacity, options.opacity),
-                    strokeWidth: options.line.width,
-                    stroke: options.line.color || options.color,
-                    dashType: options.line.dashType,
-                    strokeLineCap: "butt",
-                    data: { data: { modelId: this.modelId } }
-                });
+        reflowOutliers: function(outliers) {
+            var valueAxis = this.owner.seriesValueAxis(this.options);
+            var centerX = this.box.center().x;
+
+            for (var i = 0; i < outliers.length; i++) {
+                var outlierValue = outliers[i].value;
+                var markerBox = valueAxis.getSlot(outlierValue).move(centerX);
+
+                this.box = this.box.wrap(markerBox);
+                outliers[i].reflow(markerBox);
+            }
         },
 
-        createMedian: function(view) {
-            var point = this,
-                options = point.options;
+        mainVisual: function(options) {
+            var group = Candlestick.fn.mainVisual.call(this, options);
 
-            return view.createPolyline(point.medianPoints, false, {
-                    strokeOpacity: valueOrDefault(options.median.opacity, options.opacity),
-                    strokeWidth: options.median.width,
-                    stroke: options.median.color || options.color,
-                    dashType: options.median.dashType,
-                    strokeLineCap: "butt",
-                    data: { data: { modelId: this.modelId } }
-                });
-        },
-
-        createBody: function(view, options) {
-            var point = this,
-                border = options.border.width > 0 ? {
-                    stroke: options.color || point.getBorderColor(),
-                    strokeWidth: options.border.width,
-                    dashType: options.border.dashType,
-                    strokeOpacity: valueOrDefault(options.border.opacity, options.opacity)
-                } : {},
-                body = deepExtend({
-                    fill: options.color,
-                    fillOpacity: options.opacity,
-                    data: { data: { modelId: this.modelId } }
-                }, border);
-
-            if (options.overlay) {
-                body.overlay = deepExtend({
-                    rotation: 0
-                }, options.overlay);
+            var outliers = this.renderOutliers(options);
+            for (var i = 0; i < outliers.length; i++) {
+                var element = outliers[i].getElement();
+                if (element) {
+                    group.append(element);
+                }
             }
 
-            return view.createRect(point.boxSlot, body);
-        },
-
-        createMean: function(view) {
-            var point = this,
-                options = point.options;
-
-            return view.createPolyline(point.meanPoints, false, {
-                    strokeOpacity: valueOrDefault(options.mean.opacity, options.opacity),
-                    strokeWidth: options.mean.width,
-                    stroke: options.mean.color || options.color,
-                    dashType: options.mean.dashType,
-                    strokeLineCap: "butt",
-                    data: { data: { modelId: this.modelId } }
-                });
-        },
-
-        highlightOverlay: function(view) {
-            var point = this,
-                group = view.createGroup();
-
-            group.children = point.render(view, deepExtend({},
-                point.options.highlight, {
-                border: {
-                    color: point.getBorderColor()
-                }
-            }));
-
             return group;
+        },
+
+        createLines: function(container, options) {
+            this.drawLines(container, options, this.whiskerPoints, options.line);
+            this.drawLines(container, options, this.medianPoints, options.median);
+            this.drawLines(container, options, this.meanPoints, options.mean);
+        },
+
+        getBorderColor: function() {
+            if (this.color) {
+                return this.color;
+            }
+
+            return Candlestick.getBorderColor.call(this);
         }
     });
     deepExtend(BoxPlot.fn, PointEventsMixin);
@@ -6720,9 +6704,6 @@
             segment.sector = sector;
 
             ChartElement.fn.init.call(segment, options);
-
-            segment.id = uniqueId();
-            segment.enableDiscovery();
         },
 
         options: {
@@ -6782,7 +6763,6 @@
 
             if (labels.visible && labelText) {
                 segment.label = new TextBox(labelText, deepExtend({}, labels, {
-                        id: uniqueId(),
                         align: CENTER,
                         vAlign: "",
                         animation: {
@@ -6838,83 +6818,92 @@
             }
         },
 
-        getViewElements: function(view) {
+        createVisual: function() {
             var segment = this,
                 sector = segment.sector,
                 options = segment.options,
                 borderOptions = options.border || {},
                 border = borderOptions.width > 0 ? {
-                    stroke: borderOptions.color,
-                    strokeWidth: borderOptions.width,
-                    strokeOpacity: borderOptions.opacity,
-                    dashType: borderOptions.dashType
+                    stroke: {
+                        color: borderOptions.color,
+                        width: borderOptions.width,
+                        opacity: borderOptions.opacity,
+                        dashType: borderOptions.dashType
+                    }
                 } : {},
                 elements = [],
-                overlay = options.overlay;
+                color = options.color,
+                fill = {
+                    color: color,
+                    opacity: options.opacity
+                },
+                visual;
 
-            if (overlay) {
-                overlay = deepExtend({}, options.overlay, {
-                    r: sector.r,
-                    ir: sector.ir,
-                    cx: sector.c.x,
-                    cy: sector.c.y,
-                    bbox: sector.getBBox()
-                });
-            }
-
+            ChartElement.fn.createVisual.call(this);
             if (segment.value) {
-                elements.push(segment.createSegment(view, sector, deepExtend({
-                    id: segment.id,
-                    fill: options.color,
-                    overlay: overlay,
-                    fillOpacity: options.opacity,
-                    strokeOpacity: options.opacity,
-                    animation: deepExtend(options.animation, {
-                        delay: segment.animationDelay
-                    }),
-                    data: { modelId: segment.modelId },
-                    zIndex: options.zIndex,
-                    singleSegment: (segment.options.data || []).length === 1
-                }, border)));
+                visual = segment.createSegment(sector, deepExtend({
+                    fill: fill,
+                    stroke: {
+                        opacity: options.opacity
+                    },
+                    zIndex: options.zIndex
+                }, border));
+
+                this.visual.append(visual);
+
+                if (hasGradientOverlay(options)) {
+                    this.visual.append(this.createGradientOverlay(visual, {
+                            baseColor: color,
+                            fallbackFill: fill
+                        }, deepExtend({
+                            center: [sector.c.x, sector.c.y],
+                            innerRadius: sector.ir,
+                            radius: sector.r,
+                            userSpace: true
+                        }, options.overlay)
+                    ));
+                }
             }
-
-            append(elements,
-                ChartElement.fn.getViewElements.call(segment, view)
-            );
-
-            return elements;
         },
 
-        createSegment: function(view, sector, options) {
+        createSegment: function(sector, options) {
             if (options.singleSegment) {
-                return view.createCircle(sector.c, sector.r, options);
+                return new draw.Circle(new geom.Circle(new geom.Point(sector.c.x, sector.c.y), sector.r), options);
             } else {
-                return view.createSector(sector, options);
+                return ShapeBuilder.current.createRing(sector, options);
             }
         },
 
-        highlightOverlay: function(view, options) {
+        createAnimation: function() {
+            var options = this.options;
+
+            var center = this.sector.c;
+            deepExtend(options, {
+                animation: {
+                    center: [center.x, center.y],
+                    delay: this.animationDelay
+                }
+            });
+
+            ChartElement.fn.createAnimation.call(this);
+        },
+
+        createHighlight: function(options) {
             var segment = this,
                 highlight = segment.options.highlight || {},
-                border = highlight.border || {},
-                outlineId = segment.id + OUTLINE_SUFFIX,
-                element;
+                border = highlight.border || {};
 
-            options = deepExtend({}, options, { id: outlineId });
-
-            if (segment.value !== 0) {
-                element = segment.createSegment(view, segment.sector, deepExtend({}, options, {
-                    fill: highlight.color,
-                    fillOpacity: highlight.opacity,
-                    strokeOpacity: border.opacity,
-                    strokeWidth: border.width,
-                    stroke: border.color,
-                    id: null,
-                    data: { modelId: segment.modelId }
-                }));
-            }
-
-            return element;
+            return segment.createSegment(segment.sector, deepExtend({}, options, {
+                fill: {
+                    color: highlight.color,
+                    opacity: highlight.opacity
+                },
+                stroke: {
+                    opacity: border.opacity,
+                    width: border.width,
+                    color: border.color
+                }
+            }));
         },
 
         tooltipAnchor: function(width, height) {
@@ -7020,7 +7009,6 @@
                 colorsCount = colors.length,
                 series = options.series,
                 seriesCount = series.length,
-                overlayId = uniqueId(),
                 currentSeries, pointData, fields, seriesIx,
                 angle, data, anglePerValue, value, plotValue, explode,
                 total, currentAngle, i, pointIx = 0;
@@ -7065,9 +7053,6 @@
                         explode: explode,
                         visibleInLegend: fields.visibleInLegend,
                         visible: fields.visible,
-                        overlay: {
-                            id: overlayId + seriesIx
-                        },
                         zIndex: seriesCount - seriesIx,
                         animationDelay: chart.animationDelay(i, seriesIx, seriesCount)
                     });
@@ -7090,7 +7075,7 @@
                 dataItem: fields.dataItem,
                 category: fields.category,
                 percentage: fields.percentage
-            }, { defaults: series._defaults, excluded: ["data"] });
+            }, { defaults: series._defaults, excluded: ["data", "template"] });
         },
 
         addValue: function(value, sector, fields) {
@@ -7296,18 +7281,19 @@
             }
         },
 
-        getViewElements: function(view) {
+        createVisual: function() {
             var chart = this,
                 options = chart.options,
                 connectors = options.connectors,
                 points = chart.points,
                 connectorLine,
-                lines = [],
                 count = points.length,
                 space = 4,
-                sector, angle, connectorPoints, segment,
+                sector, angle, segment,
                 seriesIx, label, i;
 
+            ChartElement.fn.createVisual.call(this);
+            this._connectorLines = [];
             for (i = 0; i < count; i++) {
                 segment = points[i];
                 sector = segment.sector;
@@ -7316,7 +7302,16 @@
                 seriesIx = { seriesId: segment.seriesIx };
 
                 if (label) {
-                    connectorPoints = [];
+                    connectorLine = new draw.Path({
+                        stroke: {
+                            color:  connectors.color,
+                            width: connectors.width
+                        },
+                        animation: {
+                            type: FADEIN,
+                            delay: segment.animationDelay
+                        }
+                    });
                     if (label.options.position === OUTSIDE_END && segment.value !== 0) {
                         var box = label.box,
                             centerPoint = sector.c,
@@ -7325,7 +7320,7 @@
                             sr, end, crossing;
 
                         start = sector.clone().expand(connectors.padding).point(angle);
-                        connectorPoints.push(start);
+                        connectorLine.moveTo(start.x, start.y);
                         // TODO: Extract into a method to remove duplication
                         if (label.orientation == RIGHT) {
                             end = Point2D(box.x1 - connectors.padding, box.center().y);
@@ -7339,17 +7334,17 @@
                                 sr = sector.c.x + sector.r + space;
                                 if (segment.options.labels.align !== COLUMN) {
                                     if (sr < middle.x) {
-                                        connectorPoints.push(Point2D(sr, start.y));
+                                        connectorLine.lineTo(sr, start.y);
                                     } else {
-                                        connectorPoints.push(Point2D(start.x + space * 2, start.y));
+                                        connectorLine.lineTo(start.x + space * 2, start.y);
                                     }
                                 } else {
-                                    connectorPoints.push(Point2D(sr, start.y));
+                                    connectorLine.lineTo(sr, start.y);
                                 }
-                                connectorPoints.push(Point2D(middle.x, end.y));
+                                connectorLine.lineTo(middle.x, end.y);
                             } else {
                                 crossing.y = end.y;
-                                connectorPoints.push(crossing);
+                                connectorLine.lineTo(crossing.x, crossing.y);
                             }
                         } else {
                             end = Point2D(box.x2 + connectors.padding, box.center().y);
@@ -7363,41 +7358,27 @@
                                 sr = sector.c.x - sector.r - space;
                                 if (segment.options.labels.align !== COLUMN) {
                                     if (sr > middle.x) {
-                                        connectorPoints.push(Point2D(sr, start.y));
+                                        connectorLine.lineTo(sr, start.y);
                                     } else {
-                                        connectorPoints.push(Point2D(start.x - space * 2, start.y));
+                                        connectorLine.lineTo(start.x - space * 2, start.y);
                                     }
                                 } else {
-                                    connectorPoints.push(Point2D(sr, start.y));
+                                    connectorLine.lineTo(sr, start.y);
                                 }
-                                connectorPoints.push(Point2D(middle.x, end.y));
+                                connectorLine.lineTo(middle.x, end.y);
                             } else {
                                 crossing.y = end.y;
-                                connectorPoints.push(crossing);
+                                connectorLine.lineTo(crossing.x, crossing.y);
                             }
                         }
 
-                        connectorPoints.push(end);
-                        connectorLine = view.createPolyline(connectorPoints, false, {
-                            id: uniqueId(),
-                            stroke: connectors.color,
-                            strokeWidth: connectors.width,
-                            animation: {
-                                type: FADEIN,
-                                delay: segment.animationDelay
-                            },
-                            data: { modelId: segment.modelId }
-                        });
+                        connectorLine.lineTo(end.x, end.y);
 
-                        lines.push(connectorLine);
+                        this._connectorLines.push(connectorLine);
+                        this.visual.append(connectorLine);
                     }
                 }
             }
-
-            append(lines,
-                ChartElement.fn.getViewElements.call(chart, view));
-
-            return lines;
         },
 
         labelComparator: function (reverse) {
@@ -7473,8 +7454,8 @@
             }
         },
 
-        createSegment: function(view, sector, options) {
-            return view.createRing(sector, options);
+        createSegment: function(sector, options) {
+            return ShapeBuilder.current.createRing(sector, options);
         }
     });
     deepExtend(DonutSegment.fn, PointEventsMixin);
@@ -7679,7 +7660,6 @@
             segment.from = from;
             segment.to = to;
             segment.series = series;
-            segment.id = uniqueId();
         },
 
         options: {
@@ -7698,39 +7678,34 @@
             if (from.isVertical) {
                 var y = from.aboveAxis ? fromBox.y1 : fromBox.y2;
                 points.push(
-                    Point2D(fromBox.x1, y),
-                    Point2D(toBox.x2, y)
+                    [fromBox.x1, y],
+                    [toBox.x2, y]
                 );
             } else {
                 var x = from.aboveAxis ? fromBox.x2 : fromBox.x1;
                 points.push(
-                    Point2D(x, fromBox.y1),
-                    Point2D(x, toBox.y2)
+                    [x, fromBox.y1],
+                    [x, toBox.y2]
                 );
             }
 
             return points;
         },
 
-        getViewElements: function(view) {
-            var segment = this,
-                options = segment.options,
-                series = segment.series;
+        createVisual: function() {
+            ChartElement.fn.createVisual.call(this);
 
-            ChartElement.fn.getViewElements.call(segment, view);
+            var options = this.options;
+            var line = this.series.line || {};
 
-            var line = series.line || {};
-            return [
-                view.createPolyline(segment.linePoints(), false, {
-                    id: segment.id,
-                    animation: options.animation,
-                    stroke: line.color,
-                    strokeWidth: line.width,
-                    strokeOpacity: line.opacity,
-                    fill: "",
+            this.visual.append(draw.Path.fromPoints(this.linePoints(), {
+                stroke: {
+                    color: line.color,
+                    width: line.width,
+                    opacity: line.opacity,
                     dashType: line.dashType
-                })
-            ];
+                }
+            }));
         }
     });
 
@@ -7741,7 +7716,7 @@
             BoxElement.fn.init.call(pane, options);
 
             options = pane.options;
-            pane.id = uniqueId();
+            pane.id = kendo.guid();
 
             pane.createTitle();
 
@@ -7819,40 +7794,33 @@
             var pane = this;
 
             // Content (such as charts) is rendered, but excluded from reflows
+            var content;
             if (last(pane.children) === pane.content) {
-                pane.children.pop();
+                content = pane.children.pop();
             }
 
             BoxElement.fn.reflow.call(pane, targetBox);
+
+            if (content) {
+                pane.children.push(content);
+            }
 
             if (pane.title) {
                 pane.contentBox.y1 += pane.title.box.height();
             }
         },
 
-        getViewElements: function(view) {
-            var pane = this,
-                elements = BoxElement.fn.getViewElements.call(pane, view),
-                group = view.createGroup({
-                    id: pane.id
-                }),
-                result = [];
-
-            group.children = elements.concat(
-                pane.renderGridLines(view),
-                pane.content.getViewElements(view)
-            );
-
-            pane.view = view;
-
-            if (pane.options.visible) {
-                result = [group];
+        renderComplete: function() {
+            if (this.options.visible) {
+                this.createGridLines();
             }
-
-            return result;
         },
 
-        renderGridLines: function(view) {
+        stackRoot: function() {
+            return this;
+        },
+
+        createGridLines: function() {
             var pane = this,
                 axes = pane.axes,
                 allAxes = axes.concat(pane.parent.axes),
@@ -7861,31 +7829,34 @@
                 gridLines, i, j, axis,
                 vertical, altAxis;
 
+            // TODO
+            // Is full combination really necessary?
             for (i = 0; i < axes.length; i++) {
                 axis = axes[i];
                 vertical = axis.options.vertical;
                 gridLines = vertical ? vGridLines : hGridLines;
-
                 for (j = 0; j < allAxes.length; j++) {
                     if (gridLines.length === 0) {
                         altAxis = allAxes[j];
                         if (vertical !== altAxis.options.vertical) {
-                            append(gridLines, axis.renderGridLines(view, altAxis, axis));
+                            append(gridLines, axis.createGridLines(altAxis));
                         }
                     }
                 }
             }
-
-            return vGridLines.concat(hGridLines);
         },
 
         refresh: function() {
-            var pane = this,
-                view = pane.view;
+            this.visual.clear();
 
-            if (view) {
-                view.replace(pane);
-            }
+            this.content.parent = null;
+            this.content.createGradient = $.proxy(this.createGradient, this);
+            this.content.renderVisual();
+            this.content.parent = this;
+
+            this.visual.append(this.content.visual);
+
+            this.renderComplete();
         },
 
         clipBox: function() {
@@ -7905,6 +7876,7 @@
                 children = container.children,
                 length = children.length,
                 i;
+
             for (i = 0; i < length; i++) {
                 if (children[i].options.clip === true) {
                     return true;
@@ -7933,39 +7905,29 @@
             return clipBox;
         },
 
-        getViewElements: function (view) {
-            var container = this,
-                shouldClip = container.shouldClip(),
-                clipPathId,
-                labels = [],
-                group,
-                result;
-
-            if (shouldClip) {
-                container.clipBox = container._clipBox();
-                container.clipPathId = container.clipPathId || uniqueId();
-                clipPathId = container.clipPathId;
-                view.createClipPath(container.clipPathId, container.clipBox);
-
-                labels = container.labelViewElements(view);
-            }
-
-            container.id = uniqueId();
-            group = view.createGroup({
-                id: container.id,
-                clipPathId: clipPathId
+        createVisual: function() {
+            this.visual = new draw.Group({
+                zIndex: 0
             });
 
-            group.children = group.children.concat(ChartElement.fn.getViewElements.call(container, view));
-            result = [group].concat(labels);
+            if (this.shouldClip()) {
+                var clipBox = this.clipBox = this._clipBox();
 
-            return result;
+                var clipRect = clipBox.toRect();
+                var clipPath = draw.Path.fromRect(clipRect);
+                this.visual.clip(clipPath);
+
+                this.unclipLabels();
+            }
         },
 
-        labelViewElements: function(view) {
+        stackRoot: function() {
+            return this;
+        },
+
+        unclipLabels: function() {
             var container = this,
                 charts = container.children,
-                elements = [],
                 clipBox = container.clipBox,
                 points, point,
                 i, j, length;
@@ -7980,15 +7942,11 @@
                             if (point.label.alignToClipBox) {
                                 point.label.alignToClipBox(clipBox);
                             }
-                            point.label.modelId = point.modelId;
-                            append(elements, point.label.getViewElements(view));
+                            point.label.options.noclip = true;
                         }
-                        point.label.options.visible = false;
                     }
                 }
             }
-
-            return elements;
         },
 
         destroy: function() {
@@ -8009,9 +7967,6 @@
             plotArea.options.legend.items = [];
             plotArea.axes = [];
             plotArea.crosshairs = [];
-
-            plotArea.id = uniqueId();
-            plotArea.enableDiscovery();
 
             plotArea.createPanes();
             plotArea.render();
@@ -8709,34 +8664,26 @@
             return box || plotArea.box;
         },
 
-        getViewElements: function(view) {
-            var plotArea = this,
-                bgBox = plotArea.backgroundBox(),
-                options = plotArea.options,
-                userOptions = options.plotArea,
-                border = userOptions.border || {},
-                elements = ChartElement.fn.getViewElements.call(plotArea, view);
+        createVisual: function() {
+            ChartElement.fn.createVisual.call(this);
 
-            append(elements, [
-                view.createRect(bgBox, {
-                    fill: userOptions.background,
-                    fillOpacity: userOptions.opacity,
-                    zIndex: -2,
-                    strokeWidth: 0.1
-                }),
-                view.createRect(bgBox, {
-                    id: plotArea.id,
-                    data: { modelId: plotArea.modelId },
-                    stroke: border.width ? border.color : "",
-                    strokeWidth: border.width,
-                    fill: WHITE,
-                    fillOpacity: 0,
-                    zIndex: -1,
-                    dashType: border.dashType
-                })
-            ]);
+            var bgBox = this.backgroundBox();
+            var options = this.options.plotArea;
+            var border = options.border || {};
 
-            return elements;
+            var bg = draw.Path.fromRect(bgBox.toRect(), {
+                fill: {
+                    color: options.background,
+                    opacity: options.opacity
+                },
+                stroke: {
+                    color: border.width ? border.color : "",
+                    width: border.width
+                },
+                zIndex: -1
+            });
+
+            this.appendVisual(bg);
         },
 
         pointsByCategoryIndex: function(categoryIndex) {
@@ -8899,11 +8846,6 @@
                     pane
                 );
 
-                plotArea.createLineChart(
-                    filterSeriesByType(filteredSeries, [LINE, VERTICAL_LINE]),
-                    pane
-                );
-
                 plotArea.createCandlestickChart(
                     filterSeriesByType(filteredSeries, CANDLESTICK),
                     pane
@@ -8921,6 +8863,11 @@
 
                 plotArea.createWaterfallChart(
                     filterSeriesByType(filteredSeries, [WATERFALL, HORIZONTAL_WATERFALL]),
+                    pane
+                );
+
+                plotArea.createLineChart(
+                    filterSeriesByType(filteredSeries, [LINE, VERTICAL_LINE]),
                     pane
                 );
             }
@@ -9774,161 +9721,81 @@
         }
     });
 
-    var PieAnimation = ElementAnimation.extend({
+    var PieAnimation = draw.Animation.extend({
         options: {
             easing: "easeOutElastic",
             duration: INITIAL_ANIMATION_DURATION
         },
 
         setup: function() {
-            var element = this.element,
-                sector = element.config,
-                startRadius;
-
-            if (element.options.singleSegment) {
-                sector = element;
-            }
-
-            this.endRadius = sector.r;
-            startRadius = this.startRadius = sector.ir || 0;
-            sector.r = startRadius;
+            this.element.transform(geom.transform()
+                .scale(0, 0, this.options.center)
+            );
         },
 
         step: function(pos) {
-            var animation = this,
-                element = animation.element,
-                endRadius = animation.endRadius,
-                sector = element.config,
-                startRadius = animation.startRadius;
-
-            if (element.options.singleSegment) {
-                sector = element;
-            }
-
-            sector.r = interpolateValue(startRadius, endRadius, pos);
+            this.element.transform(geom.transform()
+                .scale(pos, pos, this.options.center)
+            );
         }
     });
+    draw.AnimationFactory.current.register(PIE, PieAnimation);
 
-    var BubbleAnimation = ElementAnimation.extend({
+    var BubbleAnimation = draw.Animation.extend({
         options: {
-            easing: "easeOutElastic",
-            duration: INITIAL_ANIMATION_DURATION
+            easing: "easeOutElastic"
         },
 
         setup: function() {
-            var circle = this.element;
-
-            circle.endRadius = circle.radius;
-            circle.radius = 0;
+            var center = this.center = this.element.bbox().center();
+            this.element.transform(geom.transform()
+                .scale(0, 0, center)
+            );
         },
 
         step: function(pos) {
-            var circle = this.element,
-                endRadius = circle.endRadius;
-
-            circle.radius = interpolateValue(0, endRadius, pos);
+            this.element.transform(geom.transform()
+                .scale(pos, pos, this.center)
+            );
         }
     });
-
-    var BarAnimationDecorator = animationDecorator(BAR, BarAnimation),
-        PieAnimationDecorator = animationDecorator(PIE, PieAnimation),
-        BubbleAnimationDecorator = animationDecorator(BUBBLE, BubbleAnimation);
+    draw.AnimationFactory.current.register(BUBBLE, BubbleAnimation);
 
     var Highlight = Class.extend({
-        init: function(view, viewElement) {
-            var highlight = this;
-
-            highlight.view = view;
-            highlight.viewElement = viewElement;
-            highlight._overlays = [];
+        init: function() {
+            this._points = [];
         },
 
-        options: {
-            fill: WHITE,
-            fillOpacity: 0.2,
-            stroke: WHITE,
-            strokeWidth: 1,
-            strokeOpacity: 0.2
+        destroy: function() {
+            this._points = [];
         },
 
         show: function(points) {
-            var highlight = this,
-                view = highlight.view,
-                container,
-                overlay,
-                overlays = highlight._overlays,
-                overlayElement, i, point,
-                pointOptions;
+            points = [].concat(points);
+            this.hide();
 
-            highlight.hide();
-            highlight._points = points = [].concat(points);
-
-            for (i = 0; i < points.length; i++) {
-                point = points[i];
-                if (point) {
-                    pointOptions = point.options;
-
-                    if (!pointOptions || (pointOptions.highlight || {}).visible) {
-                        if (point.highlightOverlay && point.visible !== false) {
-                            overlay = point.highlightOverlay(view, highlight.options);
-
-                            if (overlay) {
-                                overlayElement = view.renderElement(overlay);
-                                overlays.push(overlayElement);
-
-                                if (point.owner && point.owner.id) {
-                                    container = getElement(point.owner.id);
-                                }
-
-                                (container || highlight.viewElement).appendChild(overlayElement);
-                            }
-                        }
-
-                        if (point.toggleHighlight) {
-                            point.toggleHighlight(view);
-                        }
-                    }
+            for (var i = 0; i < points.length; i++) {
+                var point = points[i];
+                if (point && point.toggleHighlight) {
+                    point.toggleHighlight(true);
+                    this._points.push(point);
                 }
             }
         },
 
         hide: function() {
-            var highlight = this,
-                points = highlight._points,
-                overlays = highlight._overlays,
-                overlay, i, point, pointOptions;
-
-            while (overlays.length) {
-                overlay = highlight._overlays.pop();
-                if (overlay.parentNode) {
-                    overlay.parentNode.removeChild(overlay);
-                }
+            var points = this._points;
+            while (points.length) {
+                points.pop().toggleHighlight(false);
             }
-
-            if (points) {
-                for (i = 0; i < points.length; i++) {
-                    point = points[i];
-                    if (point) {
-                        pointOptions = point.options;
-
-                        if (!pointOptions || (pointOptions.highlight || {}).visible) {
-                            if (point.toggleHighlight) {
-                                point.toggleHighlight(highlight.view);
-                            }
-                        }
-                    }
-                }
-            }
-
-            highlight._points = [];
         },
 
-        isOverlay: function(element) {
-            var overlays = this._overlays;
+        isHighlighted: function(element) {
+            var points = this._points;
 
-            for (var i = 0; i < overlays.length; i++) {
-                var current = overlays[i];
-                if (element == current || $.contains(current, element)) {
+            for (var i = 0; i < points.length; i++) {
+                var point = points[i];
+                if (element == point) {
                     return true;
                 }
             }
@@ -10191,7 +10058,7 @@
             var tooltip = this,
                 options = deepExtend({}, tooltip.options, point.options.tooltip);
 
-            if (!point) {
+            if (!point || !point.tooltipAnchor || !tooltip.element) {
                 return;
             }
 
@@ -10296,17 +10163,10 @@
 
     var Crosshair = ChartElement.extend({
         init: function(axis, options) {
-            var crosshair = this;
+            ChartElement.fn.init.call(this, options);
 
-            ChartElement.fn.init.call(crosshair, options);
-            crosshair.axis = axis;
-
-            if (!crosshair.id) {
-                crosshair.id = uniqueId();
-            }
-            crosshair._visible = false;
-            crosshair.stickyMode = axis instanceof CategoryAxis;
-            crosshair.enableDiscovery();
+            this.axis = axis;
+            this.stickyMode = axis instanceof CategoryAxis;
         },
 
         options: {
@@ -10318,46 +10178,33 @@
             }
         },
 
-        repaint: function() {
-            var crosshair = this,
-                element = crosshair.element;
-
-            crosshair.getViewElements(crosshair._view);
-            element = crosshair.element;
-            element.refresh(getElement(crosshair.id));
-        },
-
         showAt: function(point) {
             var crosshair = this;
 
-            crosshair._visible = true;
-            crosshair.point = point;
-            crosshair.repaint();
+            this.point = point;
+            this.moveLine();
+            this.line.visible(true);
 
-            if (crosshair.options.tooltip.visible) {
-                if (!crosshair.tooltip) {
-                    crosshair.tooltip = new CrosshairTooltip(
-                        crosshair,
-                        deepExtend({}, crosshair.options.tooltip, { stickyMode: crosshair.stickyMode })
+            var tooltipOptions = this.options.tooltip;
+            if (tooltipOptions.visible) {
+                if (!this.tooltip) {
+                    this.tooltip = new CrosshairTooltip(this,
+                        deepExtend({}, tooltipOptions, { stickyMode: this.stickyMode })
                     );
                 }
-                crosshair.tooltip.showAt(point);
+                this.tooltip.showAt(point);
             }
         },
 
         hide: function() {
-            var crosshair = this;
+            this.line.visible(false);
 
-            if (crosshair._visible) {
-                crosshair._visible = false;
-                crosshair.repaint();
-                if (crosshair.tooltip) {
-                    crosshair.tooltip.hide();
-                }
+            if (this.tooltip) {
+                this.tooltip.hide();
             }
         },
 
-        linePoints: function() {
+        moveLine: function() {
             var crosshair = this,
                 axis = crosshair.axis,
                 vertical = axis.options.vertical,
@@ -10366,11 +10213,11 @@
                 dim = vertical ? Y : X,
                 slot, lineStart, lineEnd;
 
-            lineStart = Point2D(box.x1, box.y1);
+            lineStart = new geom.Point(box.x1, box.y1);
             if (vertical) {
-                lineEnd = Point2D(box.x2, box.y1);
+                lineEnd = new geom.Point(box.x2, box.y1);
             } else {
-                lineEnd = Point2D(box.x1, box.y2);
+                lineEnd = new geom.Point(box.x1, box.y2);
             }
 
             if (point) {
@@ -10384,7 +10231,7 @@
 
             crosshair.box = box;
 
-            return [lineStart, lineEnd];
+            this.line.moveTo(lineStart).lineTo(lineEnd);
         },
 
         getBox: function() {
@@ -10414,29 +10261,22 @@
             return box;
         },
 
-        getViewElements: function(view) {
-            var crosshair = this,
-                options = crosshair.options,
-                elements = [];
+        createVisual: function() {
+            ChartElement.fn.createVisual.call(this);
 
-            crosshair.points = crosshair.linePoints();
-            crosshair.element = view.createPolyline(crosshair.points, false, {
-                data: { modelId: crosshair.modelId },
-                id: crosshair.id,
-                stroke: options.color,
-                strokeWidth: options.width,
-                strokeOpacity: options.opacity,
-                dashType: options.dashType,
-                zIndex: options.zIndex,
-                visible: crosshair._visible
+            var options = this.options;
+            this.line = new draw.Path({
+                stroke: {
+                    color: options.color,
+                    width: options.width,
+                    opacity: options.opacity,
+                    dashType: options.dashType
+                },
+                visible: false
             });
 
-            elements.push(crosshair.element);
-            crosshair._view = view;
-
-            append(elements, ChartElement.fn.getViewElements.call(crosshair, view));
-
-            return elements;
+            this.moveLine();
+            this.visual.append(this.line);
         },
 
         destroy: function() {
@@ -10452,7 +10292,7 @@
     var CrosshairTooltip = BaseTooltip.extend({
         init: function(crosshair, options) {
             var tooltip = this,
-                chartElement = crosshair.axis.getRoot().parent.element;
+                chartElement = crosshair.axis.getRoot().chart.element;
 
             tooltip.crosshair = crosshair;
 
@@ -10473,11 +10313,13 @@
             var tooltip = this,
                 element = tooltip.element;
 
-            tooltip.point = point;
-            tooltip.element.html(tooltip.content(point));
-            tooltip.anchor = tooltip.getAnchor();
+            if (element) {
+                tooltip.point = point;
+                tooltip.element.html(tooltip.content(point));
+                tooltip.anchor = tooltip.getAnchor();
 
-            tooltip.move();
+                tooltip.move();
+            }
         },
 
         move: function() {
@@ -10518,35 +10360,34 @@
             var tooltip = this,
                 options = tooltip.options,
                 position = options.position,
-                vertical = tooltip.crosshair.axis.options.vertical,
-                points = tooltip.crosshair.points,
-                fPoint = points[0],
-                sPoint = points[1],
+                crosshair = this.crosshair,
+                vertical = !crosshair.axis.options.vertical,
+                lineBox = crosshair.line.bbox(),
                 size = this._measure(),
                 halfWidth = size.width / 2,
                 halfHeight = size.height / 2,
                 padding = options.padding,
-                x, y;
+                anchor;
 
             if (vertical) {
-                if (position === LEFT) {
-                    x = fPoint.x - size.width - padding;
-                    y = fPoint.y - halfHeight;
+                if (position === BOTTOM) {
+                    anchor = lineBox.bottomLeft()
+                        .translate(-halfWidth, padding);
                 } else {
-                    x = sPoint.x + padding;
-                    y = sPoint.y - halfHeight;
+                    anchor = lineBox.topLeft()
+                        .translate(-halfWidth, -size.height - padding);
                 }
             } else {
-                if (position === BOTTOM) {
-                    x = sPoint.x - halfWidth;
-                    y = sPoint.y + padding;
+                if (position === LEFT) {
+                    anchor = lineBox.topLeft()
+                        .translate(-size.width - padding, -halfHeight);
                 } else {
-                    x = fPoint.x - halfWidth;
-                    y = fPoint.y - size.height - padding;
+                    anchor = lineBox.topRight()
+                        .translate(padding, -halfHeight);
                 }
             }
 
-            return Point2D(x, y);
+            return anchor;
         },
 
         hide: function() {
@@ -10564,9 +10405,8 @@
     var Aggregates = {
         min: function(values) {
             var min = MAX_VALUE,
-                i,
                 length = values.length,
-                n;
+                i, n;
 
             for (i = 0; i < length; i++) {
                 n = values[i];
@@ -10580,9 +10420,8 @@
 
         max: function(values) {
             var max = MIN_VALUE,
-                i,
                 length = values.length,
-                n;
+                i, n;
 
             for (i = 0; i < length; i++) {
                 n = values[i];
@@ -10597,8 +10436,7 @@
         sum: function(values) {
             var length = values.length,
                 sum = 0,
-                i,
-                n;
+                i, n;
 
             for (i = 0; i < length; i++) {
                 n = values[i];
@@ -10610,11 +10448,20 @@
             return sum;
         },
 
+        sumOrNull: function(values) {
+            var result = null;
+
+            if (countNumbers(values)) {
+                result = Aggregates.sum(values);
+            }
+
+            return result;
+        },
+
         count: function(values) {
             var length = values.length,
                 count = 0,
-                i,
-                val;
+                i, val;
 
             for (i = 0; i < length; i++) {
                 val = values[i];
@@ -10798,6 +10645,10 @@
             if (userEvents) {
                 userEvents.destroy();
             }
+
+            that._state = null;
+
+            this.wrapper.remove();
         },
 
         _rangeEventArgs: function(range) {
@@ -11278,35 +11129,6 @@
         }
     };
 
-    function sparseArrayMin(arr) {
-        return sparseArrayLimits(arr).min;
-    }
-
-    function sparseArrayMax(arr) {
-        return sparseArrayLimits(arr).max;
-    }
-
-    function sparseArrayLimits(arr) {
-        var min = MAX_VALUE,
-            max = MIN_VALUE,
-            i,
-            length = arr.length,
-            n;
-
-        for (i = 0; i < length; i++) {
-            n = arr[i];
-            if (n !== null && isFinite(n)) {
-                min = math.min(min, n);
-                max = math.max(max, n);
-            }
-        }
-
-        return {
-            min: min === MAX_VALUE ? undefined : min,
-            max: max === MIN_VALUE ? undefined : max
-        };
-    }
-
     function intersection(a1, a2, b1, b2) {
         var result,
             ua_t = (b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x),
@@ -11557,6 +11379,7 @@
 
             if (unit === YEARS) {
                 result = new Date(date.getFullYear() + value, 0, 1);
+                kendo.date.adjustDST(result, 0);
             } else if (unit === MONTHS) {
                 result = new Date(date.getFullYear(), date.getMonth() + value, 1);
                 kendo.date.adjustDST(result, hours);
@@ -11994,6 +11817,11 @@
         return sum;
     }
 
+    function hasGradientOverlay(options) {
+        var overlay = options.overlay;
+        return overlay && overlay.gradient && overlay.gradient != "none";
+    }
+
     // Exports ================================================================
     dataviz.ui.plugin(Chart);
 
@@ -12089,10 +11917,8 @@
         AreaSegment: AreaSegment,
         AxisGroupRangeTracker: AxisGroupRangeTracker,
         Bar: Bar,
-        BarAnimationDecorator: BarAnimationDecorator,
         BarChart: BarChart,
         BarLabel: BarLabel,
-        BubbleAnimationDecorator: BubbleAnimationDecorator,
         BubbleChart: BubbleChart,
         BulletChart: BulletChart,
         CandlestickChart: CandlestickChart,
@@ -12122,7 +11948,6 @@
         LineSegment: LineSegment,
         Pane: Pane,
         PieAnimation: PieAnimation,
-        PieAnimationDecorator: PieAnimationDecorator,
         PieChart: PieChart,
         PieChartMixin: PieChartMixin,
         PiePlotArea: PiePlotArea,
@@ -12166,7 +11991,6 @@
         seriesTotal: seriesTotal,
         singleItemOrArray: singleItemOrArray,
         sortDates: sortDates,
-        sparseArrayLimits: sparseArrayLimits,
         startOfWeek: startOfWeek,
         transpose: transpose,
         toDate: toDate,

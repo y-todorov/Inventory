@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -11,6 +11,42 @@
 })(function(){
 
 
+
+/* Filter cell operator messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.operators =
+$.extend(true, kendo.ui.FilterCell.prototype.options.operators,{
+  "date": {
+    "eq": "Egal cu",
+    "gt": "După",
+    "gte": "După sau egal cu",
+    "lt": "Inainte de",
+    "lte": "Inainte sau egal cu",
+    "neq": "Diferit de"
+  },
+  "enum": {
+    "eq": "Egal cu",
+    "neq": "Diferit de"
+  },
+  "number": {
+    "eq": "Egal cu",
+    "gt": "Mai mare decât",
+    "gte": "Mai mare sau egal cu",
+    "lt": "Mai mic decât",
+    "lte": "Mai mic sau egal cu",
+    "neq": "Diferit de"
+  },
+  "string": {
+    "contains": "Conține",
+    "doesnotcontain": "Nu conține",
+    "endswith": "Se termină cu",
+    "eq": "Egal cu",
+    "neq": "Diferit de",
+    "startswith": "Incepe cu"
+  }
+});
+}
 
 /* Filter menu operator messages */
 
@@ -184,6 +220,19 @@ $.extend(true, kendo.ui.Editor.prototype.options.messages,{
 });
 }
 
+/* FilterCell messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.messages =
+$.extend(true, kendo.ui.FilterCell.prototype.options.messages,{
+  "clear": "Șterge",
+  "filter": "Filtrează",
+  "isFalse": "este fals",
+  "isTrue": "este adevărat",
+  "operator": "Operator"
+});
+}
+
 /* FilterMenu messages */
 
 if (kendo.ui.FilterMenu) {
@@ -325,6 +374,7 @@ $.extend(true, kendo.ui.Upload.prototype.options.localization,{
   "headerStatusUploading": "Uploading..."
 });
 }
+
 
 return window.kendo;
 

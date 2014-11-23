@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -41,6 +41,20 @@
             current = arr[idx];
             result[current[key]] = current;
         }
+        return result;
+    }
+
+    function leafColumns(columns) {
+        var result = [];
+
+        for (var idx = 0; idx < columns.length; idx++) {
+            if (!columns[idx].columns) {
+                result.push(columns[idx]);
+                continue;
+            }
+            result = result.concat(leafColumns(columns[idx].columns));
+        }
+
         return result;
     }
 
@@ -220,7 +234,7 @@
                 that.dataSource.unbind(CHANGE, that._refreshHandler);
             }
 
-            if (that.options.columns && that.owner) {
+            if (that.options.columns && that.owner && that._updateColumnsMenuHandler) {
                 that.owner.unbind("columnShow", that._updateColumnsMenuHandler);
                 that.owner.unbind("columnHide", that._updateColumnsMenuHandler);
             }
@@ -296,7 +310,7 @@
         },
 
         _ownerColumns: function() {
-            var columns = this.owner.columns,
+            var columns = leafColumns(this.owner.columns),
                 menuColumns = grep(columns, function(col) {
                     var result = true,
                         title = trim(col.title || "");
@@ -357,6 +371,7 @@
         _sortDataSource: function(item, dir) {
             var that = this,
                 sortable = that.options.sortable,
+                compare = sortable.compare === null ? undefined : sortable.compare,
                 dataSource = that.dataSource,
                 idx,
                 length,
@@ -370,7 +385,7 @@
             }
 
             if (sortable === true || sortable.mode === "single") {
-                sort = [ { field: that.field, dir: dir } ];
+                sort = [ { field: that.field, dir: dir, compare: compare} ];
             } else {
                 for (idx = 0, length = sort.length; idx < length; idx++) {
                     if (sort[idx].field === that.field) {
@@ -378,7 +393,7 @@
                         break;
                     }
                 }
-                sort.push({ field: that.field, dir: dir });
+                sort.push({ field: that.field, dir: dir, compare: compare });
             }
 
             dataSource.sort(sort);
@@ -400,7 +415,7 @@
                         input,
                         index,
                         column,
-                        columns = that.owner.columns,
+                        columns = leafColumns(that.owner.columns),
                         field;
 
                     if (that._isMobile) {
@@ -421,12 +436,11 @@
                     column = grep(columns, function(column) {
                         return column.field == field || column.title == field;
                     })[0];
-                    index = inArray(column, columns);
 
                     if (column.hidden === true) {
-                        that.owner.showColumn(index);
+                        that.owner.showColumn(column);
                     } else {
-                        that.owner.hideColumn(index);
+                        that.owner.hideColumn(column);
                     }
                 });
             }
@@ -546,6 +560,10 @@
             var column = grep(columns, function(column) {
                 return column.field == field || column.title == field;
             })[0];
+
+            if (!column) {
+                return;
+            }
 
             var locked = column.locked === true;
             var length = grep(columns, function(column) {

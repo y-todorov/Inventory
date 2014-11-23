@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -160,6 +160,7 @@
             "close",
             "change",
             "select",
+            "filtering",
             "dataBinding",
             "dataBound"
         ],
@@ -299,9 +300,7 @@
 
             length = word.length;
 
-            if (!length) {
-                that.popup.close();
-            } else if (length >= that.options.minLength) {
+            if (!length || length >= options.minLength) {
                 that._open = true;
 
                 that._filterSource({

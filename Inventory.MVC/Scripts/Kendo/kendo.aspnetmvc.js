@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -209,6 +209,18 @@
         return aggregates;
     }
 
+    function convertAggregates(aggregates) {
+        var idx, length, aggregate;
+        var result = {};
+
+        for (idx = 0, length = aggregates.length; idx < length; idx++) {
+            aggregate = aggregates[idx];
+            result[aggregate.Member] = extend(true, result[aggregate.Member], translateAggregateResults(aggregate));
+        }
+
+        return result;
+    }
+
     extend(true, kendo.data, {
         schemas: {
             "aspnetmvc-ajax": {
@@ -217,17 +229,17 @@
                 },
                 aggregates: function(data) {
                     data = data.d || data;
-                    var result = {},
-                        aggregates = data.AggregateResults || [],
-                        aggregate,
-                        idx,
-                        length;
+                    var aggregates = data.AggregateResults || [];
 
-                    for (idx = 0, length = aggregates.length; idx < length; idx++) {
-                        aggregate = aggregates[idx];
-                        result[aggregate.Member] = extend(true, result[aggregate.Member], translateAggregateResults(aggregate));
+                    if (!$.isArray(aggregates)) {
+                        for (var key in aggregates) {
+                            aggregates[key] = convertAggregates(aggregates[key]);
+                        }
+
+                        return aggregates;
                     }
-                    return result;
+
+                    return convertAggregates(aggregates);
                 }
             }
         }

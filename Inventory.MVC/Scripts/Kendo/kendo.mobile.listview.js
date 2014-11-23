@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -202,9 +202,9 @@
                         handler.dataSource.read(pullParameters.call(listView, handler._first));
                     }
                 },
-                pullTemplate: options.pullTemplate,
-                releaseTemplate: options.releaseTemplate,
-                refreshTemplate: options.refreshTemplate
+                pullTemplate: options.messages.pullTemplate,
+                releaseTemplate: options.messages.releaseTemplate,
+                refreshTemplate: options.messages.refreshTemplate
             });
         },
 
@@ -523,7 +523,7 @@
         init: function(listView, buffer) {
 
             this._loadIcon = $(LOAD_ICON).hide();
-            this._loadButton = $('<a class="km-load">' + listView.options.loadMoreText + '</a>').hide();
+            this._loadButton = $('<a class="km-load">' + listView.options.messages.loadMoreText + '</a>').hide();
             this.element = $('<li class="km-load-more" style="display: none"></li>').append(this._loadIcon).append(this._loadButton).appendTo(listView.element);
 
             var loadMore = this;
@@ -945,13 +945,15 @@
             headerTemplate: '<span class="km-text">#:value#</span>',
             appendOnRefresh: false,
             loadMore: false,
-            loadMoreText: "Press to load more",
             endlessScroll: false,
             scrollThreshold: 30,
             pullToRefresh: false,
-            pullTemplate: "Pull to refresh",
-            releaseTemplate: "Release to refresh",
-            refreshTemplate: "Refreshing",
+            messages: {
+                loadMoreText: "Press to load more",
+                pullTemplate: "Pull to refresh",
+                releaseTemplate: "Release to refresh",
+                refreshTemplate: "Refreshing"
+            },
             pullOffset: 140,
             filterable: false,
             virtualViewSize: null
@@ -1039,15 +1041,6 @@
                         listView.trigger(ITEM_CHANGE, { item: items.eq(i), data: dataItems[i], ns: ui });
                     }
                 }
-
-                listView.angular("compile", function(){
-                    return {
-                        elements: items,
-                        data: dataItems.map(function(data){
-                            return { dataItem: data };
-                        })
-                    };
-                });
             });
         },
 
@@ -1114,6 +1107,16 @@
 
         _renderItems: function(dataItems, callback) {
             var items = $(kendo.render(this.template, dataItems));
+
+            this.angular("compile", function(){
+                return {
+                    elements: items,
+                    data: dataItems.map(function(data){
+                        return { dataItem: data };
+                    })
+                };
+            });
+
             callback(items);
             mobile.init(items);
             this._enhanceItems(items);

@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -180,8 +180,15 @@
 [data-role="layout"] {
   display: none;
 }
+/**
+ * The angular tags will be converted to div kendo-mobile-view
+ *
+ */
 [data-role="view"],
-[data-role="drawer"] {
+[data-role="drawer"],
+kendo-mobile-view,
+kendo-mobile-split-view,
+kendo-mobile-drawer {
   visibility: hidden;
 }
 .km-view {

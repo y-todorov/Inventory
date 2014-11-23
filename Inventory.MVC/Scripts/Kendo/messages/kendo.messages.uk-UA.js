@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -11,6 +11,42 @@
 })(function(){
 
 
+
+/* Filter cell operator messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.operators =
+$.extend(true, kendo.ui.FilterCell.prototype.options.operators,{
+  "date": {
+    "eq": "рівними",
+    "gte": "після або рівна",
+    "gt": "після",
+    "lte": "до або рівними",
+    "lt": "до",
+    "neq": "не рівна"
+  },
+  "number": {
+    "eq": "рівне",
+    "gte": "більше або рівними",
+    "gt": "більше",
+    "lte": "менше або рівними",
+    "lt": "менше",
+    "neq": "не рівними"
+  },
+  "string": {
+    "endswith": "закінчуються на",
+    "eq": "рівні",
+    "neq": "не рівні",
+    "startswith": "починаються на",
+    "contains": "містять",
+    "doesnotcontain": "Does not contain"
+  },
+  "enum": {
+    "eq": "рівними",
+    "neq": "не рівними"
+  }
+});
+}
 
 /* Filter menu operator messages */
 
@@ -158,6 +194,19 @@ $.extend(true, kendo.ui.Pager.prototype.options.messages,{
   "next": "Перейдіть на наступну сторінку",
   "previous": "Перейти на попередню сторінку",
   "morePages": "Більше сторінок"
+});
+}
+
+/* FilterCell messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.messages =
+$.extend(true, kendo.ui.FilterCell.prototype.options.messages,{
+  "filter": "фільтрувати",
+  "clear": "очистити фільтр",
+  "isFalse": "хиба",
+  "isTrue": "істина",
+  "operator": "Oператор"
 });
 }
 
@@ -329,6 +378,7 @@ $.extend(true, kendo.ui.Upload.prototype.options.localization,{
   "uploadSelectedFiles": "Upload files"
 });
 }
+
 
 return window.kendo;
 

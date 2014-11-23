@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -26,6 +26,7 @@
         ERROR = "error",
         PROGRESS = "progress",
         STATERESET = "stateReset",
+        AUTO = "auto",
         DIV = "<div/>",
         NS = ".kendoPivotGrid",
         ROW_TOTAL_KEY = "__row_total__",
@@ -36,7 +37,9 @@
         STATE_EXPANDED = "k-i-arrow-s",
         STATE_COLLAPSED = "k-i-arrow-e",
         HEADER_TEMPLATE = "#: data.member.caption || data.member.name #",
-        DATACELL_TEMPLATE = '#: data.dataItem ? (data.dataItem.fmtValue || data.dataItem.value) : "" #',
+        KPISTATUS_TEMPLATE = '<span class="k-icon k-i-kpi-#=data.dataItem.value > 0 ? \"open\" : data.dataItem.value < 0 ? \"denied\" : \"hold\"#">#:data.dataItem.value#</span>',
+        KPITREND_TEMPLATE = '<span class="k-icon k-i-kpi-#=data.dataItem.value > 0 ? \"increase\" : data.dataItem.value < 0 ? \"decrease\" : \"equal\"#">#:data.dataItem.value#</span>',
+        DATACELL_TEMPLATE = '#= data.dataItem ? kendo.htmlEncode(data.dataItem.fmtValue || data.dataItem.value) || "&nbsp;" : "&nbsp;" #',
         LAYOUT_TABLE = '<table class="k-pivot-layout">' +
                             '<tr>' +
                                 '<td>' +
@@ -48,52 +51,92 @@
                             '</tr>' +
                         '</table>';
 
-    function normalizeMembers(member) {
-        var descriptor = typeof member === "string" ? { name: member, expand: false } : member,
-            descriptors = toString.call(descriptor) === "[object Array]" ? descriptor : (descriptor !== undefined ? [descriptor] : []);
+    function normalizeMeasures(measure) {
+        var descriptor = typeof measure === "string" ? [{ name: measure }] : measure;
+        var descriptors = toString.call(descriptor) === "[object Array]" ? descriptor : (descriptor !== undefined ? [descriptor] : []);
 
         return map(descriptors, function(d) {
             if (typeof d === "string") {
-                return { name: d, expand: false };
+                return { name: d };
             }
-            return { name: d.name, expand: d.expand };
+            return { name: d.name, type: d.type };
         });
     }
 
-    function accumulateMembers(accumulator, tuples, level) {
+    function normalizeMembers(member) {
+        var descriptor = typeof member === "string" ? [{ name: [member], expand: false }] : member;
+        var descriptors = toString.call(descriptor) === "[object Array]" ? descriptor : (descriptor !== undefined ? [descriptor] : []);
+
+        return map(descriptors, function(d) {
+            if (typeof d === "string") {
+                return { name: [d], expand: false };
+            }
+            return { name: (toString.call(d.name) === "[object Array]" ? d.name.slice() : [d.name]), expand: d.expand };
+        });
+    }
+
+    function parentName(tuple, level) {
+        var member = tuple.members[level];
+        var parentNameValue = buildPath(tuple, level - 1);
+
+        if (member.parentName) {
+            parentNameValue.push(member.parentName);
+        }
+
+        if (!parentNameValue.length) {
+            parentNameValue = "";
+        }
+
+        return kendo.stringify(parentNameValue);
+    }
+
+    function accumulateMembers(accumulator, rootTuple, tuple, level) {
+        var idx, length;
+        var children;
         var member;
-        var name;
-        var parentName;
 
-        for (var idx = 0; idx < tuples.length; idx++) {
-            member = tuples[idx].members[level];
-            name = member.name;
-            parentName = member.parentName || "";
+        if (!tuple) {
+            tuple = rootTuple;
+        }
 
-            if (member.children.length > 0) {
-                accumulator[name] = true;
-                accumulateMembers(accumulator, member.children, level);
-            } else if (!(parentName in accumulator)) {
-                accumulator[name] = false;
+        if (!level) {
+            level = 0;
+        }
+
+        member = tuple.members[level];
+
+        if (!member || member.measure) { //return if no member or measure
+            return;
+        }
+
+        children = member.children;
+        length = children.length;
+
+        if (tuple === rootTuple) {
+            accumulator[kendo.stringify([member.name])] = !!length;
+        } else if (length) {
+            accumulator[kendo.stringify(buildPath(tuple, level))] = true;
+        }
+
+        if (length) {
+            for (idx = 0; idx < length; idx++) {
+                accumulateMembers(accumulator, rootTuple, children[idx], level);
             }
         }
+
+        accumulateMembers(accumulator, rootTuple, tuple, level + 1);
     }
 
     function descriptorsForAxes(tuples) {
         var result = {};
 
         if (tuples.length) {
-            var members = tuples[0].members || [];
-            for (var idx = 0; idx < members.length; idx++) {
-                if (!members[idx].measure) {
-                    accumulateMembers(result, tuples, idx);
-                }
-            }
+            accumulateMembers(result, tuples[0]);
         }
 
         var descriptors = [];
         for (var k in result) {
-            descriptors.push({ name: k, expand: result[k] });
+            descriptors.push({ name: $.parseJSON(k), expand: result[k] });
         }
 
         return descriptors;
@@ -113,14 +156,14 @@
 
                 var found = false;
                 for (var j = 0; j < members.length; j++) {
-                    if (members[j].name.indexOf(tupleMembers[idx].hierarchy) === 0) {
+                    if (getName(members[j]).indexOf(tupleMembers[idx].hierarchy) === 0) {
                         found = true;
                         break;
                     }
                 }
 
                 if (!found) {
-                    members.push(tupleMembers[idx]);
+                    members.push({ name: [tupleMembers[idx].name], expand: false }); //calling normalize here to make name from string to array
                 }
             }
         }
@@ -134,7 +177,9 @@
             if (members[idx].measure) {
                 continue;
             }
-            result.push({ name: members[idx].name, expand: members[idx].children.length > 0});
+
+            //make tuple name an array
+            result.push({ name: [members[idx].name], expand: members[idx].children.length > 0});
         }
 
         return result;
@@ -167,23 +212,175 @@
         return members;
     }
 
-    function addDataCell(result, rowIndex, map, key, format) {
-        result[result.length] = {
-            ordinal: rowIndex,
-            value: map[key].aggregates,
-            fmtValue: format ? kendo.format(format, map[key].aggregates) : map[key].aggregates
-        };
+    function addDataCellVertical(result, rowIndex, map, key, resultFuncs, formats, offset) {
+        var value, aggregate, columnKey, resultFunc, format, measuresCount = 0;
+
+        var start = rowIndex;
+
+        for (aggregate in map[key].aggregates) {
+            value = map[key].aggregates[aggregate];
+            resultFunc = resultFuncs[aggregate];
+            format = formats[aggregate];
+
+            value = resultFunc ? resultFunc(value) : value.accumulator;
+
+            result[start] = {
+                ordinal: start,
+                value: value,
+                fmtValue: format ? kendo.format(format, value) : value
+            };
+            ++measuresCount;
+            start += offset;
+        }
 
         var items = map[key].items;
 
-        for (var columnKey in items) {
-            result[result.length] = {
-                ordinal: rowIndex + items[columnKey].index + 1,
-                value: items[columnKey].aggregate,
-                fmtValue: format ? kendo.format(format, items[columnKey].aggregate) : items[columnKey].aggregate
-            };
+        for (columnKey in items) {
+            var index = items[columnKey].index * measuresCount;
+
+            index = start + index*offset;
+
+            for (aggregate in items[columnKey].aggregates) {
+                value = items[columnKey].aggregates[aggregate];
+                resultFunc = resultFuncs[aggregate];
+                format = formats[aggregate];
+
+                value = resultFunc ? resultFunc(value) : value.accumulator;
+
+                result[index] = {
+                    ordinal: index,
+                    value: value,
+                    fmtValue: format ? kendo.format(format, value) : value
+                };
+                index += offset;
+            }
         }
     }
+
+    function addDataCell(result, rowIndex, map, key, resultFuncs, formats) {
+        var value, aggregate, columnKey, resultFunc, format, measuresCount = 0;
+
+        for (aggregate in map[key].aggregates) {
+            value = map[key].aggregates[aggregate];
+            resultFunc = resultFuncs[aggregate];
+            format = formats[aggregate];
+
+            value = resultFunc ? resultFunc(value) : value.accumulator;
+
+            result[result.length] = {
+                ordinal: rowIndex++,
+                value: value,
+                fmtValue: format ? kendo.format(format, value) : value
+            };
+            ++measuresCount;
+        }
+
+        var items = map[key].items;
+
+        for (columnKey in items) {
+            var index = items[columnKey].index * measuresCount;
+
+            for (aggregate in items[columnKey].aggregates) {
+                value = items[columnKey].aggregates[aggregate];
+                resultFunc = resultFuncs[aggregate];
+                format = formats[aggregate];
+
+                value = resultFunc ? resultFunc(value) : value.accumulator;
+
+                result[result.length] = {
+                    ordinal: rowIndex + index++,
+                    value: value,
+                    fmtValue: format ? kendo.format(format, value) : value
+                };
+            }
+        }
+    }
+
+    function createAggregateGetter(m) {
+        var measureGetter = kendo.getter(m.field, true);
+        return function(aggregatorContext, state) {
+            return m.aggregate(measureGetter(aggregatorContext.dataItem), state, aggregatorContext);
+        };
+    }
+
+    function isNumber(val) {
+        return typeof val === "number" && !isNaN(val);
+    }
+
+    function isDate(val) {
+        return val && val.getTime;
+    }
+
+    var functions = {
+        sum: function(value, state) {
+            var accumulator = state.accumulator;
+
+            if (!isNumber(accumulator)) {
+                accumulator = value;
+            } else if (isNumber(value)) {
+                accumulator += value;
+            }
+
+            return accumulator;
+        },
+        count: function(value, state) {
+            return (state.accumulator || 0) + 1;
+        },
+        average: {
+            aggregate: function(value, state) {
+                var accumulator = state.accumulator;
+
+                if (state.count === undefined) {
+                    state.count = 0;
+                }
+
+                if (!isNumber(accumulator)) {
+                    accumulator = value;
+                } else if (isNumber(value)) {
+                    accumulator += value;
+                }
+
+                if (isNumber(value)) {
+                    state.count++;
+                }
+
+                return accumulator;
+            },
+            result: function(state) {
+                var accumulator = state.accumulator;
+
+                if (isNumber(accumulator)) {
+                    accumulator = accumulator / state.count;
+                }
+
+                return accumulator;
+            }
+        },
+        max: function(value, state) {
+            var accumulator = state.accumulator;
+
+            if (!isNumber(accumulator) && !isDate(accumulator)) {
+                accumulator = value;
+            }
+
+            if(accumulator < value && (isNumber(value) || isDate(value))) {
+                accumulator = value;
+            }
+            return accumulator;
+        },
+        min: function(value, state) {
+            var accumulator = state.accumulator;
+
+            if (!isNumber(accumulator) && !isDate(accumulator)) {
+                accumulator = value;
+            }
+
+            if(accumulator > value && (isNumber(value) || isDate(value))) {
+                accumulator = value;
+            }
+            return accumulator;
+        }
+    };
 
     var PivotCubeBuilder = Class.extend({
         init: function(options) {
@@ -212,72 +409,127 @@
             return descriptors;
         },
 
-        _asTuples: function(map, descriptors) {
+        _asTuples: function(map, descriptors, measureAggregators) {
+            measureAggregators = measureAggregators || [];
+
             var dimensionsSchema = this.dimensions || [];
             var result = [];
             var root;
             var idx;
             var length;
+            var measureIdx;
+            var tuple;
+            var name;
+            var aggregatorsLength = measureAggregators.length || 1;
 
-            if (descriptors.length) {
-                root = { members: [] };
+            if (descriptors.length || measureAggregators.length) {
+                for (measureIdx = 0; measureIdx < aggregatorsLength; measureIdx++) {
 
-                for (idx = 0, length = descriptors.length; idx < length; idx++) {
-                    root.members[root.members.length] = {
-                        children: [],
-                        caption: (dimensionsSchema[descriptors[idx].name] || {}).caption || "All",
-                        name: descriptors[idx].name,
-                        levelName: descriptors[idx].name,
-                        levelNum: "0",
-                        hasChildren: true,
-                        parentName: undefined,
-                        hierarchy: descriptors[idx].name
-                    };
-                }
+                    root = { members: [] };
 
-                result[result.length] = root;
-            }
+                    for (idx = 0, length = descriptors.length; idx < length; idx++) {
+                        name = getName(descriptors[idx].name);
 
-            for (var key in map) {
-                var tuple = { members: [] };
-                for (idx = 0, length = descriptors.length; idx < length; idx++) {
-                    if (map[key].parentName.indexOf(descriptors[idx].name) === 0) {
-                        tuple.members[tuple.members.length] = {
+                        root.members[root.members.length] = {
                             children: [],
-                            caption: map[key].value,
-                            name: map[key].name,
-                            levelName: map[key].name,
-                            levelNum: 1,
-                            hasChildren: false,
-                            parentName: descriptors[idx].name,
-                            hierarchy: descriptors[idx].name
-                        };
-                    } else {
-                        tuple.members[tuple.members.length] = {
-                            children: [],
-                            caption: (dimensionsSchema[descriptors[idx].name] || {}).caption || "All",
-                            name: descriptors[idx].name,
-                            levelName: descriptors[idx].name,
+                            caption: (dimensionsSchema[name] || {}).caption || "All",
+                            name: name,
+                            levelName: name,
                             levelNum: "0",
                             hasChildren: true,
                             parentName: undefined,
-                            hierarchy: descriptors[idx].name
+                            hierarchy: name
                         };
                     }
-                }
 
-                result[result.length] = tuple;
+                    if (aggregatorsLength > 1) {
+                        root.members[root.members.length] = {
+                            children: [],
+                            caption: (measureAggregators[measureIdx]).caption,
+                            name: measureAggregators[measureIdx].descriptor.name,
+                            levelName: "MEASURES",
+                            levelNum: "0",
+                            hasChildren: false,
+                            parentName: undefined,
+                            hierarchy: "MEASURES"
+                        };
+                    }
+                    result[result.length] = root;
+                }
+            }
+
+            for (var key in map) {
+                for (measureIdx = 0; measureIdx < aggregatorsLength; measureIdx++) {
+                    tuple = { members: [] };
+                    for (idx = 0, length = descriptors.length; idx < length; idx++) {
+                        name = getName(descriptors[idx].name);
+
+                        if (map[key].parentName.indexOf(name) === 0) {
+                            tuple.members[tuple.members.length] = {
+                                children: [],
+                                caption: map[key].value,
+                                name: map[key].name,
+                                levelName: map[key].name,
+                                levelNum: 1,
+                                hasChildren: false,
+                                parentName: name,
+                                hierarchy: name
+                            };
+                        } else {
+                            tuple.members[tuple.members.length] = {
+                                children: [],
+                                caption: (dimensionsSchema[name] || {}).caption || "All",
+                                name: name,
+                                levelName: name,
+                                levelNum: "0",
+                                hasChildren: true,
+                                parentName: undefined,
+                                hierarchy: name
+                            };
+                        }
+                    }
+
+                    if (aggregatorsLength > 1) {
+                        tuple.members[tuple.members.length] = {
+                            children: [],
+                            caption: measureAggregators[measureIdx].caption,
+                            name: measureAggregators[measureIdx].descriptor.name,
+                            levelName: "MEASURES",
+                            levelNum: "0",
+                            hasChildren: true,
+                            parentName: undefined,
+                            hierarchy: "MEASURES"
+                        };
+                    }
+
+                    result[result.length] = tuple;
+                }
             }
 
             return result;
         },
 
-        _toDataArray: function(map, columns, measures) {
-            var format;
-            if (measures && measures.length) {
-                var measure = (this.measures || {})[measures[0]];
-                if (measure.format) {
-                    format = measure.format;
+        _toDataArray: function(map, rowStartOffset, measures, offset, addFunc) {
+            var formats = {};
+            var resultFuncs = {};
+            var descriptors, measure, name;
+
+            var idx = 0;
+            var length = measures && measures.length;
+
+            if (length) {
+                descriptors = (this.measures || {});
+                for (; idx < length; idx++) {
+                    name = measures[idx].name;
+                    measure = descriptors[name];
+
+                    if (measure.result) {
+                        resultFuncs[name] = measure.result;
+                    }
+
+                    if (measure.format) {
+                        formats[name] = measure.format;
+                    }
                 }
             }
 
@@ -285,18 +537,15 @@
             var items;
             var rowIndex = 0;
 
-            addDataCell(result, rowIndex, map, ROW_TOTAL_KEY, format);
-
-            rowIndex += columns.length;
+            addFunc(result, rowIndex, map, ROW_TOTAL_KEY, resultFuncs, formats, rowStartOffset);
 
             for (var key in map) {
                 if (key === ROW_TOTAL_KEY) {
                     continue;
                 }
 
-                addDataCell(result, rowIndex, map, key, format);
-
-                rowIndex += columns.length;
+                rowIndex += offset;
+                addFunc(result, rowIndex, map, key, resultFuncs, formats, rowStartOffset);
             }
 
             return result;
@@ -311,7 +560,7 @@
 
             while (idx > 0) {
                 descriptor = descriptors[--idx];
-                parts = descriptor.name.split("&");
+                parts = getName(descriptor).split("&");
                 if (parts.length > 1) {
                     parentField = parts[0];
                     expectedValue = parts[1];
@@ -334,12 +583,28 @@
             return false;
         },
 
-        _processColumns: function(measureAggregator, descriptors, getters, columns, dataItem, rowTotal, state, updateColumn) {
+        _calculateAggregate: function(measureAggregators, aggregatorContext, totalItem) {
+            var result = {};
+            var state;
+            var name;
+
+            for (var measureIdx = 0; measureIdx < measureAggregators.length; measureIdx++) {
+                name = measureAggregators[measureIdx].descriptor.name;
+                state = totalItem.aggregates[name] || { };
+                state.accumulator = measureAggregators[measureIdx].aggregator(aggregatorContext, state);
+                result[name] = state;
+            }
+
+            return result;
+        },
+
+        _processColumns: function(measureAggregators, descriptors, getters, columns, aggregatorContext, rowTotal, state, updateColumn) {
             var value;
             var descriptor;
             var name;
             var column;
             var totalItem;
+            var dataItem = aggregatorContext.dataItem;
 
             for (var idx = 0; idx < descriptors.length; idx++) {
                 descriptor = descriptors[idx];
@@ -349,23 +614,28 @@
                         continue;
                     }
 
-                    value = getters[descriptor.name](dataItem);
+                    name = getName(descriptor);
+
+                    value = getters[name](dataItem);
                     value = value !== undefined ? value.toString() : value;
 
-                    name = descriptor.name + "&" + value;
+                    name = name + "&" + value;
 
                     column = columns[name] || {
                         index: state.columnIndex,
                         name: name,
-                        parentName: descriptor.name,
+                        parentName: name,
                         value: value
                     };
 
                     totalItem = rowTotal.items[name] || {
-                        aggregate: 0
+                        aggregates: {}
                     };
 
-                    rowTotal.items[name] = { index: column.index, aggregate: measureAggregator(dataItem, totalItem.aggregate) };
+                    rowTotal.items[name] = {
+                        index: column.index,
+                        aggregates: this._calculateAggregate(measureAggregators, aggregatorContext, totalItem)
+                    };
 
                     if (updateColumn) {
                         if (!columns[name]) {
@@ -377,35 +647,69 @@
             }
         },
 
-        _measureAggregator: function(options) {
+        _measureAggregators: function(options) {
             var measureDescriptors = options.measures || [];
-            var measure = (this.measures || {})[measureDescriptors[0]];
-            var measureAggregator;
+            var measures = this.measures || {};
+            var aggregators = [];
+            var descriptor, measure, idx, length;
+            var defaultAggregate, aggregate;
 
-            if (measure) {
-                var measureGetter = kendo.getter(measure.field, true);
-                measureAggregator = function(data, state) {
-                    return measure.aggregate(measureGetter(data), state);
-                };
+            if (measureDescriptors.length) {
+                for (idx = 0, length = measureDescriptors.length; idx < length; idx++) {
+                    descriptor = measureDescriptors[idx];
+                    measure = measures[descriptor.name];
+                    defaultAggregate = null;
+
+                    if (measure) {
+                        aggregate = measure.aggregate;
+                        if (typeof aggregate === "string") {
+                            defaultAggregate = functions[aggregate.toLowerCase()];
+
+                            if (!defaultAggregate) {
+                                throw new Error("There is no such aggregate function");
+                            }
+
+                            measure.aggregate = defaultAggregate.aggregate || defaultAggregate;
+                            measure.result = defaultAggregate.result;
+                        }
+
+
+                        aggregators.push({
+                            descriptor: descriptor,
+                            caption: measure.caption,
+                            result: measure.result,
+                            aggregator: createAggregateGetter(measure)
+                        });
+                    }
+                }
             } else {
-                measureAggregator = function() { return 1; };
+                aggregators.push({
+                    descriptor: { name: "default"},
+                    caption: "default",
+                    aggregator: function() { return 1; }
+                });
             }
-            return measureAggregator;
+
+            return aggregators;
         },
 
         _buildGetters: function(descriptors) {
             var result = {};
             var descriptor;
             var parts;
+            var name;
 
             for (var idx = 0, length = descriptors.length; idx < length; idx++) {
                 descriptor = descriptors[idx];
-                parts = descriptor.name.split("&");
+
+                name = getName(descriptor);
+
+                parts = name.split("&");
 
                 if (parts.length > 1) {
                     result[parts[0]] = kendo.getter(parts[0], true);
                 } else {
-                    result[descriptor.name] = kendo.getter(descriptor.name, true);
+                    result[name] = kendo.getter(name, true);
                 }
             }
 
@@ -416,8 +720,26 @@
             data = data || [];
             options = options || {};
 
-            var columnDescriptors = options.columns || [];
-            var rowDescriptors = options.rows || [];
+            var measures = options.measures || [];
+
+            var measuresRowAxis = options.measuresAxis === "rows";
+
+            var columnDescriptors = (measuresRowAxis ? options.rows : options.columns) || [];
+            var rowDescriptors = (!measuresRowAxis ? options.rows : options.columns) || [];
+
+            if (!columnDescriptors.length && rowDescriptors.length && (!measures.length || (measures.length && measuresRowAxis))) {
+                columnDescriptors = rowDescriptors;
+                rowDescriptors = [];
+                measuresRowAxis = false;
+            }
+
+            if (!columnDescriptors.length && !rowDescriptors.length) {
+                measuresRowAxis = false;
+            }
+
+            if (!columnDescriptors.length && measures.length) {
+                columnDescriptors = normalizeMembers(options.measures);
+            }
 
             var aggregatedData = {};
             var columns = {};
@@ -426,52 +748,63 @@
             var rowValue;
             var state = { columnIndex: 0 };
 
-            var measureAggregator = this._measureAggregator(options);
+            var measureAggregators = this._measureAggregators(options);
             var columnGetters = this._buildGetters(columnDescriptors);
             var rowGetters = this._buildGetters(rowDescriptors);
 
             var processed = false;
 
             if (columnDescriptors.length || rowDescriptors.length) {
+                var dataItem;
+                var aggregatorContext;
                 var hasExpandedRows = this._isExpanded(rowDescriptors);
 
                 processed = true;
 
                 for (var idx = 0, length = data.length; idx < length; idx++) {
-                    var rowTotal = aggregatedData[ROW_TOTAL_KEY] || {
-                        items: {},
-                        aggregates: 0
+                    dataItem = data[idx];
+
+                    aggregatorContext = {
+                        dataItem: dataItem,
+                        index: idx
                     };
 
-                    this._processColumns(measureAggregator, columnDescriptors, columnGetters, columns, data[idx], rowTotal, state, !hasExpandedRows);
+                    var rowTotal = aggregatedData[ROW_TOTAL_KEY] || {
+                        items: {},
+                        aggregates: {}
+                    };
 
-                    rowTotal.aggregates = measureAggregator(data[idx], rowTotal.aggregates);
+                    this._processColumns(measureAggregators, columnDescriptors, columnGetters, columns, aggregatorContext, rowTotal, state, !hasExpandedRows);
+
+                    rowTotal.aggregates = this._calculateAggregate(measureAggregators, aggregatorContext, rowTotal);
                     aggregatedData[ROW_TOTAL_KEY] = rowTotal;
 
                     for (var rowIdx = 0, rowLength = rowDescriptors.length; rowIdx < rowLength; rowIdx++) {
                         var rowDescriptor = rowDescriptors[rowIdx];
 
                         if (rowDescriptor.expand) {
-                            if (!this._matchDescriptors(data[idx], rowDescriptors, rowGetters, rowIdx)) {
+                            if (!this._matchDescriptors(dataItem, rowDescriptors, rowGetters, rowIdx)) {
                                 continue;
                             }
 
-                            rowValue = rowGetters[rowDescriptor.name](data[idx]);
+                            var rowName = getName(rowDescriptor);
+
+                            rowValue = rowGetters[rowName](dataItem);
                             rowValue = rowValue !== undefined ? rowValue.toString() : rowValue;
                             rows[rowValue] = {
-                                name: rowDescriptor.name + "&" + rowValue,
-                                parentName: rowDescriptor.name,
+                                name: rowName + "&" + rowValue,
+                                parentName: rowName,
                                 value: rowValue
                             };
 
                             var value = aggregatedData[rowValue] || {
                                 items: {},
-                                aggregates: 0
+                                aggregates: {}
                             };
 
-                            this._processColumns(measureAggregator, columnDescriptors, columnGetters, columns, data[idx], value, state, true);
+                            this._processColumns(measureAggregators, columnDescriptors, columnGetters, columns, aggregatorContext, value, state, true);
 
-                            value.aggregates = measureAggregator(data[idx], value.aggregates);
+                            value.aggregates = this._calculateAggregate(measureAggregators, aggregatorContext, value);
                             aggregatedData[rowValue] = value;
                         }
                     }
@@ -479,9 +812,25 @@
             }
 
             if (processed && data.length) {
-                columns = this._asTuples(columns, columnDescriptors);
-                rows = this._asTuples(rows, rowDescriptors);
-                aggregatedData = this._toDataArray(aggregatedData, columns, options.measures);
+                if (measureAggregators.length > 1 && (!options.columns || !options.columns.length)) {
+                    columnDescriptors = [];
+                }
+
+                columns = this._asTuples(columns, columnDescriptors, measureAggregators);
+                rows = this._asTuples(rows, rowDescriptors, []);
+
+                var offset = columns.length;
+
+                if (measuresRowAxis) {
+                    offset = 1;
+
+                    var tmp = columns;
+                    columns = rows;
+                    rows = tmp;
+                }
+
+                aggregatedData = this._toDataArray(aggregatedData, columns.length, options.measures, offset, measuresRowAxis ? addDataCellVertical : addDataCell);
+                aggregatedData = this._normalizeData(aggregatedData, columns.length, rows.length);
             } else {
                 aggregatedData = columns = rows = [];
             }
@@ -493,6 +842,30 @@
                 },
                 data: aggregatedData
             };
+        },
+
+        _normalizeData: function(data, columns, rows) {
+            var axesLength = (columns || 1) * (rows || 1);
+            var result = new Array(axesLength);
+            var length = data.length;
+            var cell, idx;
+
+            if (length === axesLength) {
+                return data;
+            }
+
+            for (idx = 0; idx < axesLength; idx++) {
+                result[idx] = { value: "", fmtValue: "", ordinal: idx };
+            }
+
+            for (idx = 0; idx < length; idx++) {
+               cell = data[idx];
+               if (cell) {
+                   result[cell.ordinal] = cell;
+               }
+            }
+
+            return result;
         }
     });
 
@@ -556,40 +929,94 @@
 
     var PivotDataSource = DataSource.extend({
         init: function(options) {
-            DataSource.fn.init.call(this, extend(true, {}, {
-                schema: {
-                    axes: identity,
-                    cubes: identity,
-                    catalogs: identity,
-                    measures: identity,
-                    dimensions: identity,
-                    hierarchies: identity,
-                    levels: identity,
-                    members: identity
-                }
-            }, options));
+            var cube = ((options || {}).schema || {}).cube;
+            var measuresAxis = "columns";
+            var measures;
 
-            if (this.options.schema && this.options.schema.cube) {
-                this.cubeBuilder = new PivotCubeBuilder(this.options.schema.cube);
+            var schema = {
+                axes: identity,
+                cubes: identity,
+                catalogs: identity,
+                measures: identity,
+                dimensions: identity,
+                hierarchies: identity,
+                levels: identity,
+                members: identity
+            };
+
+            if (cube) {
+                schema = $.extend(schema, this._cubeSchema(cube));
+                this.cubeBuilder = new PivotCubeBuilder(cube);
             }
+
+            DataSource.fn.init.call(this, extend(true, {}, {
+                schema: schema
+            }, options));
 
             this.transport = new PivotTransport(this.options.transport || {}, this.transport);
 
             this._columns = normalizeMembers(this.options.columns);
             this._rows = normalizeMembers(this.options.rows);
 
-            var measures = this.options.measures || [];
-            var measuresAxis = "columns";
+            measures = this.options.measures || [];
 
             if (this.options.measures !== null && toString.call(this.options.measures) === "[object Object]") {
                 measures = this.options.measures.values || [];
                 measuresAxis = this.options.measures.axis || "columns";
             }
 
-            this._measures = measures || [];
+            this._measures = normalizeMeasures(measures || []);
             this._measuresAxis = measuresAxis;
 
             this._axes = {};
+        },
+
+        _cubeSchema: function(cube) {
+            return {
+                dimensions: function() {
+                    var result = [];
+                    var dimensions = cube.dimensions;
+
+                    for (var key in dimensions) {
+                        result.push({
+                            name: key,
+                            caption: dimensions[key].caption || key,
+                            uniqueName: key,
+                            defaultHierarchy: key,
+                            type: 1
+                        });
+                    }
+
+                    if (cube.measures) {
+                        result.push({
+                            name: "Measures",
+                            caption: "Measures",
+                            uniqueName: "Measures",
+                            type: 2
+                        });
+                    }
+
+                    return result;
+                },
+                hierarchies: function(){
+                    return [];
+                },
+                measures: function() {
+                    var result = [];
+                    var measures = cube.measures;
+
+                    for (var key in measures) {
+                        result.push({
+                            name: key,
+                            caption: key,
+                            uniqueName: key,
+                            aggregator: key
+                        });
+                    }
+
+                    return result;
+                }
+            };
         },
 
         options: {
@@ -664,7 +1091,7 @@
             this.query({
                 columns: this.columnsAxisDescriptors(),
                 rows: this.rowsAxisDescriptors(),
-                measures: val
+                measures: normalizeMeasures(val)
             });
         },
 
@@ -677,14 +1104,16 @@
             var other = axis === "columns" ? "rows" : "columns";
 
             var members = normalizeMembers(path);
-            var memberToExpand = members[members.length - 1].name;
+            var memberToExpand = getName(members[members.length - 1]);
 
             this._lastExpanded = origin;
 
             members = descriptorsForMembers(this.axes()[origin], members, this.measures());
 
             for (var idx = 0; idx < members.length; idx++) {
-                if (members[idx].name === memberToExpand) {
+                var memberName = getName(members[idx]);
+
+                if (memberName === memberToExpand) {
                     if (members[idx].expand) {
                         return;
                     }
@@ -735,7 +1164,7 @@
                 this._clearAxesData = true;
             }
 
-            that.query(extend({}, {
+            return that.query(extend({}, {
                 page: that.page(),
                 pageSize: that.pageSize(),
                 sort: that.sort(),
@@ -750,19 +1179,22 @@
 
         query: function(options) {
             var state = this._mergeState(options);
+
             if (this._data.length && this.cubeBuilder) {
                 this._params(state);
                 this._updateLocalData(this._pristineData);
-            } else {
-                this.read(state);
+
+                return $.Deferred().resolve().promise();
             }
+
+            return this.read(state);
         },
 
         _mergeState: function(options) {
             options = DataSource.fn._mergeState.call(this, options);
 
             if (options !== undefined) {
-                this._measures = asArray(options.measures);
+                this._measures = normalizeMeasures(options.measures);
 
                 if (options.columns) {
                     options.columns = normalizeMembers(options.columns);
@@ -815,6 +1247,7 @@
                 axes = processedData.axes;
             }
 
+            var columnIndexes, rowIndexes;
             var tuples, resultAxis, measures, axisToSkip;
             var columnDescriptors = this.columns().length;
             var rowDescriptors = this.rows().length;
@@ -844,7 +1277,18 @@
                 rows: normalizeAxis(axes.rows)
             };
 
-            data = this._normalizeData(data, axes.columns.tuples.length, axes.rows.tuples.length);
+            columnIndexes = this._normalizeTuples(axes.columns.tuples, this._axes.columns.tuples, this._columnMeasures());
+            rowIndexes = this._normalizeTuples(axes.rows.tuples, this._axes.rows.tuples, this._rowMeasures());
+
+            if (!this.cubeBuilder) {
+                data = this._normalizeData({
+                    columnsLength: axes.columns.tuples.length,
+                    rowsLength: axes.rows.tuples.length,
+                    columnIndexes: columnIndexes,
+                    rowIndexes: rowIndexes,
+                    data: data
+                });
+            }
 
             if (this._lastExpanded == "rows") {
                 tuples = axes.columns.tuples;
@@ -855,7 +1299,11 @@
                     axisToSkip = "columns";
                     axes.columns = resultAxis;
                     adjustDataByColumn(tuples, resultAxis.tuples, axes.rows.tuples.length, measures, data);
-                    data = this._normalizeData(data, membersCount(axes.columns.tuples, measures), axes.rows.tuples.length);
+                    data = this._normalizeData({
+                        columnsLength: membersCount(axes.columns.tuples, measures),
+                        rowsLength: axes.rows.tuples.length,
+                        data: data
+                    });
                 }
             } else if (this._lastExpanded == "columns") {
                 tuples = axes.rows.tuples;
@@ -866,7 +1314,12 @@
                     axisToSkip = "rows";
                     axes.rows = resultAxis;
                     adjustDataByRow(tuples, resultAxis.tuples, axes.columns.tuples.length, measures, data);
-                    data = this._normalizeData(data, membersCount(axes.rows.tuples, measures), axes.columns.tuples.length);
+
+                    data = this._normalizeData({
+                        columnsLength: membersCount(axes.rows.tuples, measures),
+                        rowsLength: axes.columns.tuples.length,
+                        data: data
+                    });
                 }
             }
 
@@ -883,6 +1336,86 @@
             var newData = this.reader.data(data);
 
             return this._processResult(newData, axes);
+        },
+
+        _createTuple: function(tuple, measure, buildRoot) {
+            var name;
+            var member;
+            var parentName;
+            var members = tuple.members;
+            var length = members.length;
+            var root = { members: [] };
+            var levelNum;
+            var caption;
+            var idx = 0;
+
+            if (measure) {
+                length -= 1;
+            }
+
+            for (; idx < length; idx++) {
+                member = members[idx];
+                levelNum = Number(member.levelNum);
+
+                name = member.name;
+                parentName = member.parentName;
+                caption = member.caption || name;
+
+                if (buildRoot) {
+                    caption = "All";
+                    if (levelNum === 0) {
+                        parentName = member.name;
+                    } else {
+                        levelNum -= 1;
+                    }
+
+                    name = parentName;
+                }
+
+                root.members.push({
+                    name: name,
+                    children: [],
+                    caption: caption,
+                    levelName: parentName,
+                    levelNum: levelNum.toString(),
+                    hasChildren: buildRoot,
+                    hierarchy: parentName,
+                    parentName: !buildRoot ? parentName: ""
+                });
+            }
+
+            if (measure) {
+                root.members.push({
+                    name: measure.name,
+                    children: []
+                });
+            }
+
+            return root;
+        },
+
+        _hasRoot: function(target, source) {
+            if (source.length) {
+                return findExistingTuple(source, target).tuple;
+            }
+
+            var members = target.members;
+            var member;
+
+            var isRoot = true;
+            var levelNum;
+
+            for (var idx = 0, length = members.length; idx < length; idx++) {
+                member = members[idx];
+                levelNum = Number(member.levelNum) || 0;
+
+                if (levelNum !== 0) {
+                    isRoot = false;
+                    break;
+                }
+            }
+
+            return isRoot;
         },
 
         _mergeAxes: function(sourceAxes, data, axisToSkip) {
@@ -902,6 +1435,7 @@
                 tuples = parseSource(sourceAxes.columns.tuples, columnMeasures);
                 data = prepareDataOnColumns(tuples, data);
             }
+
             var mergedColumns = mergeTuples(axes.columns.tuples, tuples, columnMeasures);
 
             if (axisToSkip == "rows") {
@@ -1039,22 +1573,112 @@
             }
         },
 
-        _normalizeData: function(data, columns, rows) {
-            var cell, idx, length;
-            var axesLength = (columns || 1) * (rows || 1);
-            var result = new Array(axesLength);
+        _normalizeTuples: function(tuples, source, measures) {
+            var length = measures.length || 1;
+            var idx = 0;
 
-            if (data.length === axesLength) {
+            var roots = [];
+            var indexes = {};
+            var measureIdx = 0;
+            var tuple, memberIdx, last;
+
+            if (!tuples.length) {
+                return;
+            }
+
+            if (!this._hasRoot(tuples[0], source)) {
+                for (; idx < length; idx++) {
+                    roots.push(this._createTuple(tuples[0], measures[idx], true));
+                    indexes[idx] = idx;
+                }
+
+                tuples.splice.apply(tuples, [0, tuples.length].concat(roots).concat(tuples));
+                idx = length;
+            }
+
+            if (measures.length) {
+                last = tuple = tuples[idx];
+                memberIdx = tuple.members.length - 1;
+
+                while (tuple) {
+                    if (measureIdx >= length) {
+                        measureIdx = 0;
+                    }
+
+                    if (tuple.members[memberIdx].name !== measures[measureIdx].name) {
+                        tuples.splice(idx, 0, this._createTuple(tuple, measures[measureIdx]));
+                        indexes[idx] = idx;
+                    }
+
+                    idx += 1;
+                    measureIdx += 1;
+                    tuple = tuples[idx];
+
+                    if (length > measureIdx && (!tuple || tupleName(last, memberIdx - 1) !== tupleName(tuple, memberIdx - 1))) {
+                        for (; measureIdx < length; measureIdx++) {
+                            tuples.splice(idx, 0, this._createTuple(last, measures[measureIdx]));
+                            indexes[idx] = idx;
+                            idx += 1;
+                        }
+                        tuple = tuples[idx];
+                    }
+                    last = tuple;
+                }
+            }
+
+            return indexes;
+        },
+
+        _normalizeData: function(options) {
+            var data = options.data;
+
+            var columnIndexes = options.columnIndexes || {};
+            var rowIndexes = options.rowIndexes || {};
+
+            var columnsLength = options.columnsLength || 1;
+            var length = columnsLength * (options.rowsLength || 1);
+
+            var idx = 0;
+            var dataIdx = 0;
+            var lastOrdinal = 0;
+            var dataItem, i;
+            var result = new Array(length);
+
+            if (data.length === length) {
                 return data;
             }
 
-            for (idx = 0, length = result.length; idx < length; idx++) {
-                result[idx] = { value: "", fmtValue: "", ordinal: idx };
-            }
+            for (; idx < length; idx++) {
+                if (rowIndexes[parseInt(idx / columnsLength, 10)] !== undefined) {
+                    for (i = 0; i < columnsLength; i++) {
+                        result[idx] = { value: "", fmtValue: "", ordinal: idx };
+                        idx += 1;
+                    }
+                }
 
-            for (idx = 0, length = data.length; idx < length; idx++) {
-               cell = data[idx];
-               result[cell.ordinal] = cell;
+                if (columnIndexes[idx % columnsLength] !== undefined) {
+                    result[idx] = { value: "", fmtValue: "", ordinal: idx };
+                    idx += 1;
+                }
+
+                dataItem = data[dataIdx];
+
+                if (dataItem) {
+                    if (dataItem.ordinal - lastOrdinal > 1) {
+                        lastOrdinal += 1;
+                        for (; lastOrdinal < dataItem.ordinal; lastOrdinal++) {
+                            result[idx] = { value: "", fmtValue: "", ordinal: idx };
+                            idx += 1;
+                        }
+                    }
+
+                    lastOrdinal = dataItem.ordinal;
+                    dataItem.ordinal = idx;
+                    result[idx] = dataItem;
+                    dataIdx += 1;
+                } else {
+                    result[idx] = { value: "", fmtValue: "", ordinal: idx };
+                }
             }
 
             return result;
@@ -1101,6 +1725,22 @@
                 }
             }, function(response) {
                 return that.reader.measures(response);
+            });
+        },
+
+        schemaKPIs: function() {
+            var that = this;
+
+            return that.discover({
+                data: {
+                    command: "schemaKPIs",
+                    restrictions: {
+                        catalogName: that.transport.catalog(),
+                        cubeName: that.transport.cube()
+                    }
+                }
+            }, function(response) {
+                return that.reader.kpis(response);
             });
         },
 
@@ -1393,6 +2033,7 @@
     function equalTuples(first, second) {
         var equal = true;
         var idx, length;
+        var name;
 
         first = first.members;
         second = second.members;
@@ -1401,7 +2042,8 @@
             if (first[idx].measure || second[idx].measure) {
                 continue;
             }
-            equal = equal && (first[idx].name === second[idx].name);
+
+            equal = equal && (getName(first[idx]) === getName(second[idx]));
         }
 
         return equal;
@@ -1504,13 +2146,13 @@
         var measure = measures[0];
         var members = tuple.members;
         for (var idx = 0, len = members.length; idx < len; idx ++) {
-            if (members[idx].name == measure) {
+            if (members[idx].name == measure.name) {
                 return idx;
             }
         }
     }
 
-    function normalizeMeasures(tuple, index) {
+    function normalizeTupleMeasures(tuple, index) {
         if (index < 0) {
             return;
         }
@@ -1539,7 +2181,7 @@
             //keep the old data index of the tuple
             tuple.dataIndex = i;
 
-            normalizeMeasures(tuple, measureIndex);
+            normalizeTupleMeasures(tuple, measureIndex);
             var parentMember = findParentMember(tuple, map);
 
             if (parentMember) {
@@ -1568,19 +2210,21 @@
         var rowsLength = indices.length;
         var columnsLength = Math.max(data.length / rowsLength, 1);
         var rowIndex, columnIndex, targetIndex, sourceIndex;
+        var calcIndex;
 
         for (rowIndex = 0; rowIndex < rowsLength; rowIndex++) {
             targetIndex = columnsLength * rowIndex;
             sourceIndex = columnsLength * indices[rowIndex];
             for (columnIndex = 0; columnIndex < columnsLength; columnIndex++) {
-                result[targetIndex + columnIndex] = data[sourceIndex + columnIndex];
+                calcIndex = parseInt(sourceIndex + columnIndex, 10);
+                result[parseInt(targetIndex + columnIndex, 10)] = data[calcIndex] || { value: "", fmtValue: "", ordinal: calcIndex };
             }
         }
 
         return result;
     }
 
-    function prepareDataOnColumns(tuples, data) {
+    function prepareDataOnColumns(tuples, data, rootAdded) {
         if (!tuples || !tuples.length) {
             return data;
         }
@@ -1589,12 +2233,13 @@
         var indices = buildDataIndices(tuples);
         var columnsLength = indices.length;
         var rowsLength = Math.max(data.length / columnsLength, 1);
-        var columnIndex, rowIndex, dataIndex;
+        var columnIndex, rowIndex, dataIndex, calcIndex;
 
         for (rowIndex = 0; rowIndex < rowsLength; rowIndex++) {
             dataIndex = columnsLength * rowIndex;
             for (columnIndex = 0; columnIndex < columnsLength; columnIndex++) {
-                result[dataIndex + columnIndex] = data[indices[columnIndex] + dataIndex];
+                calcIndex = indices[columnIndex] + dataIndex;
+                result[dataIndex + columnIndex] = data[calcIndex] || { value: "", fmtValue: "", ordinal: calcIndex };
             }
         }
 
@@ -1646,16 +2291,6 @@
         return dataSource instanceof PivotDataSource ? dataSource : new PivotDataSource(dataSource);
     };
 
-    function transformDescriptors(members, mapFunction) {
-        var result = [];
-
-        for (var idx = 0; idx < members.length; idx++) {
-            result.push(mapFunction(members[idx]));
-        }
-
-        return result;
-    }
-
     function baseHierarchyPath(memberName) {
         var parts = memberName.split(".");
         if (parts.length > 2) {
@@ -1664,106 +2299,37 @@
         return memberName;
     }
 
-    function trimSameHierarchyChildDescriptors(members) {
-        var result = members.slice(0);
+    function expandMemberDescriptor(names, sort) {
+        var idx = names.length - 1;
+        var name = names[idx];
+        var sortDescriptor;
 
-        for (var idx = 0; idx < members.length; idx++) {
-            var hierarchyName = baseHierarchyPath(members[idx].name);
+        sortDescriptor = sortDescriptorForMember(sort, name);
 
-            var j = idx + 1;
-            while(j < result.length) {
-                if (result[j].name.indexOf(hierarchyName) === 0) {
-                    result.splice(j, 1);
-                } else {
-                    j++;
-                }
-            }
+        if (sortDescriptor && sortDescriptor.dir) {
+            name = "ORDER(" + name + ".Children," + sortDescriptor.field + ".CurrentMember.MEMBER_CAPTION," + sortDescriptor.dir + ")";
+        } else {
+            name += ".Children";
         }
 
-        return result;
+        names[idx] = name;
+
+        return names;
     }
 
-    function trimSameHierarchyChildDescriptorsForName(members, memberName) {
-        var result = [];
-
-        for (var idx = 0; idx < members.length; idx++) {
-            var name = members[idx].name;
-            var hierarchyName = baseHierarchyPath(memberName);
-
-            if (memberName == name || name.indexOf(hierarchyName) !== 0) {
-                result.push(members[idx]);
+    function sortDescriptorForMember(sort, member) {
+        for (var idx = 0, length = sort.length; idx < length; idx++) {
+            if (member.indexOf(sort[idx].field) === 0) {
+                return sort[idx];
             }
         }
-
-        return result;
-    }
-
-    function sameHierarchyDescriptors(members) {
-        var same = {};
-
-        for (var idx = 0; idx < members.length; idx++) {
-            var name = members[idx].name;
-            var hierarchyName = baseHierarchyPath(name);
-
-            for (var j = 0; j < members.length; j++) {
-                var memberName = members[j].name;
-                if (memberName.indexOf(hierarchyName) === 0 && memberName !== name) {
-                    same[name] = members[idx];
-                }
-            }
-        }
-
-        var result = [];
-
-        for (var key in same) {
-            result.push(same[key]);
-        }
-
-        return result;
-    }
-
-
-    function expandMemberDescriptor(members, memberNames) {
-        return transformDescriptors(members, function(member) {
-            var name = member.name;
-
-            var found = false;
-
-            for (var idx = 0; idx < memberNames.length; idx++) {
-                if (name === memberNames[idx]) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (member.expand && found) {
-                name += ".Children";
-            }
-
-            return name;
-        });
-    }
-
-    function expandDescriptors(members) {
-        return transformDescriptors(members, function(member) {
-            var name = member.name;
-
-            if (member.expand) {
-                name += ".Children";
-            }
-            return name;
-        });
-    }
-
-    function convertMemberDescriptors(members) {
-        return transformDescriptors(members, function(member) {
-            return member.name;
-        });
+        return null;
     }
 
     function crossJoin(names) {
         var result = "CROSSJOIN({";
         var r;
+
         if (names.length > 2) {
             r = names.pop();
             result += crossJoin(names);
@@ -1771,6 +2337,7 @@
             result += names.shift();
             r = names.pop();
         }
+
         result += "},{";
         result += r;
         result += "})";
@@ -1778,9 +2345,11 @@
     }
 
     function crossJoinCommand(members, measures) {
-        var tmp = members;
+        var tmp = members.slice(0);
+        var names;
+
         if (measures.length > 1) {
-            tmp.push("{" + measures.join(",") + "}");
+            tmp.push("{" + measureNames(measures).join(",") + "}");
         }
         return crossJoin(tmp);
     }
@@ -1797,57 +2366,160 @@
         return result;
     }
 
-    function serializeMembers(members, measures) {
+    function measureNames(measures) {
+        var idx = 0;
+        var length = measures.length;
+        var result = [];
+        var measure;
+
+        for (; idx < length; idx++) {
+            measure = measures[idx];
+            result.push(measure.name !== undefined ? measure.name :  measure);
+        }
+
+        return result;
+    }
+
+    function getName(name) {
+        name = name.name || name;
+
+        if (toString.call(name) === "[object Array]") {
+            name = name[name.length - 1];
+        }
+
+        return name;
+    }
+
+    function getRootNames(members) {
+        var length = members.length;
+        var names = [];
+        var idx = 0;
+
+        for (; idx < length; idx++) {
+            names.push(members[idx].name[0]);
+        }
+
+        return names;
+    }
+
+    function mapNames(names, rootNames) {
+        var name;
+        var rootName;
+
+        var j;
+        var idx = 0;
+        var length = names.length;
+        var rootLength = rootNames.length;
+
+        rootNames = rootNames.slice(0);
+
+        for (; idx < length; idx++) {
+            name = names[idx];
+
+            for (j = 0; j < rootLength; j++) {
+                rootName = baseHierarchyPath(rootNames[j]);
+
+                if (name.indexOf(rootName) !== -1) {
+                    rootNames[j] = name;
+                    break;
+                }
+            }
+        }
+
+        return rootNames;
+    }
+
+    function parseDescriptors(members) {
+        var expanded = [];
+        var child = [];
+        var root = [];
+        var member;
+
+        var j, l;
+        var idx = 0;
+        var length = members.length;
+
+        var name;
+        var hierarchyName;
+
+        var found;
+
+        for (; idx < length; idx++) {
+            member = members[idx];
+            name = member.name;
+            found = false;
+
+            if (toString.call(name) !== "[object Array]") {
+                member.name = name = [name];
+            }
+
+            if (name.length > 1) {
+                child.push(member);
+            } else {
+                hierarchyName = baseHierarchyPath(name[0]);
+
+                for (j = 0, l = root.length; j < l; j++) {
+                    if (root[j].name[0].indexOf(hierarchyName) === 0) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    root.push(member);
+                }
+
+                if (member.expand) {
+                    expanded.push(member);
+                }
+            }
+        }
+
+        expanded = expanded.concat(child);
+
+        return {
+            root: root,
+            expanded: expanded
+        };
+    }
+
+    function serializeMembers(members, measures, sort) {
         var command = "";
 
         members = members || [];
 
-        var memberNames = convertMemberDescriptors(trimSameHierarchyChildDescriptors(members));
-        var expandedColumns = expandedMembers(members);
+        var expanded = parseDescriptors(members);
+        var root = expanded.root;
 
-        if (memberNames.length > 1 || measures.length > 1) {
-            command += crossJoinCommand(memberNames, measures);
+        var rootNames = getRootNames(root);
+        var crossJoinCommands = [];
 
-            if (expandedColumns.length) {
-                var start = 0;
-                var idx;
-                var j;
-                var name;
+        expanded = expanded.expanded;
 
-                var expandedMemberNames = [];
-                var sameHierarchyMembers = sameHierarchyDescriptors(members);
+        var length = expanded.length;
+        var idx = 0;
 
-                var generatedMembers = [];
+        var memberName;
+        var names = [];
 
-                for (idx = 0; idx < expandedColumns.length; idx++) {
+        if (rootNames.length > 1 || measures.length > 1) {
+            crossJoinCommands.push(crossJoinCommand(rootNames, measures));
 
-                    for (j=start; j < expandedColumns.length; j++) {
-                        name = expandedColumns[j].name;
+            for (; idx < length; idx++) {
+                memberName = expandMemberDescriptor(expanded[idx].name, sort);
+                names = mapNames(memberName, rootNames);
 
-                        var tmpMembers = trimSameHierarchyChildDescriptors(members);
-
-                        if ($.inArray(expandedColumns[j], sameHierarchyMembers) > -1) {
-                            tmpMembers = trimSameHierarchyChildDescriptorsForName(members, name);
-                        }
-
-                        var tmp = crossJoinCommand(expandMemberDescriptor(tmpMembers, expandedMemberNames.concat(name)), measures);
-                        if ($.inArray(tmp, generatedMembers) == -1) {
-                            command += ",";
-                            command += tmp;
-                            generatedMembers.push(tmp);
-                        }
-                    }
-                    start++;
-
-                    expandedMemberNames.push(expandedColumns[idx].name);
-                    expandedMemberNames.shift();
-                }
+                crossJoinCommands.push(crossJoinCommand(names, measures));
             }
+
+            command += crossJoinCommands.join(",");
         } else {
-            if (expandedColumns.length) {
-                memberNames = memberNames.concat(expandDescriptors(members));
+            for (; idx < length; idx++) {
+                memberName = expandMemberDescriptor(expanded[idx].name, sort);
+                names.push(memberName[0]); //check if this is ok
             }
-            command += memberNames.join(",");
+
+            command += rootNames.concat(names).join(",");
         }
 
         return command;
@@ -1932,7 +2604,8 @@
         schemaDimensions: "MDSCHEMA_DIMENSIONS",
         schemaHierarchies: "MDSCHEMA_HIERARCHIES",
         schemaLevels: "MDSCHEMA_LEVELS",
-        schemaMembers: "MDSCHEMA_MEMBERS"
+        schemaMembers: "MDSCHEMA_MEMBERS",
+        schemaKPIs: "MDSCHEMA_KPIS"
     };
 
     var convertersMap = {
@@ -1946,6 +2619,7 @@
 
             var measures = options.measures || [];
             var measuresRowAxis = options.measuresAxis === "rows";
+            var sort = options.sort || [];
 
             if (!columns.length && rows.length && (!measures.length || (measures.length && measuresRowAxis))) {
                 columns = rows;
@@ -1958,9 +2632,9 @@
             }
 
             if (columns.length) {
-                command += serializeMembers(columns, !measuresRowAxis ? measures : []);
+                command += serializeMembers(columns, !measuresRowAxis ? measures : [], sort);
             } else if (measures.length && !measuresRowAxis) {
-                command += measures.join(",");
+                command += measureNames(measures).join(",");
             }
 
             command += "} DIMENSION PROPERTIES CHILDREN_CARDINALITY, PARENT_UNIQUE_NAME ON COLUMNS";
@@ -1969,9 +2643,9 @@
                 command += ", NON EMPTY {";
 
                 if (rows.length) {
-                    command += serializeMembers(rows, measuresRowAxis ? measures : []);
+                    command += serializeMembers(rows, measuresRowAxis ? measures : [], sort);
                 } else {
-                    command += measures.join(",");
+                    command += measureNames(measures).join(",");
                 }
 
                 command += "} DIMENSION PROPERTIES CHILDREN_CARDINALITY, PARENT_UNIQUE_NAME ON ROWS";
@@ -1987,7 +2661,7 @@
             }
 
             if (measures.length == 1 && columns.length) {
-                command += " WHERE (" + measures.join(",") + ")";
+                command += " WHERE (" + measureNames(measures).join(",") + ")";
             }
 
             command += '</Statement></Command><Properties><PropertyList><Catalog>' + options.connection.catalog + '</Catalog><Format>Multidimensional</Format></PropertyList></Properties></Execute></Body></Envelope>';
@@ -2125,6 +2799,18 @@
             displayFolder: kendo.getter("MEASURE_DISPLAY_FOLDER['#text']", true),
             defaultFormat: kendo.getter("DEFAULT_FORMAT_STRING['#text']", true)
         },
+        kpis: {
+            name: kendo.getter("KPI_NAME['#text']", true),
+            caption: kendo.getter("KPI_CAPTION['#text']", true),
+            value: kendo.getter("KPI_VALUE['#text']", true),
+            goal: kendo.getter("KPI_GOAL['#text']", true),
+            status: kendo.getter("KPI_STATUS['#text']", true),
+            trend: kendo.getter("KPI_TREND['#text']", true),
+            statusGraphic: kendo.getter("KPI_STATUS_GRAPHIC['#text']", true),
+            trendGraphic: kendo.getter("KPI_TREND_GRAPHIC['#text']", true),
+            description: kendo.getter("KPI_DESCRIPTION['#text']", true),
+            groupName: kendo.getter("MEASUREGROUP_NAME['#text']", true)
+        },
         dimensions: {
             name: kendo.getter("DIMENSION_NAME['#text']", true),
             caption: kendo.getter("DIMENSION_CAPTION['#text']", true),
@@ -2167,7 +2853,29 @@
         }
     };
 
+    var xmlaReaderMethods = ["axes", "catalogs", "cubes", "dimensions", "hierarchies", "levels", "measures"];
+
     var XmlaDataReader = kendo.data.XmlDataReader.extend({
+        init: function(options) {
+            kendo.data.XmlDataReader.call(this, options);
+
+            this._extend(options);
+        },
+        _extend: function(options) {
+            var idx = 0;
+            var length = xmlaReaderMethods.length;
+            var methodName;
+            var option;
+
+            for (; idx < length; idx++) {
+                methodName = xmlaReaderMethods[idx];
+                option = options[methodName];
+
+                if (option && option !== identity) {
+                    this[methodName] = option;
+                }
+            }
+        },
         parse: function(xml) {
             var result = kendo.data.XmlDataReader.fn.parse(xml.replace(/<(\/?)(\w|-)+:/g, "<$1"));
             return kendo.getter("['Envelope']['Body']", true)(result);
@@ -2237,6 +2945,9 @@
         measures: function(root) {
             return this._mapSchema(root, schemaDataReaderMap.measures);
         },
+        kpis: function(root) {
+            return this._mapSchema(root, schemaDataReaderMap.kpis);
+        },
         hierarchies: function(root) {
             return this._mapSchema(root, schemaDataReaderMap.hierarchies);
         },
@@ -2270,52 +2981,93 @@
        }
     });
 
+    var sortExpr = function(expressions, name) {
+        if (!expressions) {
+            return null;
+        }
+
+        for (var idx = 0, length = expressions.length; idx < length; idx++) {
+            if (expressions[idx].field === name) {
+                return expressions[idx];
+            }
+        }
+
+        return null;
+    };
+
+    var removeExpr = function(expressions, name) {
+        var result = [];
+
+        for (var idx = 0, length = expressions.length; idx < length; idx++) {
+            if (expressions[idx].field !== name) {
+                result.push(expressions[idx]);
+            }
+        }
+
+        return result;
+    };
+
     kendo.ui.PivotSettingTarget = Widget.extend({
         init: function(element, options) {
-            Widget.fn.init.call(this, element, options);
+            var that = this;
 
-            this.element.addClass("k-pivot-setting");
+            Widget.fn.init.call(that, element, options);
 
-            this.dataSource = kendo.data.PivotDataSource.create(options.dataSource);
+            that.element.addClass("k-pivot-setting");
 
-            this._refreshHandler = $.proxy(this.refresh, this);
-            this.dataSource.first(CHANGE, this._refreshHandler);
+            that.dataSource = kendo.data.PivotDataSource.create(options.dataSource);
+
+            that._refreshHandler = $.proxy(that.refresh, that);
+            that.dataSource.first(CHANGE, that._refreshHandler);
 
             if (!options.template) {
-                this.options.template = "<div data-" + kendo.ns + 'name="${data.name || data}">${data.name || data}' +
-                    (this.options.enabled ?
+                that.options.template = "<div data-" + kendo.ns + 'name="${data.name || data}">${data.name || data}' +
+                    (that.options.enabled ?
                     '<a class="k-button k-button-icon k-button-bare"><span class="k-icon k-setting-delete"></span></a>' : "") + '</div>';
             }
 
-            this.template = kendo.template(this.options.template);
-            this.emptyTemplate = kendo.template(this.options.emptyTemplate);
+            that.template = kendo.template(that.options.template);
+            that.emptyTemplate = kendo.template(that.options.emptyTemplate);
 
-            this._sortable();
+            that._sortable();
 
-            var that = this;
+            that.element.on("click" + NS, ".k-button,.k-item", function(e) {
+                var target = $(e.target);
+                var name = target.closest("[" + kendo.attr("name") + "]")
+                                 .attr(kendo.attr("name"));
 
-            this.element.on("click" + NS, ".k-setting-delete", function() {
-                var name = $(this).closest("[" + kendo.attr("name") + "]").attr(kendo.attr("name"));
-                if (name) {
+                if (!name) {
+                    return;
+                }
+
+                if (target.hasClass("k-setting-delete")) {
                     that.remove(name);
+                } else if (that.options.sortable && target[0] === e.currentTarget) {
+                    that.sort({
+                        field: name,
+                        dir: target.find(".k-i-sort-asc")[0] ? "desc" : "asc"
+                    });
                 }
             });
 
-            if (options.filterable) {
-                this.fieldMenu = new ui.PivotFieldMenu(this.element, {
-                    messages: this.options.messages.fieldMenu,
-                    filter: ".k-setting-filter",
-                    dataSource: this.dataSource
+            if (options.filterable || options.sortable) {
+                that.fieldMenu = new ui.PivotFieldMenu(that.element, {
+                    messages: that.options.messages.fieldMenu,
+                    filter: ".k-setting-fieldmenu",
+                    filterable: options.filterable,
+                    sortable: options.sortable,
+                    dataSource: that.dataSource
                 });
             }
 
-            this.refresh();
+            that.refresh();
         },
 
         options: {
             name: "PivotSettingTarget",
             template: null,
             filterable: false,
+            sortable: false,
             emptyTemplate: "<div class='k-empty'>${data}</div>",
             setting: "columns",
             enabled: true,
@@ -2344,6 +3096,9 @@
                     filter: ">:not(.k-empty)",
                     hint: that.options.hint,
                     cursor: "move",
+                    start: function(e) {
+                        e.item.focus().blur();
+                    },
                     change: function(e) {
                         var name = e.item.attr(kendo.attr("name"));
 
@@ -2363,7 +3118,7 @@
             var idx, length, index = -1;
 
             for (idx = 0, length = items.length; idx < length; idx++) {
-                if (items[idx].name === name || items[idx] === name) {
+                if (getName(items[idx]) === name) {
                     index = idx;
                     break;
                 }
@@ -2371,8 +3126,12 @@
             return index;
         },
 
+        _isKPI: function(data) {
+            return data.type === "kpi" || data.measure;
+        },
+
         validate: function(data) {
-            var isMeasure = (data.type == 2 || "aggregator" in data);
+            var isMeasure = (data.type == 2 || "aggregator" in data || this._isKPI(data));
 
             if (isMeasure) {
                 return this.options.setting === "measures";
@@ -2398,22 +3157,34 @@
 
         add: function(name) {
             var items = this.dataSource[this.options.setting]();
-            var idx = this._indexOf(name, items);
+            var i, l;
+            var idx;
 
-            if (idx == -1) {
-                items.push(name);
+            name = $.isArray(name) ? name.slice(0) : [name];
+
+            for (i = 0, l = name.length; i < l; i++) {
+                if (this._indexOf(name[i], items) !== -1) {
+                    name.splice(i, 1);
+                    i -= 1;
+                    l -= 1;
+                }
+            }
+
+            if (name.length) {
+                items = items.concat(name);
                 this.dataSource[this.options.setting](items);
             }
         },
 
         move: function(name, index) {
             var items = this.dataSource[this.options.setting]();
-
             var idx = this._indexOf(name, items);
 
             if (idx > -1) {
-                items.splice(idx, 1);
+                name = items.splice(idx, 1)[0];
+
                 items.splice(index, 0, name);
+
                 this.dataSource[this.options.setting](items);
             }
         },
@@ -2428,13 +3199,41 @@
             }
         },
 
+        sort: function(expr) {
+            var sortable = this.options.sortable;
+            var allowUnsort = sortable === true || sortable.allowUnsort;
+            var skipExpr = allowUnsort && expr.dir === "asc";
+
+            var expressions = (this.dataSource.sort() || []);
+            var result = removeExpr(expressions, expr.field);
+
+            if (skipExpr && expressions.length !== result.length) {
+                expr = null;
+            }
+
+            if (expr) {
+                result.push(expr);
+            }
+
+            this.dataSource.sort(result);
+        },
+
         refresh: function() {
+            var html = "";
             var items = this.dataSource[this.options.setting]();
+            var length = items.length;
+            var idx = 0;
+            var item;
 
-            var html = this.emptyTemplate(this.options.messages.empty);
+            if (length) {
+                for (; idx < length; idx++) {
+                    item = items[idx];
+                    item = item.name === undefined ? { name: item } : item;
 
-            if (items.length) {
-                html = kendo.render(this.template, items);
+                    html += this.template(extend({ sortIcon: this._sortIcon(item.name) }, item));
+                }
+            } else {
+                html = this.emptyTemplate(this.options.messages.empty);
             }
 
             this.element.html(html);
@@ -2456,6 +3255,18 @@
 
             this.element = null;
             this._refreshHandler = null;
+        },
+
+        _sortIcon: function(name) {
+            var expressions = this.dataSource.sort();
+            var expr = sortExpr(expressions, getName(name));
+            var icon = "";
+
+            if (expr) {
+                icon = "k-i-sort-" + expr.dir;
+            }
+
+            return icon;
         }
     });
 
@@ -2473,7 +3284,6 @@
 
             that._wrapper();
             that._createLayout();
-
 
             that._columnBuilder = columnBuilder = new ColumnBuilder();
             that._rowBuilder = rowBuilder = new RowBuilder();
@@ -2542,12 +3352,15 @@
             autoBind: true,
             reorderable: true,
             filterable: false,
+            sortable: false,
             height: null,
             columnWidth: 100,
             configurator: "",
             columnHeaderTemplate: null,
             rowHeaderTemplate: null,
             dataCellTemplate: null,
+            kpiStatusTemplate: null,
+            kpiTrendTemplate: null,
             messages: {
                 measureFields: "Drop Data Fields Here",
                 columnFields: "Drop Column Fields Here",
@@ -2556,12 +3369,16 @@
         },
 
         _templates: function() {
-            var dataTemplate = this.options.dataCellTemplate;
             var columnTemplate = this.options.columnHeaderTemplate;
             var rowTemplate = this.options.rowHeaderTemplate;
+            var dataTemplate = this.options.dataCellTemplate;
+            var kpiStatusTemplate = this.options.kpiStatusTemplate;
+            var kpiTrendTemplate = this.options.kpiTrendTemplate;
 
             this._columnBuilder.template = kendo.template(columnTemplate || HEADER_TEMPLATE, { useWithBlock: !!columnTemplate });
-            this._contentBuilder.template = kendo.template(dataTemplate || DATACELL_TEMPLATE, { useWithBlock: !!dataTemplate });
+            this._contentBuilder.dataTemplate = kendo.template(dataTemplate || DATACELL_TEMPLATE, { useWithBlock: !!dataTemplate });
+            this._contentBuilder.kpiStatusTemplate = kendo.template(kpiStatusTemplate || KPISTATUS_TEMPLATE, { useWithBlock: !!kpiStatusTemplate });
+            this._contentBuilder.kpiTrendTemplate = kendo.template(kpiTrendTemplate || KPITREND_TEMPLATE, { useWithBlock: !!kpiTrendTemplate });
             this._rowBuilder.template = kendo.template(rowTemplate || HEADER_TEMPLATE, { useWithBlock: !!rowTemplate });
         },
 
@@ -2667,7 +3484,13 @@
         },
 
         _wrapper: function() {
+            var height = this.options.height;
+
             this.wrapper = this.element.addClass("k-widget k-pivot");
+
+            if (height) {
+                this.wrapper.css("height", height);
+            }
         },
 
         _measureFields: function() {
@@ -2682,11 +3505,18 @@
         },
 
         _createSettingTarget: function(element, options) {
-            var template = '<span class="k-button" data-' + kendo.ns + 'name="${data.name || data}">${data.name || data}';
+            var template = '<span tabindex="0" class="k-button" data-' + kendo.ns + 'name="${data.name}">${data.name}';
+            var sortable = options.sortable;
             var icons = "";
 
-            if (options.filterable) {
-                icons += '<span class="k-icon k-filter k-setting-filter"></span>';
+            if (sortable) {
+                icons += '#if (data.sortIcon) {#';
+                icons += '<span class="k-icon ${data.sortIcon} k-setting-sort"></span>';
+                icons += '#}#';
+            }
+
+            if (options.filterable || sortable) {
+                icons += '<span class="k-icon k-i-arrowhead-s k-setting-fieldmenu"></span>';
             }
             if (this.options.reorderable) {
                 icons += '<span class="k-icon k-si-close k-setting-delete"></span>';
@@ -2711,6 +3541,7 @@
                 connectWith: this.rowFields,
                 setting: "columns",
                 filterable: this.options.filterable,
+                sortable: this.options.sortable,
                 messages: {
                     empty: this.options.messages.columnFields,
                     fieldMenu: this.options.messages.fieldMenu
@@ -2721,6 +3552,7 @@
                 connectWith: this.columnFields,
                 setting: "rows",
                 filterable: this.options.filterable,
+                sortable: this.options.sortable,
                 messages: {
                     empty: this.options.messages.rowFields,
                     fieldMenu: this.options.messages.fieldMenu
@@ -2771,17 +3603,26 @@
         },
 
         _resize: function() {
+            var columnTable = this.columnsHeader.children("table");
+
             if (this.content[0].firstChild) {
                 this._setSectionsWidth();
                 this._setSectionsHeight();
                 this._setContentWidth();
                 this._setContentHeight();
+
+                columnTable.css("table-layout", AUTO);
+
+                clearTimeout(this._layoutTimeout);
+                this._layoutTimeout = setTimeout(function() {
+                    columnTable.css("table-layout", "fixed");
+                });
             }
         },
 
         _setSectionsWidth: function() {
             var rowsHeader = this.rowsHeader;
-            var leftColumn = rowsHeader.parent(".k-pivot-rowheaders").width("auto");
+            var leftColumn = rowsHeader.parent(".k-pivot-rowheaders").width(AUTO);
             var width;
 
             width = Math.max(this.measureFields.outerWidth(), this.rowFields.outerWidth());
@@ -2791,10 +3632,10 @@
         },
 
         _setSectionsHeight: function() {
-            var measureFieldsHeight = this.measureFields.height("auto").height();
-            var columnFieldsHeight = this.columnFields.height("auto").height();
-            var rowFieldsHeight = this.rowFields.height("auto").innerHeight();
-            var columnsHeight = this.columnsHeader.height("auto").innerHeight();
+            var measureFieldsHeight = this.measureFields.height(AUTO).height();
+            var columnFieldsHeight = this.columnFields.height(AUTO).height();
+            var rowFieldsHeight = this.rowFields.height(AUTO).innerHeight();
+            var columnsHeight = this.columnsHeader.height(AUTO).innerHeight();
 
             var padding = rowFieldsHeight - this.rowFields.height();
 
@@ -2808,7 +3649,7 @@
         },
 
         _setContentWidth: function() {
-            var contentTable = this.content.children("table");
+            var contentTable = this.content.find("table");
             var contentWidth = this.content.width();
 
             var rowLength = contentTable.children("colgroup").children().length;
@@ -2829,7 +3670,7 @@
             var that = this;
             var content = that.content;
             var rowsHeader = that.rowsHeader;
-            var height = that.options.height;
+            var height = that.wrapper.innerHeight();
             var scrollbar = kendo.support.scrollbar();
             var skipScrollbar = content[0].offsetHeight === content[0].clientHeight;
 
@@ -2848,6 +3689,9 @@
 
                 if (height <= scrollbar * 2) { // do not set height if proper scrollbar cannot be displayed
                     height = scrollbar * 2 + 1;
+                    if (!skipScrollbar) {
+                        height += scrollbar;
+                    }
                 }
 
                 content.height(height);
@@ -2858,6 +3702,21 @@
 
                 rowsHeader.height(height - scrollbar);
             }
+        },
+
+        _axisMeasures: function(axis) {
+            var result = [];
+            var dataSource = this.dataSource;
+            var measures = dataSource.measures();
+            var hasMeasure = measures.length > 1 || (measures[0] && measures[0].type);
+
+            if (dataSource.measuresAxis() === axis) {
+                if (dataSource[axis]().length === 0 || hasMeasure) {
+                    result = measures;
+                }
+            }
+
+            return result;
         },
 
         refresh: function() {
@@ -2878,7 +3737,7 @@
                 return;
             }
 
-            columnBuilder.measures = dataSource._columnMeasures();
+            columnBuilder.measures = this._axisMeasures("columns");
 
             that.columnsHeaderTree.render(columnBuilder.build(columns));
             that.rowsHeaderTree.render(rowBuilder.build(rows));
@@ -2891,7 +3750,7 @@
 
             rowAxis = {
                 indexes: rowBuilder._indexes,
-                measures: dataSource._rowMeasures(),
+                measures: this._axisMeasures("rows"),
                 metadata: rowBuilder.metadata
             };
 
@@ -2978,6 +3837,17 @@
         return path;
     };
 
+    var tupleName = function(tuple, index) {
+        var name = "";
+        var idx = 0;
+
+        for(; idx <= index; idx++) {
+            name += tuple.members[idx].name;
+        }
+
+        return name;
+    };
+
     var ColumnBuilder = Class.extend({
         init: function(options) {
             this.measures = 1;
@@ -3022,7 +3892,7 @@
                 this._buildRows(root, 0);
                 this._normalize();
             } else {
-                this.rows.push(element("tr", null, [ element("th", null) ]));
+                this.rows.push(element("tr", null, [ element("th", null, [ htmlNode("&nbsp;") ]) ]));
             }
 
             return element("tbody", null, this.rows);
@@ -3042,7 +3912,7 @@
             for (; rowIdx < rowsLength; rowIdx++) {
                 row = rows[rowIdx];
 
-                if (row.rowspan === 1) {
+                if (row.rowSpan === 1) {
                     continue;
                 }
 
@@ -3055,7 +3925,7 @@
                     cell = cells[cellIdx];
 
                     if (cell.tupleAll) {
-                        cell.attr.rowspan = row.rowspan;
+                        cell.attr.rowSpan = row.rowSpan;
                     }
                 }
             }
@@ -3083,7 +3953,7 @@
 
             if (length) {
                 for (; idx < length; idx++) {
-                    rowLength += cells[idx].attr.colspan || 1;
+                    rowLength += cells[idx].attr.colSpan || 1;
                 }
             }
 
@@ -3108,8 +3978,8 @@
                 row = element("tr", null, []);
 
                 row.parentMember = parentMember;
-                row.colspan = 0;
-                row.rowspan = 1;
+                row.colSpan = 0;
+                row.rowSpan = 1;
 
                 map[rowKey] = row;
                 parentRow = map[rootName + (Number(levelNum) - 1)];
@@ -3130,7 +4000,7 @@
 
                 if (!row.parentMember || row.parentMember !== parentMember) {
                     row.parentMember = parentMember;
-                    row.colspan = 0;
+                    row.colSpan = 0;
                 }
             }
 
@@ -3178,7 +4048,7 @@
             var path;
 
             var idx = 0;
-            var colspan;
+            var colSpan;
             var metadata;
 
             if (member.measure) {
@@ -3218,7 +4088,7 @@
             cell = this._cell((row.notFirst ? " k-first" : ""), cellChildren);
 
             row.children.push(cell);
-            row.colspan += 1;
+            row.colSpan += 1;
 
             if (childrenLength) {
                 allCell = this._cell(" k-alt", [this._content(member, tuple)]);
@@ -3228,40 +4098,40 @@
                     childRow = this._buildRows(children[idx], memberIdx, member);
                 }
 
-                colspan = childRow.colspan;
-                cell.attr.colspan = colspan;
+                colSpan = childRow.colSpan;
+                cell.attr.colSpan = colSpan;
 
-                metadata.children = colspan;
+                metadata.children = colSpan;
                 metadata.members = 1;
 
-                row.colspan += colspan;
-                row.rowspan = childRow.rowspan + 1;
+                row.colSpan += colSpan;
+                row.rowSpan = childRow.rowSpan + 1;
 
                 if (nextMember) {
                     if (nextMember.measure) {
-                        colspan = this._measures(nextMember.children, tuple, " k-alt");
+                        colSpan = this._measures(nextMember.children, tuple, " k-alt");
                     } else {
-                        colspan = this._buildRows(tuple, memberIdx + 1).colspan;
+                        colSpan = this._buildRows(tuple, memberIdx + 1).colSpan;
                     }
 
-                    allCell.attr.colspan = colspan;
-                    colspan -= 1;
+                    allCell.attr.colSpan = colSpan;
+                    colSpan -= 1;
 
-                    metadata.members += colspan;
-                    row.colspan += colspan;
+                    metadata.members += colSpan;
+                    row.colSpan += colSpan;
                 }
             } else if (nextMember) {
                 if (nextMember.measure) {
-                    colspan = this._measures(nextMember.children, tuple);
+                    colSpan = this._measures(nextMember.children, tuple);
                 } else {
-                    colspan = this._buildRows(tuple, memberIdx + 1).colspan;
+                    colSpan = this._buildRows(tuple, memberIdx + 1).colSpan;
                 }
 
-                metadata.members = colspan;
+                metadata.members = colSpan;
 
-                if (colspan > 1) {
-                    cell.attr.colspan = colspan;
-                    row.colspan += colspan - 1;
+                if (colSpan > 1) {
+                    cell.attr.colSpan = colSpan;
+                    row.colSpan += colSpan - 1;
                 }
             }
 
@@ -3322,7 +4192,7 @@
                 this._buildRows(root, 0);
                 this._normalize();
             } else {
-                this.rows.push(element("tr", null, [ element("td", null) ]));
+                this.rows.push(element("tr", null, [ element("td", null, [ htmlNode("&nbsp;") ]) ]));
             }
 
             return element("tbody", null, this.rows);
@@ -3340,7 +4210,7 @@
 
             var row;
             var cell;
-            var maxColspan;
+            var maxcolSpan;
             var map = this.map;
             var allRow;
 
@@ -3348,11 +4218,11 @@
                 row = rows[rowIdx];
 
                 for (memberIdx = 0; memberIdx < membersLength; memberIdx++) {
-                    maxColspan = this[members[memberIdx].name];
-                    cell = row.colspan["dim" + memberIdx];
+                    maxcolSpan = this[members[memberIdx].name];
+                    cell = row.colSpan["dim" + memberIdx];
 
-                    if (cell && cell.levelNum < maxColspan) {
-                        cell.attr.colspan = (maxColspan - cell.levelNum) + 1;
+                    if (cell && cell.levelNum < maxcolSpan) {
+                        cell.attr.colSpan = (maxcolSpan - cell.levelNum) + 1;
                     }
                 }
             }
@@ -3371,8 +4241,8 @@
 
         _row: function(children) {
             var row = element("tr", null, children);
-            row.rowspan = 1;
-            row.colspan = {};
+            row.rowSpan = 1;
+            row.colSpan = {};
 
             this.rows.push(row);
 
@@ -3424,7 +4294,7 @@
                 attr = { className: row.allCell ? "k-grid-footer" : "" };
                 row.children.push(element("td", attr, [ this._content(children[0], tuple) ]));
 
-                row.rowspan = childrenLength;
+                row.rowSpan = childrenLength;
 
                 for (idx = 1; idx < childrenLength; idx++) {
                     this._row([ element("td", attr, [ this._content(children[idx], tuple) ]) ]);
@@ -3464,7 +4334,7 @@
             cell.levelNum = levelNum;
 
             row.children.push(cell);
-            row.colspan["dim" + memberIdx] = cell;
+            row.colSpan["dim" + memberIdx] = cell;
 
             if (!this[rootName] || this[rootName] < levelNum) {
                 this[rootName] = levelNum;
@@ -3478,41 +4348,41 @@
                     childRow = this._buildRows(children[idx], memberIdx);
 
                     if (row !== childRow) {
-                        row.rowspan += childRow.rowspan;
+                        row.rowSpan += childRow.rowSpan;
                     }
                 }
 
-                if (row.rowspan > 1) {
-                    cell.attr.rowspan = row.rowspan;
+                if (row.rowSpan > 1) {
+                    cell.attr.rowSpan = row.rowSpan;
                 }
 
-                metadata.children = row.rowspan;
+                metadata.children = row.rowSpan;
 
                 allCell = element("td", { className: "k-grid-footer" }, [this._content(member, tuple)]);
                 allCell.levelNum = levelNum;
 
                 allRow = this._row([ allCell ]);
-                allRow.colspan["dim" + memberIdx] = allCell;
+                allRow.colSpan["dim" + memberIdx] = allCell;
                 allRow.allCell = true;
 
                 map[tuplePath + member.name + "all"] = allRow;
 
                 if (nextMember) {
                     childRow = this._buildRows(tuple, memberIdx + 1);
-                    allCell.attr.rowspan = childRow.rowspan;
+                    allCell.attr.rowSpan = childRow.rowSpan;
                 }
 
-                row.rowspan += allRow.rowspan;
+                row.rowSpan += allRow.rowSpan;
 
-                metadata.members = allRow.rowspan;
+                metadata.members = allRow.rowSpan;
 
             } else if (nextMember) {
                 row.hasChild = false;
                 this._buildRows(tuple, memberIdx + 1);
 
-                (allCell || cell).attr.rowspan = row.rowspan;
+                (allCell || cell).attr.rowSpan = row.rowSpan;
 
-                metadata.members = row.rowspan;
+                metadata.members = row.rowSpan;
             }
 
             if (metadata.maxChildren < metadata.children) {
@@ -3581,7 +4451,7 @@
 
                 this._buildRows();
             } else {
-                this.rows.push(element("tr", null, [ element("td", null, [ text("") ]) ]));
+                this.rows.push(element("tr", null, [ element("td", null, [ htmlNode("&nbsp;") ]) ]));
             }
 
             return element("tbody", null, this.rows);
@@ -3676,8 +4546,9 @@
             var cells = [];
             var idx = 0;
 
+            var templateInfo;
             var cellContent;
-            var attr;
+            var attr, dataItem, measure;
 
             for (; idx < length; idx++) {
                 columnInfo = columnIndexes[idx];
@@ -3687,12 +4558,28 @@
                     attr.className = "k-alt";
                 }
 
-                cellContent = this.template({
+                cellContent = "";
+                dataItem = this.data[startIdx + columnInfo.index];
+                measure = columnInfo.measure || rowInfo.measure;
+
+                templateInfo = {
                     columnTuple: columnInfo.tuple,
                     rowTuple: rowInfo.tuple,
-                    measure: columnInfo.measure || rowInfo.measure,
-                    dataItem: this.data[startIdx + columnInfo.index]
-                });
+                    measure: measure,
+                    dataItem: dataItem
+                };
+
+                if (dataItem.value !== "" && measure && measure.type) {
+                    if (measure.type === "status") {
+                        cellContent = this.kpiStatusTemplate(templateInfo);
+                    } else if (measure.type === "trend") {
+                        cellContent = this.kpiTrendTemplate(templateInfo);
+                    }
+                }
+
+                if (!cellContent) {
+                    cellContent = this.dataTemplate(templateInfo);
+                }
 
                 cells.push(element("td", attr, [ htmlNode(cellContent) ]));
             }

@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -133,6 +133,7 @@
             "close",
             CHANGE,
             "select",
+            "filtering",
             "dataBinding",
             "dataBound",
             "cascade"
@@ -780,11 +781,6 @@
             }
         },
 
-        _iconMousedown: function(e) {
-            this.wrapper.focusin();
-            e.preventDefault();
-        },
-
         _span: function() {
             var that = this,
                 wrapper = that.wrapper,
@@ -802,8 +798,7 @@
 
             that.span = span;
             that._inputWrapper = $(wrapper[0].firstChild);
-            that._arrow = wrapper.find(".k-icon")
-                                 .mousedown(proxy(that._iconMousedown, that));
+            that._arrow = wrapper.find(".k-icon");
         },
 
         _wrapper: function() {

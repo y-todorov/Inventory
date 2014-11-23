@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -142,6 +142,7 @@
             CLOSE,
             CHANGE,
             SELECT,
+            "filtering",
             "dataBinding",
             "dataBound"
         ],
@@ -387,7 +388,9 @@
                 ignoreCase = options.ignoreCase,
                 filter = options.filter,
                 field = options.dataTextField,
-                inputValue = that.input.val();
+                inputValue = that.input.val(),
+                expression,
+                length;
 
             if (options.placeholder === inputValue) {
                 inputValue = "";
@@ -397,16 +400,21 @@
 
             word = typeof word === "string" ? word : inputValue;
 
-            if (word.length >= options.minLength) {
+            length = word.length;
+
+            if (!length || length >= options.minLength) {
                 that._state = FILTER;
                 that._open = true;
 
-                that._filterSource({
+                expression = {
                     value: ignoreCase ? word.toLowerCase() : word,
                     field: field,
                     operator: filter,
                     ignoreCase: ignoreCase
-                });
+                };
+
+                that._filterSource(expression, that._retrieveData);
+                that._retrieveData = false;
             }
         },
 

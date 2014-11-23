@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -187,6 +187,7 @@
 
             this.eventTemplate = this._eventTmpl(options.eventTemplate, EVENT_WRAPPER_STRING);
             this.dayTemplate = kendo.template(options.dayTemplate, settings);
+            this.groupHeaderTemplate = kendo.template(options.groupHeaderTemplate, settings);
         },
 
         dateForTitle: function() {
@@ -439,9 +440,9 @@
                         inner.push({ text: "<div>&nbsp;</div>", className: "k-hidden k-slot-cell" });
                     }
 
-                    rows = this._createRowsLayout(resources, inner);
+                    rows = this._createRowsLayout(resources, inner, this.groupHeaderTemplate);
                 } else {
-                    columns = this._createColumnsLayout(resources, columns);
+                    columns = this._createColumnsLayout(resources, columns, this.groupHeaderTemplate);
                 }
             }
 
@@ -893,6 +894,7 @@
             moreButtonHeight: 13,
             editable: true,
             selectedDateFormat: "{0:y}",
+            groupHeaderTemplate: "#=text#",
             dayTemplate: DAY_TEMPLATE,
             eventTemplate: EVENT_TEMPLATE
         }

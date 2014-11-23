@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -20,6 +20,43 @@
         SETTING_CONTAINER_TEMPLATE = kendo.template('<p class="k-reset"><span class="k-icon #=icon#"></span>${name}</p>' +
                 '<div class="k-list-container k-reset"/>');
 
+    function addKPI(data) {
+        var found;
+        var idx = 0;
+        var length = data.length;
+
+        for (; idx < length; idx++) {
+            if (data[idx].type == 2) {
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            data.splice(idx + 1, 0, {
+                caption: "KPIs",
+                defaultHierarchy: "[KPIs]",
+                name: "KPIs",
+                uniqueName: "[KPIs]"
+            });
+        }
+    }
+
+    function kpiNode(node) {
+        return {
+            name: node.uniqueName,
+            type: node.type
+        };
+    }
+
+    function normalizeKPIs(data) {
+        for (var idx = 0, length = data.length; idx < length; idx++) {
+            data[idx].uniqueName = data[idx].name;
+            data[idx].type = "kpi";
+        }
+
+        return data;
+    }
 
     function settingTargetFromNode(node) {
         var target = $(node).closest(".k-pivot-setting");
@@ -50,6 +87,7 @@
         options: {
             name: "PivotConfigurator",
             filterable: false,
+            sortable: false,
             messages: {
                 measures: "Drop Data Fields Here",
                 columns: "Drop Column Fields Here",
@@ -92,7 +130,6 @@
             this.refresh();
         },
 
-
         _treeViewDataSource: function() {
             var that = this;
 
@@ -108,22 +145,48 @@
                 transport: {
                     read: function(options) {
                         var promise;
+                        var node;
+                        var kpi;
+
                         if ($.isEmptyObject(options.data)) {
                             promise = that.dataSource.schemaDimensions();
+
+                            promise.done(function(data) {
+                                        if (!that.dataSource.cubeBuilder) {
+                                            addKPI(data);
+                                        }
+                                        options.success(data);
+                                    })
+                                    .fail(options.error);
                         } else {
                             //Hack to get the actual node as the HierarchicalDataSource does not support passing it
-                            var node = that.treeView.dataSource.get(options.data.uniqueName);
+                            node = that.treeView.dataSource.get(options.data.uniqueName);
 
-                            if (node.type == 2) { //measure
-                                promise = that.dataSource.schemaMeasures();
-                            } else if (node.dimensionUniqueName) { // hierarchy
-                                promise = that.dataSource.schemaLevels(options.data.uniqueName);
-                            } else { // dimension
-                                promise = that.dataSource.schemaHierarchies(options.data.uniqueName);
+                            if (node.uniqueName === "[KPIs]") {
+                                kpi = true;
+                                promise = that.dataSource.schemaKPIs();
+                                promise.done(function (data) {
+                                            options.success(normalizeKPIs(data));
+                                       })
+                                       .fail(options.error);
+                            } else if (node.type == "kpi") {
+                                kpi = true;
+                                options.success(buildKPImeasures(node));
+                            }
+
+                            if (!kpi) {
+                                if (node.type == 2) { //measure
+                                    promise = that.dataSource.schemaMeasures();
+                                } else if (node.dimensionUniqueName) { // hierarchy
+                                    promise = that.dataSource.schemaLevels(options.data.uniqueName);
+                                } else { // dimension
+                                    promise = that.dataSource.schemaHierarchies(options.data.uniqueName);
+                                }
+
+                                promise.done(options.success)
+                                        .fail(options.error);
                             }
                         }
-                        promise.done(options.success)
-                            .fail(options.error);
                     }
                 }
             });
@@ -139,16 +202,23 @@
             var container = $('<div class="k-state-default"><p class="k-reset"><span class="k-icon k-i-group"></span>' + this.options.messages.fieldsLabel + '</p></div>').appendTo(this.form);
 
             var that = this;
+            var template = '# if (item.type == 2 || item.uniqueName == "[KPIs]") { #' +
+                           '<span class="k-icon k-i-#= (item.type == 2 ? \"sum\" : \"kpi\") #"></span>' +
+                           '# } else if (item.type && item.type !== "kpi") { #' +
+                           '<span class="k-icon k-i-dimension"></span>' +
+                           '# } #' +
+                           '#: item.name #';
 
             this.treeView = $("<div/>").appendTo(container)
                 .kendoTreeView({
+                    template: template,
                     dataTextField: "name",
                     dragAndDrop: true,
                     autoBind: false,
                     dataSource: this._treeViewDataSource(),
                     dragstart: function(e) {
                         var dataItem = this.dataItem(e.sourceNode);
-                        if ((!dataItem.hasChildren && !dataItem.aggregator) || (dataItem.type == 2)) {
+                        if ((!dataItem.hasChildren && !dataItem.aggregator && !dataItem.measure) || (dataItem.type == 2) || dataItem.uniqueName === "[KPIs]") {
                             e.preventDefault();
                         }
                     },
@@ -167,9 +237,25 @@
 
                         var setting = settingTargetFromNode(e.dropTarget);
                         var node = this.dataItem(e.sourceNode);
+                        var idx, length, measures;
+                        var name;
 
                         if (setting && setting.validate(node)) {
-                            setting.add(node.defaultHierarchy || node.uniqueName);
+                            name = node.defaultHierarchy || node.uniqueName;
+
+                            if (node.type === "kpi") {
+                                measures = buildKPImeasures(node);
+                                length = measures.length;
+                                name = [];
+
+                                for (idx = 0; idx < length; idx++) {
+                                    name.push(kpiNode(measures[idx]));
+                                }
+                            } else if (node.type) {
+                                name = [kpiNode(node)];
+                            }
+
+                            setting.add(name);
                         }
                     }
                  })
@@ -177,7 +263,23 @@
         },
 
         _createTarget: function(element, options) {
-            var filter = options.filterable ? '<span class="k-icon k-filter k-setting-filter"></span>' : '';
+            var template = '<li class="k-item k-header" data-' + kendo.ns + 'name="${data.name}">${data.name}';
+            var sortable = options.sortable;
+            var icons = "";
+
+            if (sortable) {
+                icons += '#if (data.sortIcon) {#';
+                icons += '<span class="k-icon ${data.sortIcon} k-setting-sort"></span>';
+                icons += '#}#';
+            }
+
+            if (options.filterable || sortable) {
+                icons += '<span class="k-icon k-i-arrowhead-s k-setting-fieldmenu"></span>';
+            }
+
+            icons += '<span class="k-icon k-si-close k-setting-delete"></span>';
+            template += '<span class="k-field-actions">' + icons + '</span></li>';
+
             return new kendo.ui.PivotSettingTarget(element, $.extend({
                 dataSource: this.dataSource,
                 hint: function(element) {
@@ -187,8 +289,7 @@
 
                     return wrapper;
                 },
-                template: '<li class="k-item k-header" data-' + kendo.ns + 'name="${data.name || data}">${data.name || data}<span class="k-field-actions">' +
-                            filter + '<span class="k-icon k-si-close k-setting-delete"></span></span></li>',
+                template: template,
                 emptyTemplate: '<li class="k-item k-empty">${data}</li>'
             }, options));
         },
@@ -205,17 +306,20 @@
             var measuresContainer = $(SETTING_CONTAINER_TEMPLATE({ name: this.options.messages.measuresLabel, icon: "k-i-sum"})).appendTo(container);
             var measures = $('<ul class="k-pivot-configurator-settings k-list k-reset" />').appendTo(measuresContainer.last());
 
+            var options = this.options;
+
             this.columns = this._createTarget(columns, {
-                filterable: this.options.filterable,
+                filterable: options.filterable,
+                sortable: options.sortable,
                 connectWith: rows,
                 messages: {
-                    empty: this.options.messages.columns,
-                    fieldMenu: this.options.messages.fieldMenu
+                    empty: options.messages.columns,
+                    fieldMenu: options.messages.fieldMenu
                 }
             });
 
             this.rows = this._createTarget(rows, {
-                filterable: this.options.filterable,
+                filterable: options.filterable,
                 setting: "rows",
                 connectWith: columns,
                 messages: {
@@ -227,7 +331,7 @@
             this.measures = this._createTarget(measures, {
                 setting: "measures",
                 messages: {
-                    empty: this.options.messages.measures
+                    empty: options.messages.measures
                 }
             });
 
@@ -241,15 +345,39 @@
             $(e.currentTarget).toggleClass("k-state-hover", e.type === "mouseenter");
         },
 
+        _resize: function() {
+            var element = this.element;
+            var height = this.options.height;
+            var border, fields;
+
+            if (!height) {
+                return;
+            }
+
+            if (element.is(":visible")) {
+                element.height(height);
+
+                fields = element.children(".k-columns")
+                                .children("div.k-state-default");
+
+                border = (element.outerHeight() - element.innerHeight()) / 2;
+                height = height - (fields.outerHeight(true) - fields.height()) - border;
+
+                fields.height(height);
+            }
+        },
+
         refresh: function() {
             var dataSource = this.dataSource;
 
-            if (this._cube !== dataSource.cube() || this._catalog !== dataSource.catalog()) {
+            if (dataSource.cubeBuilder || this._cube !== dataSource.cube() || this._catalog !== dataSource.catalog()) {
                 this.treeView.dataSource.fetch();
             }
 
             this._catalog = this.dataSource.catalog();
             this._cube = this.dataSource.cube();
+
+            this._resize();
         },
 
         destroy: function() {
@@ -268,6 +396,27 @@
             this._refreshHandler = null;
         }
     });
+
+    function kpiMeasure(name, measure, type) {
+        return {
+            hierarchyUniqueName: name,
+            uniqueName: measure,
+            caption: measure,
+            measure: measure,
+            name: measure,
+            type: type
+        };
+    }
+
+    function buildKPImeasures(node) {
+        var name = node.name;
+        return [
+            kpiMeasure(name, node.value, "value"),
+            kpiMeasure(name, node.goal, "goal"),
+            kpiMeasure(name, node.status, "status"),
+            kpiMeasure(name, node.trend, "trend")
+        ];
+    }
 
     ui.plugin(PivotConfigurator);
 

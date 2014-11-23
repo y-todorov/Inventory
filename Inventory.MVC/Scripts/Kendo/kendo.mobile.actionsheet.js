@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -124,10 +124,17 @@
             var action = currentTarget.data("action");
 
             if (action) {
-                kendo.getter(action)(window)({
+                var actionData = {
                     target: this.target,
                     context: this.context
-                });
+                },
+                $angular = this.options.$angular;
+
+                if ($angular) {
+                    this.element.injector().get("$parse")(action)($angular[0])(actionData);
+                } else {
+                    kendo.getter(action)(window)(actionData);
+                }
             }
 
             this.trigger(COMMAND, { target: this.target, context: this.context, currentTarget: currentTarget });

@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -202,9 +202,20 @@
 
             that.wrapper.children(".k-tabstrip-items")
                 .on(CLICK + NS, ".k-state-disabled .k-link", false)
-                .on(CLICK + NS, " > " + NAVIGATABLEITEMS, function(e) {
-                    if (that.wrapper[0] !== document.activeElement) {
-                        that.wrapper.focus();
+                .on(CLICK + NS, " > " + NAVIGATABLEITEMS, function (e) {
+                    var wr = that.wrapper[0];
+                    if (wr !== document.activeElement) {
+                        var msie = kendo.support.browser.msie;
+                        if (msie) {
+                            try {
+                                // does not scroll to the active element
+                                wr.setActive();
+                            } catch (j) {
+                                wr.focus();
+                            }
+                        } else {
+                            wr.focus();
+                        }
                     }
 
                     if (that._click($(e.currentTarget))) {
@@ -624,9 +635,9 @@
         },
 
         remove: function (elements) {
-            var that = this,
-                type = typeof elements,
-                contents = $();
+            var that = this;
+            var type = typeof elements;
+            var contents;
 
             if (type === "string") {
                 elements = that.tabGroup.find(elements);
@@ -634,9 +645,12 @@
                 elements = that.tabGroup.children().eq(elements);
             }
 
-            elements.each(function () {
-                contents.push(that.contentElement($(this).index()));
+            contents = elements.map(function () {
+                var content = that.contentElement($(this).index());
+                kendo.destroy(content);
+                return content;
             });
+
             elements.remove();
             contents.remove();
 
@@ -1169,7 +1183,8 @@
                             }, 40);
                         }
 
-                        that.angular("cleanup", function(){ return { elements: content.get() }; });
+                        that.angular("cleanup", function () { return { elements: content.get() }; });
+                        kendo.destroy(content);
                         content.html(data);
                     } catch (e) {
                         var console = window.console;

@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -139,9 +139,9 @@
         linkOpenInNewWindow: "Open link in new window",
         dialogUpdate: "Update",
         dialogInsert: "Insert",
-        dialogButtonSeparator: "or",
         dialogCancel: "Cancel",
         createTable: "Create table",
+        createTableHint: "Create a {0} x {1} table",
         addColumnLeft: "Add column on the left",
         addColumnRight: "Add column on the right",
         addRowAbove: "Add row above",
@@ -472,9 +472,15 @@
                 .on("mousedown" + NS, function(e) {
                     editor._selectionStarted = true;
 
+                    // handle middle-click and ctrl-click on links
+                    if (browser.gecko) {
+                        return;
+                    }
+
                     var target = $(e.target);
 
-                    if (!browser.gecko && e.which == 2 && target.is("a[href]")) {
+                    if ((e.which == 2 || (e.which == 1 && e.ctrlKey)) &&
+                        target.is("a[href]")) {
                         window.open(target.attr("href"), "_new");
                     }
                 })
@@ -554,7 +560,8 @@
             encoded: true,
             domain: null,
             serialization: {
-                entities: true
+                entities: true,
+                scripts: false
             },
             stylesheets: [],
             dialogOptions: {
@@ -617,9 +624,19 @@
             $(document).off("mousedown", proxy(that._endTyping, that))
                        .off("mouseup", proxy(that._mouseup, that));
 
+            that._focusOutside();
+
             that.toolbar.destroy();
 
             kendo.destroy(that.wrapper);
+        },
+
+        _focusOutside: function () {
+            // move focus outside the Editor, see https://github.com/telerik/kendo/issues/3673
+            if (kendo.support.browser.msie && this.textarea) {
+                var tempInput = $("<input style='position:absolute;left:-10px;top:-10px;width:1px;height:1px;font-size:0;border:0;' />").appendTo(document.body).focus();
+                tempInput.blur().remove();
+            }
         },
 
         state: function(toolName) {
@@ -665,6 +682,8 @@
 
             this.selectionRestorePoint = null;
             this.update();
+
+            this.toolbar.refreshTools();
         },
 
         saveSelection: function(range) {
@@ -734,7 +753,7 @@
 
         getRange: function () {
             var selection = this.getSelection(),
-                range = selection.rangeCount > 0 ? selection.getRangeAt(0) : this.createRange(),
+                range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : this.createRange(),
                 doc = this.document;
 
             if (range.startContainer == doc && range.endContainer == doc && !range.startOffset && !range.endOffset) {
@@ -863,6 +882,15 @@
     // Exports ================================================================
 
     var bomFill = browser.msie && browser.version < 9 ? '\ufeff' : '';
+    var emptyElementContent = '<br class="k-br" />';
+
+    if (browser.msie) {
+        if (browser.version < 10) {
+            emptyElementContent = '\ufeff';
+        } else if (browser.version < 11) {
+            emptyElementContent = ' '; // allow up/down arrows to focus empty rows
+        }
+    }
 
     extend(kendo.ui, {
         editor: {
@@ -871,7 +899,7 @@
             Tool: Tool,
             FormatTool: FormatTool,
             _bomFill: bomFill,
-            emptyElementContent: browser.msie ? '\ufeff' : '<br _moz_dirty="" />'
+            emptyElementContent: emptyElementContent
         }
     });
 
@@ -1394,7 +1422,7 @@ var Dom = {
     },
 
     editableParent: function(node) {
-        while (node.nodeType == 3 || node.contentEditable !== 'true') {
+        while (node && (node.nodeType == 3 || node.contentEditable !== 'true')) {
             node = node.parentNode;
         }
 
@@ -1630,10 +1658,13 @@ var Dom = {
     },
 
     ensureTrailingBreak: function(node) {
-        var name = node.lastChild && Dom.name(node.lastChild);
+        var lastChild = node.lastChild;
+        var name = lastChild && Dom.name(lastChild);
         var br;
 
-        if (!name || name != "br" && name != "img") {
+        if (!name ||
+            (name != "br" && name != "img") ||
+            (name == "br" && lastChild.className != "k-br")) {
             br = node.ownerDocument.createElement("br");
             br.className = "k-br";
             node.appendChild(br);
@@ -1660,6 +1691,7 @@ var pixelRe = /^\d+(\.\d*)?(px)?$/i;
 var emptyPRe = /<p><\/p>/i;
 var cssDeclaration = /([\w|\-]+)\s*:\s*([^;]+);?/i;
 var sizzleAttr = /^sizzle-\d+/i;
+var scriptAttr = /^k-script-/i;
 var onerrorRe = /\s*onerror\s*=\s*(?:'|")?([^'">\s]*)(?:'|")?/i;
 
 var div = document.createElement("div");
@@ -1724,6 +1756,23 @@ var Serializer = {
         }
     },
 
+    _preventScriptExecution: function(root) {
+        $(root).find("*").each(function() {
+            var attributes = this.attributes;
+            var attribute, i, l, name;
+
+            for (i = 0, l = attributes.length; i < l; i++) {
+                attribute = attributes[i];
+                name = attribute.nodeName;
+
+                if (attribute.specified && /^on/i.test(name)) {
+                    this.removeAttribute(name);
+                    this.setAttribute("k-script-" + name, attribute.nodeValue);
+                }
+            }
+        });
+    },
+
     htmlToDom: function(html, root) {
         var browser = kendo.support.browser;
         var msie = browser.msie;
@@ -1766,6 +1815,8 @@ var Serializer = {
 
             Serializer._resetOrderedLists(root);
         }
+
+        Serializer._preventScriptExecution(root);
 
         Serializer._fillEmptyElements(root);
 
@@ -1834,6 +1885,7 @@ var Serializer = {
                 }
             }
         };
+        options = options || {};
 
         function styleAttr(cssText) {
             // In IE < 8 the style attribute does not return proper nodeValue
@@ -1923,6 +1975,8 @@ var Serializer = {
                     specified = false;
                 } else if (name.indexOf('_moz') >= 0) {
                     specified = false;
+                } else if (scriptAttr.test(name)) {
+                    specified = !!options.scripts;
                 }
 
                 if (specified) {
@@ -1947,6 +2001,8 @@ var Serializer = {
                     continue;
                 }
 
+                name = name.replace(scriptAttr, "");
+
                 result.push(' ');
                 result.push(name);
                 result.push('="');
@@ -1954,7 +2010,7 @@ var Serializer = {
                 if (name == 'style') {
                     styleAttr(value || node.style.cssText);
                 } else if (name == 'src' || name == 'href') {
-                    result.push(node.getAttribute(name, 2));
+                    result.push(kendo.htmlEncode(node.getAttribute(name, 2)));
                 } else {
                     result.push(dom.fillAttrs[name] ? name : value);
                 }
@@ -1986,6 +2042,10 @@ var Serializer = {
                 }
 
                 if (dom.isInline(node) && node.childNodes.length == 1 && node.firstChild.nodeType == 3&&  !text(node.firstChild)) {
+                    return;
+                }
+
+                if (!options.scripts && tagName == "telerik:script") {
                     return;
                 }
 
@@ -3120,26 +3180,44 @@ var RangeUtils = {
         partition(false);
     },
 
-    getMarkers: function(range) {
-        var markers = [];
+    mapAll: function(range, map) {
+        var nodes = [];
 
-        new RangeIterator(range).traverse(function (node) {
-            if (node.className == 'k-marker') {
-                markers.push(node);
+        new RangeIterator(range).traverse(function(node) {
+            var mapped = map(node);
+
+            if (mapped && $.inArray(mapped, nodes) < 0) {
+                nodes.push(mapped);
             }
         });
 
-        return markers;
+        return nodes;
+    },
+
+    getAll: function(range, predicate) {
+        var selector = predicate;
+
+        if (typeof predicate == "string") {
+            predicate = function(node) {
+                return dom.is(node, selector);
+            };
+        }
+
+        return RangeUtils.mapAll(range, function (node) {
+            if (predicate(node)) {
+                return node;
+            }
+        });
+    },
+
+    getMarkers: function(range) {
+        return RangeUtils.getAll(range, function(node) {
+            return node.className == 'k-marker';
+        });
     },
 
     image: function (range) {
-        var nodes = [];
-
-        new RangeIterator(range).traverse(function (node) {
-            if (dom.is(node, 'img')) {
-                nodes.push(node);
-            }
-        });
+        var nodes = RangeUtils.getAll(range, "img");
 
         if (nodes.length == 1) {
             return nodes[0];
@@ -4676,7 +4754,7 @@ var FontTool = DelayedExecutionTool.extend({
            }];
         }
 
-        dataSource = defaultValue.concat(options.items ? options.items : editor.options[toolName]);
+        dataSource = defaultValue.concat(options.items ? options.items : (editor.options[toolName] || [] ));
 
         ui[this.type]({
             dataTextField: "text",
@@ -6340,7 +6418,7 @@ var ImageCommand = Command.extend({
     insertImage: function(img, range) {
         var attributes = this.attributes;
         var doc = RangeUtils.documentFromRange(range);
-        
+
         if (attributes.src && attributes.src != "http://") {
 
             var removeIEAttributes = function() {
@@ -7324,7 +7402,7 @@ registerTool("cleanFormatting", new Tool({ command: CleanFormatCommand, template
 
             // detach from editor that was previously listened to
             if (that._editor) {
-                that._editor.unbind("select", proxy(that._updateTool, that));
+                that._editor.unbind("select", proxy(that.refreshTools, that));
             }
 
             that._editor = editor;
@@ -7378,7 +7456,7 @@ registerTool("cleanFormatting", new Tool({ command: CleanFormatCommand, template
                 ui.closest(".k-colorpicker", that.element).next(".k-colorpicker").addClass("k-editor-widget");
             });
 
-            editor.bind("select", proxy(that._updateTool, that));
+            editor.bind("select", proxy(that.refreshTools, that));
 
             that.update();
 
@@ -7748,7 +7826,7 @@ registerTool("cleanFormatting", new Tool({ command: CleanFormatCommand, template
             return tool[0] ? tool[0].substring(tool[0].lastIndexOf("-") + 1) : "custom";
         },
 
-        _updateTool: function() {
+        refreshTools: function() {
             var that = this,
                 editor = that._editor,
                 range = editor.getRange(),
@@ -7791,6 +7869,7 @@ var kendo = window.kendo,
     Editor = kendo.ui.editor,
     dom = Editor.Dom,
     EditorUtils = Editor.EditorUtils,
+    RangeUtils = Editor.RangeUtils,
     Command = Editor.Command,
     NS = ".kendoEditor",
     ACTIVESTATE = "k-state-active",
@@ -7905,7 +7984,7 @@ var InsertTableTool = PopupTool.extend({
             popupTemplate:
                 "<div class='k-ct-popup'>" +
                     new Array(this.cols * this.rows + 1).join("<span class='k-ct-cell k-state-disabled' />") +
-                    "<div class='k-status'>Cancel</div>" +
+                    "<div class='k-status'></div>" +
                 "</div>"
         }));
     },
@@ -7963,14 +8042,15 @@ var InsertTableTool = PopupTool.extend({
     },
 
     _setTableSize: function(size) {
-        var element = this._popup.element; 
+        var element = this._popup.element;
         var status = element.find(".k-status");
         var cells = element.find(".k-ct-cell");
         var rows = this.rows;
         var cols = this.cols;
+        var messages = this._editor.options.messages;
 
         if (this._valid(size)) {
-            status.text(kendo.format("Create a {0} x {1} table", size.row, size.col));
+            status.text(kendo.format(messages.createTableHint, size.row, size.col));
 
             cells.each(function(i) {
                 $(this).toggleClass(
@@ -7979,7 +8059,7 @@ var InsertTableTool = PopupTool.extend({
                 );
             });
         } else {
-            status.text("Cancel");
+            status.text(messages.dialogCancel);
             cells.removeClass(SELECTEDSTATE);
         }
     },
@@ -8028,8 +8108,13 @@ var InsertTableTool = PopupTool.extend({
     },
 
     _open: function() {
+        var messages = this._editor.options.messages;
+
         PopupTool.fn._open.call(this);
-        this.popup().element.find(".k-ct-cell").removeClass(SELECTEDSTATE);
+
+        this.popup().element
+            .find(".k-status").text(messages.dialogCancel).end()
+            .find(".k-ct-cell").removeClass(SELECTEDSTATE);
     },
 
     _close: function() {
@@ -8109,13 +8194,14 @@ var InsertColumnCommand = Command.extend({
 
 var DeleteRowCommand = Command.extend({
     exec: function () {
-        var range = this.lockRange(),
-            row = dom.closest(range.endContainer, "tr"),
-            table = dom.closest(row, "table"),
-            rowCount = table.rows.length,
-            focusElement;
+        var range = this.lockRange();
+        var rows = RangeUtils.mapAll(range, function(node) {
+            return $(node).closest("tr")[0];
+        });
+        var table = dom.closest(rows[0], "table");
+        var focusElement;
 
-        if (rowCount == 1) {
+        if (table.rows.length <= rows.length) {
             focusElement = dom.next(table);
             if (!focusElement || dom.insignificant(focusElement)) {
                 focusElement = dom.prev(table);
@@ -8123,12 +8209,15 @@ var DeleteRowCommand = Command.extend({
 
             dom.remove(table);
         } else {
-            dom.removeTextSiblings(row);
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                dom.removeTextSiblings(row);
 
-            focusElement = dom.next(row) || dom.prev(row);
-            focusElement = focusElement.cells[0];
+                focusElement = dom.next(row) || dom.prev(row);
+                focusElement = focusElement.cells[0];
 
-            dom.remove(row);
+                dom.remove(row);
+            }
         }
 
         if (focusElement) {

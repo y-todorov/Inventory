@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -59,6 +59,8 @@
     }
 
     function removeDuplicates (dataSelector, dataTextField) {
+        var getter = kendo.getter(dataTextField, true);
+
         return function(e) {
             var items = dataSelector(e),
                 result = [],
@@ -67,7 +69,8 @@
 
             while (index < items.length) {
                 var item = items[index++],
-                    text = item[dataTextField];
+                    text = getter(item);
+
                 if(!seen.hasOwnProperty(text)){
                     result.push(item);
                     seen[text] = true;
@@ -80,7 +83,7 @@
 
     var FilterCell = Widget.extend( {
         init: function(element, options) {
-            element = $(element).addClass("grid-filter-header");
+            element = $(element).addClass("k-filtercell");
             var wrapper = this.wrapper = $("<span/>").appendTo(element);
             var that = this,
                 dataSource,
@@ -144,6 +147,8 @@
 
             if (type != BOOL && options.showOperators !== false) {
                 that._createOperatorDropDown(operators);
+            } else {
+                wrapper.addClass("k-operator-hidden");
             }
 
             that._createClearIcon();
@@ -248,10 +253,11 @@
                         DataSource.create(suggestDataSource);
 
 
-                if (!options.customDataSource) {
-                    suggestDataSource._pageSize = undefined;
-                    suggestDataSource.reader.data = removeDuplicates(suggestDataSource.reader.data, this.options.field);
-                }
+            }
+
+            if (!options.customDataSource) {
+                suggestDataSource._pageSize = undefined;
+                suggestDataSource.reader.data = removeDuplicates(suggestDataSource.reader.data, this.options.field);
             }
 
             this.suggestDataSource = suggestDataSource;

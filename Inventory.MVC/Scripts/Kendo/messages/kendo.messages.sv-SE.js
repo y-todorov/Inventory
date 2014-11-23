@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -11,6 +11,42 @@
 })(function(){
 
 
+
+/* Filter cell operator messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.operators =
+$.extend(true, kendo.ui.FilterCell.prototype.options.operators,{
+  "date": {
+    "eq": "Är lika med",
+    "gt": "Är senare än",
+    "gte": "Är lika eller senare än",
+    "lt": "Är tidigare än",
+    "lte": "Är lika eller tidigare än",
+    "neq": "Är inte lika med"
+  },
+  "number": {
+    "eq": "Är lika med",
+    "gt": "Är större än",
+    "gte": "Är lika eller större än",
+    "lt": "Är mindre än",
+    "lte": "Är lika eller mindre än",
+    "neq": "Är inte lika med"
+  },
+  "string": {
+    "contains": "Innehåller",
+    "doesnotcontain": "Innehåller inte",
+    "endswith": "Slutar med",
+    "eq": "Är lika med",
+    "neq": "Är inte lika med",
+    "startswith": "Börjar med"
+  },
+  "enum": {
+    "eq": "Är lika med",
+    "neq": "Är inte lika med"
+  }
+});
+}
 
 /* Filter menu operator messages */
 
@@ -116,6 +152,19 @@ $.extend(true, kendo.ui.RecurrenceEditor.prototype.options.messages,{
     "weekday": "weekday",
     "weekend": "weekend day"
   }
+});
+}
+
+/* FilterCell messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.messages =
+$.extend(true, kendo.ui.FilterCell.prototype.options.messages,{
+  "clear": "Rensa",
+  "filter": "Filtrera",
+  "isFalse": "är falskt",
+  "isTrue": "är sant",
+  "operator": "Operatör"
 });
 }
 
@@ -325,6 +374,7 @@ $.extend(true, kendo.ui.Scheduler.prototype.options.messages,{
   "showWorkDay": "Show business hours"
 });
 }
+
 
 return window.kendo;
 

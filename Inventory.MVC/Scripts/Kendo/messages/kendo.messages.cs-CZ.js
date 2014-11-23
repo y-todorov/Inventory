@@ -1,5 +1,5 @@
 /*
-* Kendo UI v2014.2.903 (http://www.telerik.com/kendo-ui)
+* Kendo UI v2014.3.1119 (http://www.telerik.com/kendo-ui)
 * Copyright 2014 Telerik AD. All rights reserved.
 *
 * Kendo UI commercial licenses may be obtained at
@@ -12,6 +12,41 @@
 
 
 
+/* Filter cell operator messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.operators =
+$.extend(true, kendo.ui.FilterCell.prototype.options.operators,{
+  "date": {
+    "eq": "Je rovno",
+    "gt": "Začíná po",
+    "gte": "Začáná od",
+    "lt": "Končí po",
+    "lte": "Končí do",
+    "neq": "Je různá od"
+  },
+  "number": {
+    "eq": "Je rovno",
+    "gt": "Je větší než",
+    "gte": "Je větší nebo rovno",
+    "lt": "Je menší než",
+    "lte": "Je menší nebo rovno",
+    "neq": "Je různá od"
+  },
+  "string": {
+    "contains": "Obsahuje",
+    "doesnotcontain": "Neobsahuje",
+    "endswith": "Končí na",
+    "eq": "Je shodná s",
+    "neq": "Je různá od",
+    "startswith": "Začíná na"
+  },
+  "enum": {
+    "eq": "Je rovno",
+    "neq": "Je různá od"
+  }
+});
+}
 /* Filter menu operator messages */
 
 if (kendo.ui.FilterMenu) {
@@ -119,6 +154,18 @@ $.extend(true, kendo.ui.RecurrenceEditor.prototype.options.messages,{
 });
 }
 
+/* FilterCell messages */
+
+if (kendo.ui.FilterCell) {
+kendo.ui.FilterCell.prototype.options.messages =
+$.extend(true, kendo.ui.FilterCell.prototype.options.messages,{
+  "clear": "Zrušit",
+  "filter": "Filtrovat",
+  "isFalse": "není pravda",
+  "isTrue": "je pravda",
+  "operator": "Operátor"
+});
+}
 /* FilterMenu messages */
 
 if (kendo.ui.FilterMenu) {
@@ -321,6 +368,7 @@ $.extend(true, kendo.ui.Scheduler.prototype.options.messages,{
   "showWorkDay": "Zobrazit pracovní dobu"
 });
 }
+
 
 return window.kendo;
 
