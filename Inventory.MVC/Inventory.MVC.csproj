@@ -199,20 +199,24 @@
     <Compile Include="Attributes\DateDisplayAttributeYordan.cs" />
     <Compile Include="Attributes\RelationAttribute.cs" />
     <Compile Include="Controllers\AccountController.cs" />
-    <Compile Include="Controllers\CategoryController.cs" />
+    <Compile Include="Controllers\ElementControllers\CategoryController.cs" />
     <Compile Include="Controllers\ChartController.cs" />
     <Compile Include="Controllers\CodeController.cs" />
     <Compile Include="Controllers\ControllerBase.cs" />
     <Compile Include="Controllers\ControllerConstants.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
+    <Compile Include="Controllers\ElementControllers\IndustryController.cs" />
+    <Compile Include="Controllers\ElementControllers\MunicipalityController.cs" />
+    <Compile Include="Controllers\ElementControllers\RegionController.cs" />
+    <Compile Include="Controllers\ElementControllers\TownController.cs" />
     <Compile Include="Controllers\ForeignKeyController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\MapController.cs" />
     <Compile Include="Controllers\ProductController.cs" />
-    <Compile Include="Controllers\StoreController.cs" />
+    <Compile Include="Controllers\ElementControllers\StoreController.cs" />
     <Compile Include="Controllers\TestController.cs" />
-    <Compile Include="Controllers\UnitMeasureController.cs" />
+    <Compile Include="Controllers\ElementControllers\UnitMeasureController.cs" />
     <Compile Include="Extensions\ChartBuilderExtensions.cs" />
     <Compile Include="Extensions\GridBuilderExtension.cs" />
     <Compile Include="Global.asax.cs">
@@ -577,6 +581,7 @@
     <Content Include="Scripts\JQuery\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\JsBundle.js" />
     <Content Include="Scripts\JsBundle.min.js" />
+    <Content Include="Scripts\jszip.min.js" />
     <Content Include="Scripts\KendoConsole.js" />
     <Content Include="Scripts\Kendo\cultures\kendo.culture.af-ZA.js" />
     <Content Include="Scripts\Kendo\cultures\kendo.culture.af.js" />
@@ -1443,6 +1448,21 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\ChangeLog\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Town\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Region\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Municipality\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Industry\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Town\Details.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

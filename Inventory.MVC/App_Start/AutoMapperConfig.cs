@@ -27,6 +27,18 @@ namespace Inventory.MVC
 
             Mapper.CreateMap<ChangeLogViewModel, ChangeLog>();
             Mapper.CreateMap<ChangeLog, ChangeLogViewModel>();
+
+            Mapper.CreateMap<TownViewModel, Town>();
+            Mapper.CreateMap<Town, TownViewModel>();
+
+            Mapper.CreateMap<RegionViewModel, Region>();
+            Mapper.CreateMap<Region, RegionViewModel>();
+
+            Mapper.CreateMap<MunicipalityViewModel, Municipality>();
+            Mapper.CreateMap<Municipality, MunicipalityViewModel>();
+
+            Mapper.CreateMap<IndustryViewModel, Industry>();
+            Mapper.CreateMap<Industry, IndustryViewModel>();
         }
 
         public class CustomResolver : ValueResolver<double, decimal>

@@ -129,18 +129,12 @@ namespace SignalRLocalHub.Hubs
             return createdProductStoreViewModel;
         }
 
-        public IEnumerable<ProductStoreViewModel> ReadProductStore(DataSourceRequest request)
+        public IEnumerable<ProductStoreViewModel> ReadProductStore()
         {
             var productStoreViewModels = Utils.ReadBase<ProductStore, ProductStoreViewModel>().AsEnumerable();
             return productStoreViewModels;
         }
-
-        //public DataSourceResult ReadProductStore(DataSourceRequest request)
-        //{
-        //    var productStoreViewModels = Utils.ReadBase<ProductStore, ProductStoreViewModel>().AsEnumerable();
-        //    return productStoreViewModels.AsQueryable().ToDataSourceResult(request);
-        //}
-
+        
         public void UpdateProductStore(ProductStoreViewModel product)
         {
             var updatedProductStoreViewModel = Utils.UpdateBase<ProductStore, ProductStoreViewModel>(product);
@@ -152,6 +146,34 @@ namespace SignalRLocalHub.Hubs
             var deletedProductStoreViewModel = Utils.DeleteBase<ProductStore, ProductStoreViewModel>(productStore);
             Clients.Others.destroyProductStore(deletedProductStoreViewModel);
         }
+
+
+        public TownViewModel CreateTown(TownViewModel product)
+        {
+            TownViewModel createdProductStoreViewModel = Utils.CreateBase<Town, TownViewModel>(product);
+            Clients.Others.createTown(createdProductStoreViewModel);
+            return createdProductStoreViewModel;
+        }
+
+        public IEnumerable<TownViewModel> ReadTown()
+        {
+            var productStoreViewModels = Utils.ReadBase<Town, TownViewModel>().AsEnumerable();
+            return productStoreViewModels;
+        }
+
+        public void UpdateTown(TownViewModel product)
+        {
+            var updatedProductStoreViewModel = Utils.UpdateBase<Town, TownViewModel>(product);
+            Clients.Others.updateTown(updatedProductStoreViewModel);
+        }
+
+        public void DestroyTown(TownViewModel productStore)
+        {
+            var deletedProductStoreViewModel = Utils.DeleteBase<Town, TownViewModel>(productStore);
+            Clients.Others.destroyTown(deletedProductStoreViewModel);
+        }
+
+
 
         public DataSourceResult ReadFileViewModel(DataSourceRequest request)
         {
@@ -172,15 +194,6 @@ namespace SignalRLocalHub.Hubs
                 WorkingSet64 = p.WorkingSet64 / 1024 / 1024,
                 ProcessName = p.ProcessName
             });
-
-
-            //var mem = processes.Select(p => new
-            //{
-            //   p.WorkingSet64,
-            //   p.Threads[].
-            //});
-
-
             return res;
          }
         

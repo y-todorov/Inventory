@@ -1,5 +1,6 @@
 ﻿using Inventory.DAL;
 using Inventory.MVC.Models;
+using Inventory.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,17 +20,31 @@ namespace Inventory.MVC.Controllers
 
                 List<EntityBase> result = prods.Concat<EntityBase>(elem).ToList();
 
+               
                 var res = result.Select(eb => new SearchViewModel
                 {
                     EntityId = eb.Id,
                     EntityName = eb.GetType().Name,
-                    EntityToString = eb.ToString()
+                    EntityToString = eb.ToString(),
+                    EntityUrl = HttpHelperUtils.GetBaseUrlPath() + GetRealTypeName(eb.GetType().Name) + "/Details/" + eb.Id
+
 
                 }).ToList();
                 
                 return Json(res, JsonRequestBehavior.AllowGet);
             }
             return null;
+        }
+
+        private string GetRealTypeName(string typeName)
+        {
+            string result = typeName;
+            if (typeName.Contains("_"))
+            {
+                int index = typeName.IndexOf("_");
+                result = typeName.Substring(0, index);
+            }
+            return result;
         }
 
         public ActionResult Index()

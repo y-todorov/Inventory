@@ -12,5 +12,7 @@ namespace Inventory.MVC.Models
         public string EntityName { get; set; }
 
         public string EntityToString { get; set; }
+
+        public string EntityUrl { get; set; }
     }
 }

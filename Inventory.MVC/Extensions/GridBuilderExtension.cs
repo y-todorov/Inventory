@@ -13,6 +13,7 @@ using Kendo.Mvc.UI.Fluent;
 using Inventory.DAL;
 using Inventory.MVC.Models;
 using Inventory.MVC.Resources;
+using System.Diagnostics;
 
 namespace Inventory.MVC.Extensions
 {
@@ -92,7 +93,8 @@ namespace Inventory.MVC.Extensions
         // It is EXTREMELY important NOT to set the name here. This is because of details grids. There name MUST be  .Name("ProductInventoryViewModelGrid_#=ProductInventoryHeaderId#")
         public static GridBuilder<T> AddBaseOptions<T>(this GridBuilder<T> builder, DataSourceType dst = DataSourceType.Custom) where T : class
         {
-            
+            Stopwatch sw = Stopwatch.StartNew();
+
             Type viewModelEntityType = typeof(T);
             string entityTypeName = viewModelEntityType.Name.Substring(0, viewModelEntityType.Name.IndexOf("ViewModel"));
             builder
@@ -226,6 +228,9 @@ namespace Inventory.MVC.Extensions
                 t.Pdf().Text("Експорт в Pdf");
                 //t.Save();
             }); // това е бъг, трябва да си е преведено
+
+            double mills = sw.Elapsed.TotalMilliseconds;
+            Trace.WriteLine("AddBaseOptions completed in " + mills + " milliseconds.");
 
             return builder;
         }

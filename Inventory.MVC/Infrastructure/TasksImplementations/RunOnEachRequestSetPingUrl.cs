@@ -14,30 +14,30 @@ namespace Inventory.MVC.Infrastructure.TasksImplementations
     {
         public void Execute()
         {
-            var pingUrl = MemoryCache.Default.Get("pingPage") as string;
-            if (string.IsNullOrEmpty(pingUrl))
-            {
-                pingUrl = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
-                          HttpContext.Current.Request.ApplicationPath;//  + "/"+ "ping.html"; http://inventory-11.apphb.com
-                MemoryCache.Default.Set("pingPage", pingUrl, null);
-                Timer t = new Timer(1000);
-                t.Elapsed += t_Elapsed;
-                t.Start();
-            }
+            //var pingUrl = MemoryCache.Default.Get("pingPage") as string;
+            //if (string.IsNullOrEmpty(pingUrl))
+            //{
+            //    pingUrl = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority +
+            //              HttpContext.Current.Request.ApplicationPath;//  + "/"+ "ping.html"; http://inventory-11.apphb.com
+            //    MemoryCache.Default.Set("pingPage", pingUrl, null);
+            //    Timer t = new Timer(1000);
+            //    t.Elapsed += t_Elapsed;
+            //    t.Start();
+            //}
             
         }
 
         void t_Elapsed(object sender, ElapsedEventArgs e)
         {
-             var pingUrl = MemoryCache.Default.Get("pingPage") as string;
-            if (!string.IsNullOrEmpty(pingUrl))
-            {
-                using (HttpClient hc = new HttpClient())
-                {
-                    string res = hc.GetStringAsync(pingUrl).Result;
-                    Trace.WriteLine("Elapsed timer " + res);
-                }
-            }
+            // var pingUrl = MemoryCache.Default.Get("pingPage") as string;
+            //if (!string.IsNullOrEmpty(pingUrl))
+            //{
+            //    using (HttpClient hc = new HttpClient())
+            //    {
+            //        string res = hc.GetStringAsync(pingUrl).Result;
+            //        Trace.WriteLine("Elapsed timer " + res);
+            //    }
+            //}
 
         }
     }

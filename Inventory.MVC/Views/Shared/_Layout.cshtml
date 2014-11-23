@@ -1,116 +1,132 @@
 ﻿@using Microsoft.AspNet.Identity
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="description" content="Inventory Management" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Инвентар</title>
-    <link rel="shortcut icon" type="image/x-icon" href="~/Content/favicon.ico" />
-    <link href="~/Content/CssBundle.css" rel="stylesheet" />
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="Inventory Management" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Инвентар</title>
+        <link rel="shortcut icon" type="image/x-icon" href="~/Content/favicon.ico" />
+        <link href="~/Content/CssBundle.css" rel="stylesheet" />
 
-    <style>
-        .k-menu,
-        .k-menu li.k-item,
-        .k-widget.k-menu-horizontal > li.k-item {
-            border-right-width: 0; /*премахва границите между item-ите в менюто*/
-            text-align: center;
-            border-style: none;
-        }
-
-            .k-menu .k-state-hover:hover {
-                background-color: transparent;
+        @*<style>
+            .k-menu,
+            .k-menu li.k-item,
+            .k-widget.k-menu-horizontal > li.k-item {
+                border-right-width: 0; /*премахва границите между item-ите в менюто*/
+                text-align: center;
+                border-style: none;
             }
-    </style>
 
-    <script src="~/Scripts/JsBundle.js"></script>
-    <script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
-    <script src="~/signalr/hubs"></script>
-</head>
-<body>
-    <header>
-        @(
- Html.Kendo().ToolBar()
+            .k-menu .k-state-hover:hover { background-color: transparent; }
+        </style>*@
+
+        <script src="~/Scripts/JsBundle.js"></script>
+        <script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
+        <script src="~/signalr/hubs"></script>
+    </head>
+    <body>
+        <header>
+            @(
+        Html.Kendo().ToolBar()
             .Name("headerToolBar")
             .Items(items =>
             {
-                items.Add().Template(
-                    Html.Kendo().Menu()
-                        .Name("headerMenu")
-                        .BindTo("sitemap")
+                //items.Add().Template(
+                //    Html.Kendo().Menu()
+                //        .Name("headerMenu")
+                //        .BindTo("sitemap")
 
-                        .SecurityTrimming(false).ToHtmlString());
-                items.Add().Template(Html.Kendo().AutoComplete().Name("ddlSearch").Placeholder("Търсене ...").HtmlAttributes(new { style = "width: 300px;" })
-
-                                .MinLength(1)
-                                .DataTextField("EntityToString")
-                                .DataSource(ds => { ds.Read(read => read.Action("Search", "Home").Data("getText")).ServerFiltering(true); })
-                                .Template("<a href='https://www.google.bg/'>" + "#:data.EntityToString#" + "</a>")
-                                .ToHtmlString());
+                //        .SecurityTrimming(false).ToHtmlString());
+                items.Add().Template(Html.Kendo().AutoComplete().Name("ddlSearch").Placeholder("Търсене ...").HtmlAttributes(new {style = "width: 300px;float:right"})
+                    .MinLength(1)
+                    .DataTextField("EntityToString")
+                    .DataSource(ds => { ds.Read(read => read.Action("Search", "Home").Data("getText")).ServerFiltering(true); })
+                    .Template("<a href='#:data.EntityUrl#'>" + "#:data.EntityToString#" + "</a>")
+                    .ToHtmlString());
             }
             )
-        )
+                  )
 
 
-
-        @(Html.Kendo().Notification()
-                  .Name("notification")
-                  .Width("100%")
-                  .Position(position => position.Top(0).Left(0))
-        )
-
-        <span id="centeredNotification" style="display: none;"></span>
-        <span id="popupNotification" style="display: none;"></span>
-    </header>
-
-
-
-
-
-
-
-    <div id="body">
-        @RenderBody()
-    </div>
-    @*sticky footer*@
-    <footer style="position: absolute; bottom: 0; width: 100%;text-align:center;border:none;border-style: none">
-        <div>
-            @(
- Html.Kendo().ToolBar()
-            .Name("footerToolBar")
-            .Items(items =>
-            {
-                items.Add().Template(
-                    Html.Kendo().Menu()
-                  .Name("footerMenu")
-
-                  .Items(children =>
+            @(Html.Kendo().TabStrip()
+                  .Name("tabstrip")
+                  .Items(tabstrip =>
                   {
-                      children.Add().Text(Html.ActionLink("Начало", "Index", "Home").ToHtmlString()).Encoded(false);
-                      children.Add().Text(Html.ActionLink("Често задавани въпроси", "Index", "Home").ToHtmlString()).Encoded(false);
-                      children.Add().Text(Html.ActionLink("Полезни връзки", "Index", "Home").ToHtmlString()).Encoded(false);
-                      children.Add().Text(Html.ActionLink("Контакти", "Index", "Home").ToHtmlString()).Encoded(false);
-                      children.Add().Text(Html.ActionLink("Карта на сайта", "Index", "Home").ToHtmlString()).Encoded(false);
-                      children.Add().Text("<a href='https://www.google.bg' target='blank'>Google</a>").Encoded(false);
-                      children.Add().Text(Html.ActionLink("Продукти", "Index", "Product").ToHtmlString()).Encoded(false);
-                  })
-                  .SecurityTrimming(false)
-
-                                .ToHtmlString());
-            }
-            )
-            )
-
+                      tabstrip.Add().Text("Клиенти")
+                          .Action("Index", "Product");
+                      tabstrip.Add().Text("Контакти")
+                          .Action("Index", "Contact");
+                      tabstrip.Add().Text("Потенциални клиенти")
+                          .Action("Index", "Category");
+                      tabstrip.Add().Text("Календари")
+                          .Action("Index", "UnitMeasure");
+                      tabstrip.Add().Text("Задачи")
+                          .Action("Index", "Store");
+                      tabstrip.Add().Text("Градове")
+                          .Action("Index", "Town");
+                      tabstrip.Add().Text("Региони")
+                          .Action("Index", "Region");
+                      tabstrip.Add().Text("Общини")
+                          .Action("Index", "Municipality");
+                      tabstrip.Add().Text("Индустрии")
+                          .Action("Index", "Industry");
+                      tabstrip.Add().Text("Документи")
+                          .Action("Index", "Document");
+                  }).SecurityTrimming(false) // This is very important for all controls that has this property -> VERY slow if missed or set to true
+                  ).
 
             @(Html.Kendo().Notification()
                   .Name("notification")
                   .Width("100%")
                   .Position(position => position.Top(0).Left(0))
-            )
-        </div>
+                  )
 
-    </footer>
-</body>
+            <span id="centeredNotification" style="display: none;"></span>
+            <span id="popupNotification" style="display: none;"></span>
+        </header>
+
+
+
+
+
+
+
+        <div id="body">
+            @RenderBody()
+        </div>
+        @*sticky footer*@
+        <footer style="position: absolute; bottom: 0; width: 100%; text-align: center; border: none; border-style: none">
+            <div>
+                @(
+        Html.Kendo().ToolBar()
+            .Name("footerToolBar")
+            .Items(items =>
+            {
+                items.Add().Template(
+                    Html.Kendo().Menu()
+                        .Name("footerMenu")
+                        .Items(children =>
+                        {
+                            children.Add().Text(Html.ActionLink("Начало", "Index", "Home").ToHtmlString()).Encoded(false);
+                            children.Add().Text(Html.ActionLink("Често задавани въпроси", "Index", "Home").ToHtmlString()).Encoded(false);
+                            children.Add().Text(Html.ActionLink("Полезни връзки", "Index", "Home").ToHtmlString()).Encoded(false);
+                            children.Add().Text(Html.ActionLink("Контакти", "Index", "Home").ToHtmlString()).Encoded(false);
+                            children.Add().Text(Html.ActionLink("Карта на сайта", "Index", "Home").ToHtmlString()).Encoded(false);
+                            children.Add().Text("<a href='https://www.google.bg' target='blank'>Google</a>").Encoded(false);
+                            children.Add().Text(Html.ActionLink("Продукти", "Index", "Product").ToHtmlString()).Encoded(false);
+                        })
+                        .SecurityTrimming(false) // This is very important for all controls that has this property -> VERY slow if missed or set to true
+                        .ToHtmlString());
+            }
+            )
+                      )
+
+
+            </div>
+
+        </footer>
+    </body>
 </html>
 
 <script type="text/javascript">

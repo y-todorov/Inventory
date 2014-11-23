@@ -15,9 +15,9 @@
     <file>/Content/bootstrapSimplex.css</file>
     <file>/Content/Kendo/web/kendo.common.css</file>
     <file>/Content/Kendo/web/kendo.rtl.css</file>
-    <file>/Content/Kendo/web/kendo.bootstrap.css</file>
+    <file>/Content/Kendo/web/kendo.default.css</file>
     <file>/Content/Kendo/dataviz/kendo.dataviz.css</file>
-    <file>/Content/Kendo/dataviz/kendo.dataviz.bootstrap.css</file>
+    <file>/Content/Kendo/dataviz/kendo.dataviz.default.css</file>
     <file>/Content/MyStyleSheet.css</file>
   </files>
 </bundle>
