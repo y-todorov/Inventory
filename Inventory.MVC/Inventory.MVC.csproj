@@ -218,7 +218,9 @@
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\ElementControllers\UnitMeasureController.cs" />
     <Compile Include="Extensions\ChartBuilderExtensions.cs" />
+    <Compile Include="Extensions\ExtensionUtils.cs" />
     <Compile Include="Extensions\GridBuilderExtension.cs" />
+    <Compile Include="Extensions\TabStripExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -1130,7 +1132,9 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\CssBundle.css.bundle" />
+    <Content Include="Content\CssBundle.css.bundle">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Content\images\kendoui.ttf" />
     <Content Include="Content\images\kendoui.woff" />
     <Content Include="Content\Kendo\common\transitions.less" />
@@ -1463,6 +1467,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Town\Details.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\DetailsPartial.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

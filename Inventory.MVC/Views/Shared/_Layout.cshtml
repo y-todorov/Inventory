@@ -1,15 +1,16 @@
-﻿@using Microsoft.AspNet.Identity
+﻿@using Inventory.MVC.Extensions
+@using Microsoft.AspNet.Identity
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="description" content="Inventory Management" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Инвентар</title>
-        <link rel="shortcut icon" type="image/x-icon" href="~/Content/favicon.ico" />
-        <link href="~/Content/CssBundle.css" rel="stylesheet" />
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Inventory Management" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Инвентар</title>
+    <link rel="shortcut icon" type="image/x-icon" href="~/Content/favicon.ico" />
+    <link href="~/Content/CssBundle.css" rel="stylesheet" />
 
-        @*<style>
+    @*<style>
             .k-menu,
             .k-menu li.k-item,
             .k-widget.k-menu-horizontal > li.k-item {
@@ -21,35 +22,44 @@
             .k-menu .k-state-hover:hover { background-color: transparent; }
         </style>*@
 
-        <script src="~/Scripts/JsBundle.js"></script>
-        <script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
-        <script src="~/signalr/hubs"></script>
-    </head>
-    <body>
-        <header>
-            @(
-        Html.Kendo().ToolBar()
-            .Name("headerToolBar")
-            .Items(items =>
-            {
-                //items.Add().Template(
-                //    Html.Kendo().Menu()
-                //        .Name("headerMenu")
-                //        .BindTo("sitemap")
+    <script src="~/Scripts/JsBundle.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
+    <script src="~/signalr/hubs"></script>
+    <script>
+    var crudHub = $.connection.crudHub;
+    var hubStart = $.connection.hub.start();
+    </script>
 
-                //        .SecurityTrimming(false).ToHtmlString());
-                items.Add().Template(Html.Kendo().AutoComplete().Name("ddlSearch").Placeholder("Търсене ...").HtmlAttributes(new {style = "width: 300px;float:right"})
-                    .MinLength(1)
-                    .DataTextField("EntityToString")
-                    .DataSource(ds => { ds.Read(read => read.Action("Search", "Home").Data("getText")).ServerFiltering(true); })
-                    .Template("<a href='#:data.EntityUrl#'>" + "#:data.EntityToString#" + "</a>")
-                    .ToHtmlString());
-            }
-            )
-                  )
+</head>
+<body>
+    <header>
 
 
-            @(Html.Kendo().TabStrip()
+        @(
+ Html.Kendo().ToolBar()
+        .Name("headerToolBar")
+        .Items(items =>
+        {
+
+            items.Add().Template(Html.Kendo().AutoComplete().Name("ddlSearch").Placeholder("Търсене ...").HtmlAttributes(new { style = "width: 300px;float:right" })
+                .MinLength(1)
+                .DataTextField("EntityToString")
+                .DataSource(ds => { ds.Read(read => read.Action("Search", "Home").Data("getText")).ServerFiltering(true); })
+                .Template("<a href='#:data.EntityUrl#'>" + "#:data.EntityToString#" + "</a>")
+                .ToHtmlString());
+        }
+        )
+        )
+
+        @(
+
+ Html.Kendo().Menu()
+                    .Name("headerMenu")
+                    .BindTo("sitemap")
+
+                    .SecurityTrimming(false)
+        )
+        @(Html.Kendo().TabStrip()
                   .Name("tabstrip")
                   .Items(tabstrip =>
                   {
@@ -74,32 +84,35 @@
                       tabstrip.Add().Text("Документи")
                           .Action("Index", "Document");
                   }).SecurityTrimming(false) // This is very important for all controls that has this property -> VERY slow if missed or set to true
-                  ).
-
-            @(Html.Kendo().Notification()
-                  .Name("notification")
-                  .Width("100%")
-                  .Position(position => position.Top(0).Left(0))
-                  )
-
-            <span id="centeredNotification" style="display: none;"></span>
-            <span id="popupNotification" style="display: none;"></span>
-        </header>
+        )
 
 
+        @*@(ExtensionUtils.GetCachedToolbar(Html.Kendo().TabStrip().Name("tabstrip")))*@
+
+        @( Html.Kendo().Notification()
+                   .Name("notification")
+                   .Width("100%")
+                   .Position(position => position.Top(0).Left(0))
+        )
+
+        <span id="centeredNotification" style="display: none;"></span>
+        <span id="popupNotification" style="display: none;"></span>
+    </header>
 
 
 
 
 
-        <div id="body">
-            @RenderBody()
-        </div>
-        @*sticky footer*@
-        <footer style="position: absolute; bottom: 0; width: 100%; text-align: center; border: none; border-style: none">
-            <div>
-                @(
-        Html.Kendo().ToolBar()
+
+
+    <div id="body">
+        @RenderBody()
+    </div>
+    @*sticky footer*@
+    <footer style="position: absolute; bottom: 0; width: 100%; text-align: center; border: none; border-style: none">
+        <div>
+            @(
+ Html.Kendo().ToolBar()
             .Name("footerToolBar")
             .Items(items =>
             {
@@ -120,13 +133,13 @@
                         .ToHtmlString());
             }
             )
-                      )
+            )
 
 
-            </div>
+        </div>
 
-        </footer>
-    </body>
+    </footer>
+</body>
 </html>
 
 <script type="text/javascript">

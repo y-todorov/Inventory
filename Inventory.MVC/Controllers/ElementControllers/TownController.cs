@@ -9,6 +9,7 @@ namespace Inventory.MVC.Controllers.ElementControllers
 {
     public class TownController : ControllerBase
     {
+        [OutputCache(Duration=100, VaryByParam="id")]
        public ActionResult Details(int id, InventoryContext context)
        {
            var town = context.Elements.OfType<Town>().FirstOrDefault(t => t.Id == id);

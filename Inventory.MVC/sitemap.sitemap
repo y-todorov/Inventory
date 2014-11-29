@@ -23,5 +23,8 @@
     <siteMapNode title="Черна кутия">
       <siteMapNode controller="ChangeLog" action="Index" title="Черна кутия" />
     </siteMapNode>
+    <siteMapNode title="Диаграми">
+      <siteMapNode controller="Chart" action="Processes" title="Системни процеси" />
+    </siteMapNode>
   </siteMapNode>
 </siteMap>

@@ -166,10 +166,23 @@ namespace Inventory.MVC.Extensions
             PropertyInfo[] modelEntityProperties = viewModelEntityType.GetProperties();
 
             InventoryContext testContext = new InventoryContext();
-
+            // http://docs.telerik.com/kendo-ui/aspnet-mvc/helpers/grid/faq za limka na foreign key obektite @item
             builder
                 .Columns(columns =>
                 {
+                    columns.Template(t =>  @"<text></text>")
+             .Width(50)
+             .HeaderTemplate("Действие")
+//http://docs.telerik.com/kendo-ui/web/appearance-styling
+                    .ClientTemplate(@"<input type=""checkbox"" id=""checkbox#=Id#"" class=""k-checkbox checkbox"">
+<label class=""k-checkbox-label"" for=""checkbox#=Id#""></label> | 
+<a class=""k-button-icontext k-icon k-delete k-grid-delete"" href=""\#"">Изтриване</a> | 
+<a class=""k-button-icontext k-icon  k-edit k-grid-edit"" href=""\#"">Редактиране</a>");
+
+                    
+            //        columns.Template(t => t)
+            //.Width(50)
+            //.ClientTemplate(@"<a class=""k-button-icontext k-icon  k-edit k-grid-edit"" href=""\#"">Редактиране</a>");
                     // за да е първо id-то
                     columns.Bound("Id"); // временно ги махам докато разбера как да са readonly е  Popup едит
                     foreach (PropertyInfo propertyInfo in modelEntityProperties)
@@ -212,14 +225,27 @@ namespace Inventory.MVC.Extensions
                         {
                             columns.Bound(propertyInfo.Name).Locked(true).Lockable(true); //.Width("200px"); //.Title(transaltedName);
                         }
+                     
+                    } 
+                   
 
-                    }
-                    columns.Command(command => { command.Edit().Text(string.Empty); command.Destroy().Text(string.Empty); });
+                   
+                    //columns.Command(command => { command.Edit(); //command.Destroy();
+                    //});
                 });
 
             builder.ToolBar(t =>
             {
+                t.Template(@"Html.Kendo().ToolBar()
+                          .Name(""ToolBar2"")
+                          .Items(items =>
+                          {
+                              items.Add().Template(Html.Kendo().AutoComplete().Name(""autocom""));
+                              
+                          }))");
+
                 t.Create();
+                //t.Template(@"<a class=""k-button-icontext k-icon k-add k-grid-add"" href=""\#"">Добави</a>");
                 t.Custom().Text("Редактиране");
 
 

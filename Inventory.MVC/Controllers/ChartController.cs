@@ -18,6 +18,14 @@ namespace Inventory.MVC.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        public ActionResult Export_Save(string contentType, string base64, string fileName)
+        {
+            var fileContents = Convert.FromBase64String(base64);
+
+            return File(fileContents, contentType, fileName);
+        }
         
     }
 }

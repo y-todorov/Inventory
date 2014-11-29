@@ -6,7 +6,11 @@
     var crudHub = $.connection.crudHub;
     var hubStart = $.connection.hub.start();
 </script>
+
 @(
+
+        
+
  Html.Kendo().Grid<ProductViewModel>()
 
                 .Columns(columns =>
@@ -98,3 +102,13 @@
     }
 
 </script>
+
+@*<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    
+</head>
+    <body>
+        <input type="checkbox"  name="name" value=" " />
+    </body>
+</html>*@

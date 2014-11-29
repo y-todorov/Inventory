@@ -192,7 +192,7 @@ namespace SignalRLocalHub.Hubs
                 HandleCount = p.HandleCount,
                 ThreadsCount = p.Threads.Count,
                 WorkingSet64 = p.WorkingSet64 / 1024 / 1024,
-                ProcessName = p.ProcessName
+                ProcessName = p.ProcessName.Length > 10 ? p.ProcessName.Substring(0, 10) : p.ProcessName
             });
             return res;
          }
