@@ -49,6 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeLog.cs" />
+    <Compile Include="CustomField.cs" />
+    <Compile Include="CustomFieldDefinition.cs" />
     <Compile Include="Element.cs" />
     <Compile Include="EntityBase.cs" />
     <Compile Include="Industry.cs" />
@@ -57,6 +59,7 @@
     <Compile Include="ObjectContextExtensions.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductCategory.cs" />
+    <Compile Include="ProductCustomField.cs" />
     <Compile Include="ProductStore.cs" />
     <Compile Include="ProductUnitMeasure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

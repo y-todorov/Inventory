@@ -21,13 +21,17 @@
 
             .k-menu .k-state-hover:hover { background-color: transparent; }
         </style>*@
+    
+    <style>
+        .k-tooltip { margin-bottom: -100px; }
+    </style>
 
     <script src="~/Scripts/JsBundle.js"></script>
     <script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
     <script src="~/signalr/hubs"></script>
     <script>
-    var crudHub = $.connection.crudHub;
-    var hubStart = $.connection.hub.start();
+        var crudHub = $.connection.crudHub;
+        var hubStart = $.connection.hub.start();
     </script>
 
 </head>
@@ -37,27 +41,25 @@
 
         @(
  Html.Kendo().ToolBar()
-        .Name("headerToolBar")
-        .Items(items =>
-        {
-
-            items.Add().Template(Html.Kendo().AutoComplete().Name("ddlSearch").Placeholder("Търсене ...").HtmlAttributes(new { style = "width: 300px;float:right" })
-                .MinLength(1)
-                .DataTextField("EntityToString")
-                .DataSource(ds => { ds.Read(read => read.Action("Search", "Home").Data("getText")).ServerFiltering(true); })
-                .Template("<a href='#:data.EntityUrl#'>" + "#:data.EntityToString#" + "</a>")
-                .ToHtmlString());
-        }
-        )
+            .Name("headerToolBar")
+            .Items(items =>
+            {
+                items.Add().Template(Html.Kendo().AutoComplete().Name("ddlSearch").Placeholder("Търсене ...").HtmlAttributes(new { style = "width: 300px;float:right" })
+                    .MinLength(1)
+                    .DataTextField("EntityToString")
+                    .DataSource(ds => { ds.Read(read => read.Action("Search", "Home").Data("getText")).ServerFiltering(true); })
+                    .Template("<a href='#:data.EntityUrl#'>" + "#:data.EntityToString#" + "</a>")
+                    .ToHtmlString());
+            }
+            )
         )
 
         @(
 
  Html.Kendo().Menu()
-                    .Name("headerMenu")
-                    .BindTo("sitemap")
-
-                    .SecurityTrimming(false)
+            .Name("headerMenu")
+            .BindTo("sitemap")
+            .SecurityTrimming(false)
         )
         @(Html.Kendo().TabStrip()
                   .Name("tabstrip")
@@ -136,9 +138,58 @@
             )
 
 
+
+            @*@(Html.Kendo().Tooltip()
+                                   .For(".k-grid")
+                                                      .Filter(".k-checkbox")
+                .Content("Избор")
+
+            )
+
+            @(Html.Kendo().Tooltip()
+                                   .For(".k-grid")
+                                                   .Filter(".k-icon.k-grid-delete")
+        .Content("Изтриване")
+
+            )
+
+            @(Html.Kendo().Tooltip()
+                                   .For(".k-grid")
+                                                   .Filter(".k-icon.k-grid-edit")
+                                                        .Content("&#013;&#013;&#013;&#013;&#013;&#013;Редактиране")
+
+        .Width(120)
+            )*@
+
+            @(Html.Kendo().ContextMenu()
+        .Name("menu")
+                .Target(".k-grid")
+        //.Filter(".product")
+        .Orientation(ContextMenuOrientation.Vertical)
+        .Animation(animation =>
+        {
+            animation.Open(open =>
+            {
+                open.Fade(FadeDirection.In);
+                open.Duration(500);
+            });
+        })
+        .Items(items =>
+        {
+            items.Add().Text("Избор");
+            items.Add().Text("Редакция");
+            items.Add().Text("Изтриване");
+            
+        }
+
+                  )
+            )
+
+
         </div>
 
     </footer>
+
 </body>
 </html>
 

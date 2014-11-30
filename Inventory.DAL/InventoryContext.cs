@@ -20,6 +20,8 @@ namespace Inventory.DAL
 
         }
 
+        public bool CustomLoggingEnabled { get; set; }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Element> Elements { get; set; }
 
@@ -42,7 +44,8 @@ Custom DB Initializer: You can also create your own custom initializer, if any o
             modelBuilder.Conventions.Add<DateTime2Convention>();
 
             modelBuilder.Entity<Element>().ToTable("Element", "Common");
-            modelBuilder.Entity<Product>().ToTable("Product", "Production");
+            modelBuilder.Entity<CustomField>().ToTable("CustomField", "Common");
+            modelBuilder.Entity<Product>().ToTable("Product", "CRM");
             modelBuilder.Entity<ChangeLog>().ToTable("ChangeLog", "Admin");
         }
 
@@ -50,56 +53,15 @@ Custom DB Initializer: You can also create your own custom initializer, if any o
         {
             protected override void Seed(InventoryContext context)
             {
+                context.CustomLoggingEnabled = false;
+
                 SeedElements<Town>(context, SeedData.SeedData.TownsString);
                 SeedElements<Region>(context, SeedData.SeedData.RegionsString);
                 SeedElements<Municipality>(context, SeedData.SeedData.MunicipalitiesString);
                 SeedElements<Industry>(context, SeedData.SeedData.IndustriesString);
 
-                //List<string> townsList = SeedData.SeedData.TownsString.Split(new [] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList().Distinct().ToList();
-
-                //foreach (string town in townsList)
-                //{
-                //    Town t = new Town()
-                //    {
-                //        Name = town
-                //    };
-                //    context.Elements.Add(t);
-                //}
-
-                //List<string> regionsList = SeedData.SeedData.RegionsString.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList().Distinct().ToList();
-
-                //foreach (string region in regionsList)
-                //{
-                //    Region reg = new Region()
-                //    {
-                //        Name = region
-                //    };
-                //    context.Elements.Add(reg);
-                //}
-
-                //List<string> municipalitiesList = SeedData.SeedData.MunicipalitiesString.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList().Distinct().ToList();
-
-                //foreach (string municipality in municipalitiesList)
-                //{
-                //    Municipality reg = new Municipality()
-                //    {
-                //        Name = municipality
-                //    };
-                //    context.Elements.Add(reg);
-                //}
-
-                //List<string> industriesList = SeedData.SeedData.IndustriesString.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList().Distinct().ToList();
-
-                //foreach (string industry in industriesList)
-                //{
-                //    Industry ind = new Industry()
-                //    {
-                //        Name = industry
-                //    };
-                //    context.Elements.Add(ind);
-                //}
-
-                //All standards will
+                context.CustomLoggingEnabled = true;
+                
                 base.Seed(context);
             }
 
@@ -134,7 +96,10 @@ Custom DB Initializer: You can also create your own custom initializer, if any o
 
             foreach (DbEntityEntry entry in entries)
             {
-                AuditEntryInChangeLog(entry);
+                if (CustomLoggingEnabled)
+                {
+                    AuditEntryInChangeLog(entry);
+                }
 
                 if (entry.State == EntityState.Added)
                 {

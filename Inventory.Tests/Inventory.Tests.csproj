@@ -51,6 +51,10 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Linq.Dynamic, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Linq.Dynamic.1.0.3\lib\net40\System.Linq.Dynamic.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -64,7 +68,9 @@
   <ItemGroup>
     <Compile Include="CodeFirstTest.cs" />
     <Compile Include="Database\TransferDatabaseTest.cs" />
+    <Compile Include="FilterTests.cs" />
     <Compile Include="KendoTests.cs" />
+    <Compile Include="MiscTests.cs" />
     <Compile Include="PC\PCloudTests.cs" />
     <Compile Include="PerformanceCoutntersTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

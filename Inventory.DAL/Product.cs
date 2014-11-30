@@ -1,9 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Inventory.DAL
 {
     public class Product : EntityBase
     {
+        public Product()
+        {
+            ProductCustomFields = new List<ProductCustomField>();
+        }
+
         public string Name { get; set; }
 
         public string Code { get; set; }
@@ -33,6 +39,8 @@ namespace Inventory.DAL
 
         public long? StoreId { get; set; } // Vajno e da e nullabe, togava cascade deletes is false
         public ProductStore Store { get; set; }
+
+        public virtual List<ProductCustomField> ProductCustomFields { get; set; }
 
         public override string ToString()
         {

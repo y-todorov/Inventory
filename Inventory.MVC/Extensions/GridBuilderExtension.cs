@@ -170,14 +170,21 @@ namespace Inventory.MVC.Extensions
             builder
                 .Columns(columns =>
                 {
+
+                    columns.Template(t => @"<text></text>")
+             .Width(20)
+             .HeaderTemplate("Действие")
+                    .HeaderTemplate(@"<input type=""checkbox"" id=""checkboxHeader"" title=""Избери/Изчисти всички"" class=""k-checkbox checkbox"">
+<label class=""k-checkbox-label"" title=""Избери/Изчисти всички"" for=""checkboxHeader""></label>")
+                    .ClientTemplate(@"<input type=""checkbox"" id=""checkbox#=Id#""  title=""Избери/Изчисти"" class=""k-checkbox checkbox"">
+<label class=""k-checkbox-label""  title=""Избери/Изчисти"" for=""checkbox#=Id#""></label>");
+
                     columns.Template(t =>  @"<text></text>")
              .Width(50)
              .HeaderTemplate("Действие")
 //http://docs.telerik.com/kendo-ui/web/appearance-styling
-                    .ClientTemplate(@"<input type=""checkbox"" id=""checkbox#=Id#"" class=""k-checkbox checkbox"">
-<label class=""k-checkbox-label"" for=""checkbox#=Id#""></label> | 
-<a class=""k-button-icontext k-icon k-delete k-grid-delete"" href=""\#"">Изтриване</a> | 
-<a class=""k-button-icontext k-icon  k-edit k-grid-edit"" href=""\#"">Редактиране</a>");
+                    .ClientTemplate(@"<a class=""k-button-icontext k-icon k-delete k-grid-delete"" href=""\#"" title=""Изтриване"">Изтриване</a> | 
+<a class=""k-button-icontext k-icon  k-edit k-grid-edit"" href=""\#"" title=""Редактиране"">Редактиране</a>");
 
                     
             //        columns.Template(t => t)
