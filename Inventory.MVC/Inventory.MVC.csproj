@@ -523,6 +523,8 @@
     <Content Include="Content\Kendo\web\Uniform\sprite.png" />
     <Content Include="Content\Kendo\web\Uniform\sprite_2x.png" />
     <Content Include="Content\MyStyleSheet.css" />
+    <Content Include="Content\paceFlash.css" />
+    <Content Include="Content\paceGreenFlash.css" />
     <Content Include="Content\shared\world-map.png" />
     <Content Include="Content\textures\brushed-metal.png" />
     <Content Include="Content\textures\dots1.png" />
@@ -1079,6 +1081,7 @@
     <Content Include="Scripts\Kendo\messages\kendo.messages.zh-TW.js" />
     <Content Include="Scripts\modernizr.2.6.2.js" />
     <Content Include="Scripts\MyJavaScript.js" />
+    <Content Include="Scripts\pace.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
