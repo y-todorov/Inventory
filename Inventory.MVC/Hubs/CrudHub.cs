@@ -21,10 +21,19 @@ namespace SignalRLocalHub.Hubs
     [HubName("crudHub")]
     public class CrudHub : Hub
     {
+        public void ShowNotificationMessage(string message, string messageType)
+        {
+
+        }
+
         public ProductViewModel CreateProduct(ProductViewModel product)
         {
-            ProductViewModel createdProductViewModel = Utils.CreateBase<Product, ProductViewModel>(product);
+            ProductViewModel createdProductViewModel = Utils.CreateBase<Product, ProductViewModel>(product, Context.ConnectionId);
             Clients.Others.createProduct(createdProductViewModel);
+
+            //Clients.Caller.showNotificationMessage(
+            //    "Продуктът " + createdProductViewModel.Name + " беше записан успешно!", "info");
+
             return createdProductViewModel;
         }
 

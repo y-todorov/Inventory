@@ -220,6 +220,7 @@
     <Compile Include="Extensions\ChartBuilderExtensions.cs" />
     <Compile Include="Extensions\ExtensionUtils.cs" />
     <Compile Include="Extensions\GridBuilderExtension.cs" />
+    <Compile Include="Extensions\KendoNotificationTypes.cs" />
     <Compile Include="Extensions\TabStripExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

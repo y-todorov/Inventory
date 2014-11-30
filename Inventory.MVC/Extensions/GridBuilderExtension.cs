@@ -243,13 +243,13 @@ namespace Inventory.MVC.Extensions
 
             builder.ToolBar(t =>
             {
-                t.Template(@"Html.Kendo().ToolBar()
-                          .Name(""ToolBar2"")
-                          .Items(items =>
-                          {
-                              items.Add().Template(Html.Kendo().AutoComplete().Name(""autocom""));
-                              
-                          }))");
+//                t.Template(@"Html.Kendo().ToolBar()
+//                          .Name(""ToolBar2"")
+//                          .Items(items =>
+//                          {
+//                              items.Add().Template(Html.Kendo().AutoComplete().Name(""autocom""));
+//                              
+//                          }))");
 
                 t.Create();
                 //t.Template(@"<a class=""k-button-icontext k-icon k-add k-grid-add"" href=""\#"">Добави</a>");

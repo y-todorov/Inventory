@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Inventory.DAL;
+using Inventory.MVC.Extensions;
 using Inventory.MVC.Models;
 using Kendo.Mvc.Extensions;
 using Kendo.Mvc.UI;
@@ -19,7 +20,7 @@ namespace Inventory.MVC.Infrastructure
     {
         
 
-         public static TViewModelType CreateBase<TEntityType, TViewModelType>(TViewModelType viewModel) where TEntityType : class
+         public static TViewModelType CreateBase<TEntityType, TViewModelType>(TViewModelType viewModel, string clientConnectionId =  null) where TEntityType : class
          {
              using (InventoryContext context = new InventoryContext())
              {
@@ -30,7 +31,21 @@ namespace Inventory.MVC.Infrastructure
                      context.SaveChanges();
                      // Това се прави за да може да се покаже в UI новите стойности, които са автоматично генерирани от базата, като Id, например
                      viewModel = Mapper.Map<TViewModelType>(entity);
+
+
+                     if (!string.IsNullOrEmpty(clientConnectionId))
+                     {
+                         var hubContext = GlobalHost.ConnectionManager.GetHubContext<CrudHub>();
+                         string messageType = Enum.GetName(typeof (KendoNotificationTypes),
+                             KendoNotificationTypes.success);
+
+                         hubContext.Clients.Client(clientConnectionId).showNotificationMessage("Успешно създаден " + viewModel.ToString() + "!",
+                             messageType);
+                     }
+
                  }
+
+
                  return viewModel;
              }
          }
