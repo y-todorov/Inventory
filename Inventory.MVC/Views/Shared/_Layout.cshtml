@@ -33,20 +33,57 @@
     </style>
 
     <script src="~/Scripts/JsBundle.js"></script>
-    
+
     <script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
     <script src="~/signalr/hubs"></script>
     <script>
-        $(function() {
+        //$(function () {
             var crudHub = $.connection.crudHub;
 
-            crudHub.client.showNotificationMessage = function(message, type) {
+            crudHub.client.showNotificationMessage = function (message, type) {
                 debugger;
                 var notification = $("#notification").data("kendoNotification");
                 notification.show(message, type);
             };
 
             var hubStart = $.connection.hub.start();
+        //});
+    </script>
+
+    <style>
+        .clearable {
+            background: #fff url(data:image/gif;base64,R0lGODlhBwAHAIAAAP///5KSkiH5BAAAAAAALAAAAAAHAAcAAAIMTICmsGrIXnLxuDMLADs=) no-repeat right -10px center;
+            border: 1px solid #999;
+            padding: 3px 18px 3px 4px; /* Use the same right padding (18) in jQ! */
+            border-radius: 3px;
+            transition: background 0.4s;
+        }
+
+            .clearable.x {
+                background-position: right 5px center;
+            }
+
+            .clearable.onX {
+                cursor: pointer;
+            }
+    </style>
+
+    <script type="text/javascript">
+        $(function () {
+            $('input').addClass('clearable');
+
+            // /////
+            // CLEARABLE INPUT
+            function tog(v) { return v ? 'addClass' : 'removeClass'; }
+            $(document).on('input', '.clearable', function () {
+                $(this)[tog(this.value)]('x');
+            }).on('mousemove', '.x', function (e) {
+                $(this)[tog(this.offsetWidth - 18 < e.clientX - this.getBoundingClientRect().left)]('onX');
+            }).on('click', '.onX', function () {
+                $(this).removeClass('x onX').val('').change();
+            });
+
+
         });
     </script>
 
@@ -107,7 +144,7 @@
 
         @*@(ExtensionUtils.GetCachedToolbar(Html.Kendo().TabStrip().Name("tabstrip")))*@
 
-      
+
 
         <span id="centeredNotification" style="display: none;"></span>
         <span id="popupNotification" style="display: none;"></span>
@@ -195,8 +232,8 @@
         }
 
                   )
-                  )
-            
+            )
+
             @( Html.Kendo().Notification()
                    .Name("notification")
                    .Width("100%")

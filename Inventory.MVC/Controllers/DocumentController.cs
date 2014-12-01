@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
 using Kendo.Mvc.Extensions;
@@ -8,6 +9,7 @@ using Kendo.Mvc.UI;
 using PCloud.NET;
 using System.IO;
 using Inventory.MVC.Models;
+using System.Security.AccessControl;
 
 namespace Inventory.MVC.Controllers
 {
@@ -40,9 +42,11 @@ namespace Inventory.MVC.Controllers
                 try
                 {
                     hasChildren = Directory.GetDirectories(di.FullName).Length != 0;
+                    
                 }
-                catch (Exception ex)
+                catch (UnauthorizedAccessException ex)
                 {
+                    //https://connect.microsoft.com/VisualStudio/feedback/details/512171/directory-enumeratedirectory-etc-unusable-due-to-frequent-unauthorizedaccessexceptions-even-runas-administrator#tabs
                 }
                 dvms.Add(new DirectoryViewModel
                 {
@@ -82,9 +86,9 @@ namespace Inventory.MVC.Controllers
                     }
                 }
             }
-            catch (Exception ex)
+            catch (UnauthorizedAccessException ex)
             {
-
+                //https://connect.microsoft.com/VisualStudio/feedback/details/512171/directory-enumeratedirectory-etc-unusable-due-to-frequent-unauthorizedaccessexceptions-even-runas-administrator#tabs
             }
 
             //return Json(fvms, JsonRequestBehavior.AllowGet); // da fack no, here is not this way!!!

@@ -18,7 +18,7 @@ namespace Inventory.MVC.Controllers
 {
     public class ControllerBase : Controller
     {
-        //[OutputCache(Duration=3600, Location=OutputCacheLocation.Any)]
+        [OutputCache(Duration=3600, Location=OutputCacheLocation.Any)]
         public virtual ActionResult Index()
         {
             return View();
