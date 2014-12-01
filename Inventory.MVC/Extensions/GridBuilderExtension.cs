@@ -43,7 +43,7 @@ namespace Inventory.MVC.Extensions
                                    var notification = $(""#notification"").data(""kendoNotification"");
                                    notification.success(e.type);
                                    }
-                               ")
+                               ").RequestEnd("gridDataSourceRequestEnd")
                             )
                             .Batch(false)
                             .Transport(tr => tr
@@ -75,6 +75,7 @@ namespace Inventory.MVC.Extensions
                                    notification.success(e.type);
                                    }
                                ")
+                                .RequestEnd("gridDataSourceRequestEnd")
                             )
                             .Create("Create" + entityTypeName, entityTypeName)
                             .Read("Read" + entityTypeName, entityTypeName)
@@ -91,7 +92,7 @@ namespace Inventory.MVC.Extensions
         }
 
         // It is EXTREMELY important NOT to set the name here. This is because of details grids. There name MUST be  .Name("ProductInventoryViewModelGrid_#=ProductInventoryHeaderId#")
-        public static GridBuilder<T> AddBaseOptions<T>(this GridBuilder<T> builder, DataSourceType dst = DataSourceType.Custom) where T : class
+        public static GridBuilder<T> AddBaseOptions<T>(this GridBuilder<T> builder, HtmlHelper htmlHelper, DataSourceType dst = DataSourceType.Custom) where T : class
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -243,25 +244,28 @@ namespace Inventory.MVC.Extensions
 
             builder.ToolBar(t =>
             {
-//                t.Template(@"Html.Kendo().ToolBar()
-//                          .Name(""ToolBar2"")
-//                          .Items(items =>
-//                          {
-//                              items.Add().Template(Html.Kendo().AutoComplete().Name(""autocom""));
-//                              
-//                          }))");
+                t.Template(htmlHelper.Kendo().ToolBar().Name("gridToolBar").Items(items =>
+                {
+                    items.Add()
+                        .Template(
+                            @"<a class="" k-button-icontext k-icon k-add k-grid-add"" href=""\#"" title=""Добавяне на нов запис"">Добавяне</a>");
+                    items.Add()
+                        .Template(
+                            @"<a class=""k-button k-grid-excel k-excel"" href=""\#"" title=""Експорт в Excel"">Excel</a>");
+                    items.Add()
+                      .Template(
+                          @"<a class=""k-button k-grid-pdf k-pdf"" href=""\#"" title=""Експорт в Pdf"">Pdf</a>");
 
-                t.Create();
-                //t.Template(@"<a class=""k-button-icontext k-icon k-add k-grid-add"" href=""\#"">Добави</a>");
-                t.Custom().Text("Редактиране");
-
-
-                t.Custom().Text("Изтриване");
-                t.Excel().Text("Експорт в Ексел");
-                t.Pdf().Text("Експорт в Pdf");
-                //t.Save();
-            }); // това е бъг, трябва да си е преведено
-
+                    //items.Add().Template(htmlHelper.Kendo().AutoComplete().Name("autocom").ToHtmlString());
+                    items.Add().Template(htmlHelper.Kendo().TextBox().Name("tbSearch").ToHtmlString());
+                    items.Add().Template(htmlHelper.Kendo().Button().Name("btnSearch").Content("Търси").Events(e => e.Click("gridBtnSearchClick")).ToHtmlString());
+               
+                }).ToHtmlString());
+            });
+            builder.Events(events =>
+            {
+                events.DataBound("gridDataBound");
+            });
             double mills = sw.Elapsed.TotalMilliseconds;
             Trace.WriteLine("AddBaseOptions completed in " + mills + " milliseconds.");
 

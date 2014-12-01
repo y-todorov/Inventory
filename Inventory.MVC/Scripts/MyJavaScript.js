@@ -24,8 +24,11 @@ function errorHandler(e) {
     }
 }
 
-
 $(document).ready(function () {
+
+
+    
+
 
     var centered = $("#centeredNotification").kendoNotification({
         hideOnClick: false,

@@ -18,6 +18,7 @@
     <file>/Scripts/Kendo/kendo.aspnetmvc.js</file>
     <file>/Scripts/Kendo/cultures/kendo.culture.bg-BG.js</file>
     <file>/Scripts/Kendo/messages/kendo.messages.bg-BG.js</file>
+    <file>/Scripts/MyKendoGridScript.js</file>
     <file>/Scripts/MyJavaScript.js</file>
     <file>/Scripts/KendoConsole.js</file>
     <file>/Scripts/jQueryAjaxEvents.js</file>
