@@ -15,7 +15,8 @@
     <file>/Content/bootstrap.css</file>
     <file>/Content/Kendo/web/kendo.common.css</file>
     <file>/Content/Kendo/web/kendo.rtl.css</file>
-    <file>/Content/Kendo/web/kendo.default.css</file>
+    <!--темата е важно да е в _Layout за да може да се сменя динамично-->
+    <!--<file>/Content/Kendo/web/kendo.default.css</file>-->
     <file>/Content/Kendo/dataviz/kendo.dataviz.css</file>
     <file>/Content/Kendo/dataviz/kendo.dataviz.default.css</file>
     <file>/Content/MyStyleSheet.css</file>

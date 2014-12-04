@@ -24,8 +24,10 @@ namespace Inventory.DAL
 
         public DbSet<Product> Products { get; set; }
         public DbSet<Element> Elements { get; set; }
-
         public DbSet<ChangeLog> ChangeLogs { get; set; }
+
+        public DbSet<Note> Notes { get; set; }
+
 
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -47,6 +49,8 @@ Custom DB Initializer: You can also create your own custom initializer, if any o
             modelBuilder.Entity<CustomField>().ToTable("CustomField", "Common");
             modelBuilder.Entity<Product>().ToTable("Product", "CRM");
             modelBuilder.Entity<ChangeLog>().ToTable("ChangeLog", "Admin");
+            modelBuilder.Entity<Note>().ToTable("Note", "Common");
+
         }
 
         public class InventoryDbInitializer : DropCreateDatabaseIfModelChanges<InventoryContext>
@@ -98,7 +102,7 @@ Custom DB Initializer: You can also create your own custom initializer, if any o
             {
                 if (CustomLoggingEnabled)
                 {
-                    AuditEntryInChangeLog(entry);
+                    //AuditEntryInChangeLog(entry);
                 }
 
                 if (entry.State == EntityState.Added)

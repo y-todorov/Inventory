@@ -1,4 +1,4 @@
-﻿@model Inventory.DAL.Element
+﻿@model Inventory.MVC.Models.ElementViewModel
 
 @(Html.Kendo().PanelBar()
       .Name("panelbar")
@@ -26,34 +26,7 @@
 
           panelbar.Add().Text("Общи данни")
               .Expanded(true)
-                  .Content(@<text>
-
-                @(
- Html.LabelFor(m => m.CreatedBy))
-
-                @(
- Html.Kendo().TextBoxFor(m => m.CreatedBy).Enable(false))
-
-                @(
- Html.LabelFor(m => m.CreatedOn))
-
-                @(
- Html.Kendo().DateTimePickerFor(m => m.CreatedOn).Enable(false))
-
-                @(
- Html.LabelFor(m => m.ModifiedBy))
-
-                @(
- Html.Kendo().TextBoxFor(m => m.ModifiedBy).Enable(false))
-
-                @(
- Html.LabelFor(m => m.ModifiedOn))
-
-                @(
- Html.Kendo().DateTimePickerFor(m => m.ModifiedOn).Enable(false))
-
-
-                </text>);
+                  .Content(Html.Partial("~/Views/CommonDataPartial.cshtml").ToHtmlString());
 
 
           panelbar.Add().Text("Programs")

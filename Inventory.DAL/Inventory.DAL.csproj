@@ -56,6 +56,7 @@
     <Compile Include="Industry.cs" />
     <Compile Include="InventoryContext.cs" />
     <Compile Include="Municipality.cs" />
+    <Compile Include="Note.cs" />
     <Compile Include="ObjectContextExtensions.cs" />
     <Compile Include="Product.cs" />
     <Compile Include="ProductCategory.cs" />

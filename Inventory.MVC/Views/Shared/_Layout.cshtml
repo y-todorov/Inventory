@@ -13,7 +13,7 @@
 
     <link rel="shortcut icon" type="image/x-icon" href="~/Content/favicon.ico" />
     <link href="~/Content/CssBundle.css" rel="stylesheet" />
-
+    <link href="~/Content/Kendo/web/kendo.default.css" rel="stylesheet" />
     @*<style>
             .k-menu,
             .k-menu li.k-item,
@@ -39,53 +39,14 @@
     <script>
         //$(function () { // Важно е да не е в document.ready() - не се вижда в изгледите иначе
             var crudHub = $.connection.crudHub;
-
             crudHub.client.showNotificationMessage = function (message, type) {
                 var notification = $("#notification").data("kendoNotification");
                 notification.show(message, type);
             };
-
             var hubStart = $.connection.hub.start();
         //});
     </script>
-
-    <style>
-        .clearable {
-            background: #fff url(data:image/gif;base64,R0lGODlhBwAHAIAAAP///5KSkiH5BAAAAAAALAAAAAAHAAcAAAIMTICmsGrIXnLxuDMLADs=) no-repeat right -10px center;
-            border: 1px solid #999;
-            padding: 3px 18px 3px 4px; /* Use the same right padding (18) in jQ! */
-            border-radius: 3px;
-            transition: background 0.4s;
-        }
-
-            .clearable.x {
-                background-position: right 5px center;
-            }
-
-            .clearable.onX {
-                cursor: pointer;
-            }
-    </style>
-
-    <script type="text/javascript">
-        $(function () {
-            $('input').addClass('clearable');
-
-            // /////
-            // CLEARABLE INPUT
-            function tog(v) { return v ? 'addClass' : 'removeClass'; }
-            $(document).on('input', '.clearable', function () {
-                $(this)[tog(this.value)]('x');
-            }).on('mousemove', '.x', function (e) {
-                $(this)[tog(this.offsetWidth - 18 < e.clientX - this.getBoundingClientRect().left)]('onX');
-            }).on('click', '.onX', function () {
-                $(this).removeClass('x onX').val('').change();
-            });
-
-
-        });
-    </script>
-    
+  
    @*тези задължително трябва да са най-накрая на главата*@
     <!--[if lt IE 9]>
         <script src="~/Scripts/html5shiv.js"></script>
@@ -107,6 +68,30 @@
                     .DataSource(ds => { ds.Read(read => read.Action("Search", "Home").Data("getText")).ServerFiltering(true); })
                     .Template("<a href='#:data.EntityUrl#'>" + "#:data.EntityToString#" + "</a>")
                     .ToHtmlString());
+
+//                items.Add().Template(Html.Kendo().DropDownList().Name("kendoDropDownListTheme")
+//                    .Items(itms =>
+//                    {
+//                        itms.Add().Text("Default").Value("default");
+//                        itms.Add().Text("Default").Value("blueopal");
+//                        itms.Add().Text("Bootstrap").Value("bootstrap");
+//                        itms.Add().Text("Silver").Value("silver");
+//                        itms.Add().Text("Uniform").Value("uniform");
+//                        itms.Add().Text("Metro").Value("metro");
+//                        itms.Add().Text("Black").Value("black");
+//                        itms.Add().Text("Metro Black").Value("metroblack");
+//                        itms.Add().Text("High Contrast").Value("highcontrast");
+//                        itms.Add().Text("Moonlight").Value("moonlight");
+//                        itms.Add().Text("Flat").Value("flat");
+                  
+//                    })
+//                    .Events(e => e.Change(@"function(e) {
+//debugger;
+//                      theme = this.value();
+//                      window.kendoThemeChooser.changeTheme(theme, true);
+////                    initCharts(theme);
+//                }"))
+//                    .ToHtmlString());
             }
             )
         )
@@ -160,10 +145,52 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <div id="body">
         @RenderBody()
     </div>
-    @*sticky footer*@
+        @*sticky footer*@
     <footer style="position: absolute; bottom: 0; width: 100%; text-align: center; border: none; border-style: none">
         <div>
             @(
@@ -247,7 +274,7 @@
 
         </div>
 
-    </footer>
+        </footer>
 
 </body>
 </html>

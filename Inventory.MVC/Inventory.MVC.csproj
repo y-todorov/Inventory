@@ -258,6 +258,7 @@
     <Compile Include="Models\IndustryViewModel.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\MunicipalityViewModel.cs" />
+    <Compile Include="Models\NoteViewModel.cs" />
     <Compile Include="Models\Person.cs" />
     <Compile Include="Models\ProcessViewModel.cs" />
     <Compile Include="Models\ProductCategoryViewModel.cs" />
@@ -1558,6 +1559,12 @@
     <Content Include="Content\less\utilities.less" />
     <Content Include="Content\less\variables.less" />
     <Content Include="Content\less\wells.less" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\CommonDataPartial.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\NotesPartial.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -39,6 +39,9 @@ namespace Inventory.MVC
 
             Mapper.CreateMap<IndustryViewModel, Industry>();
             Mapper.CreateMap<Industry, IndustryViewModel>();
+
+            Mapper.CreateMap<NoteViewModel, Note>();
+            Mapper.CreateMap<Note, NoteViewModel>();
         }
 
         public class CustomResolver : ValueResolver<double, decimal>
