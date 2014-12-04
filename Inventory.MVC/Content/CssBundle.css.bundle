@@ -12,7 +12,7 @@
   </settings>
   <!--The order of the <file> elements determines the order of the files in the bundle.-->
   <files>
-    <file>/Content/bootstrapSimplex.css</file>
+    <file>/Content/bootstrap.css</file>
     <file>/Content/Kendo/web/kendo.common.css</file>
     <file>/Content/Kendo/web/kendo.rtl.css</file>
     <file>/Content/Kendo/web/kendo.default.css</file>

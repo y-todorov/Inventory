@@ -4,21 +4,51 @@
 
 
 @(
-
-        
-
- Html.Kendo().Grid<ProductViewModel>()
-
-                .Columns(columns =>
-            {
-                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox'  class='checkbox' />")
-                    .HeaderTemplate("<input type='checkbox' id='masterCheckBox' onclick='checkAll(this)'/>").Width(20);
-            }
-            ).AddBaseOptions(Html)
-                    .Name("grid")
-                    
-                    
+ Html.Kendo().Grid<ProductViewModel>().AddBaseOptions(Html).Name("grid")
 )
+
+
+
+<script>
+    var collection;
+
+    //get's the text by value
+    function getTextByValue(data, indexOfColumnInData, columnNameInData) {
+        grid = $("#grid").data("kendoGrid");
+        //change the index of the column with your index
+        valuesCollection = grid.options.columns[indexOfColumnInData].values;
+
+        //if the collection is empty - get it from the grid
+        if (!collection) {
+            collection = {};
+            //Set the correct FKColumn index
+            for (var value in valuesCollection) {
+                collection[valuesCollection[value].value] = valuesCollection[value].text;
+            }
+        }
+
+        var valueOfProperty = ''; // това трябва да е Id-то
+        for (var name in data) {
+            //alert(name);
+            //var value = obj[name];
+            //alert(value);
+            if (name === columnNameInData)
+            {
+                valueOfProperty = data[name];
+            }
+        }
+
+        //var resultToReturn = collection[data.CategoryId];
+        var resultToReturn = collection[valueOfProperty];
+        if (resultToReturn === undefined) {
+            resultToReturn = '';
+        }
+
+        return resultToReturn;
+    }
+</script>
+
+
 
 <script type="text/javascript">
 
@@ -99,12 +129,3 @@
 
 </script>
 
-@*<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title></title>
-    
-</head>
-    <body>
-        <input type="checkbox"  name="name" value=" " />
-    </body>
-</html>*@

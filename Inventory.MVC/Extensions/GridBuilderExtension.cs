@@ -208,8 +208,12 @@ namespace Inventory.MVC.Extensions
 
                             columns.ForeignKey(propertyInfo.Name,
                                 testContext.Set(rellAttribute.EntityType).AsQueryable(), rellAttribute.DataValueField,
-                                rellAttribute.DataTextField);//.ClientTemplate("<a href=\"#:data."
-                                //+ propertyInfo.Name + "#\">" + "#:data." + rellAttribute.PropertyNameInViewModel + ".Name" + "#  </a>").Locked(false).Lockable(true);
+                                rellAttribute.DataTextField);
+
+
+                                //.ClientTemplate("<a href='/" + rellAttribute.PropertyNameInViewModel + "/#:data." + propertyInfo.Name +
+                                //"#'>#=getTextByValue(data, " + columns.ColumnsContainer.Columns.Count + ", " + propertyInfo.Name +  ")#</a>");
+                                //.ClientTemplate("<a href=\"#:data." + propertyInfo.Name + "#\">" + "#:data." + rellAttribute.PropertyNameInViewModel + ".Name" + "#  </a>").Locked(false).Lockable(true);
                             continue;
                         }
 

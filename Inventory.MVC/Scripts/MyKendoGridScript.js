@@ -3,7 +3,6 @@
 var isReinitNeed = true;
 
 function gridDataBound(a, b, c) {
-    debugger;
     if (isReinitNeed === false) {
         var grid = $(".k-grid").data("kendoGrid");
         //var gridData = grid.dataSource.view();
@@ -14,12 +13,10 @@ function gridDataBound(a, b, c) {
 }
 
 function gridDataSourceRequestEnd(a, b, c) {
-    debugger;
     isReinitNeed = false;
 }
 
 function gridBtnSearchClick(e) {
-    debugger;
     //var grid = $("#FileViewModel").data("kendoGrid");
     var grid = $(".k-grid").data("kendoGrid");
 

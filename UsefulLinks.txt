@@ -4,3 +4,6 @@ http://www.hongkiat.com/blog/pacejs-progress-bar/
 
 use geoJSON 
 
+https://github.com/aFarkas/html5shiv
+
+https://github.com/scottjehl/Respond

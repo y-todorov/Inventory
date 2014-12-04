@@ -37,11 +37,10 @@
     <script src="~/Scripts/jquery.signalR-2.0.2.min.js"></script> @*Това е важно да е точно тук, а не в Bundle, иначе проблеми!*@
     <script src="~/signalr/hubs"></script>
     <script>
-        //$(function () {
+        //$(function () { // Важно е да не е в document.ready() - не се вижда в изгледите иначе
             var crudHub = $.connection.crudHub;
 
             crudHub.client.showNotificationMessage = function (message, type) {
-                debugger;
                 var notification = $("#notification").data("kendoNotification");
                 notification.show(message, type);
             };
@@ -86,7 +85,12 @@
 
         });
     </script>
-
+    
+   @*тези задължително трябва да са най-накрая на главата*@
+    <!--[if lt IE 9]>
+        <script src="~/Scripts/html5shiv.js"></script>
+        <script src="~/Scripts/respond.min.js"></script>
+    <![endif]-->
 </head>
 <body>
     <header>

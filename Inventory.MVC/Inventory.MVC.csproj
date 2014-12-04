@@ -289,6 +289,7 @@
     <Content Include="Content\BlueOpal\slider-v.gif" />
     <Content Include="Content\BlueOpal\sprite.png" />
     <Content Include="Content\BlueOpal\sprite_2x.png" />
+    <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrapSimplex.css" />
     <Content Include="Content\CssBundle.css" />
     <Content Include="Content\CssBundle.min.css" />
@@ -570,9 +571,12 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="ping.html" />
+    <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\globalize.culture.bg-BG.js" />
     <Content Include="Scripts\globalize.culture.bg.js" />
     <Content Include="Scripts\globalize.js" />
+    <Content Include="Scripts\html5shiv.js" />
+    <Content Include="Scripts\jquery-1.11.1.js" />
     <Content Include="Scripts\jquery.signalR-2.0.2.js" />
     <Content Include="Scripts\jquery.signalR-2.0.2.min.js" />
     <Content Include="Scripts\jquery.signalR-2.1.2.js" />
@@ -1084,6 +1088,8 @@
     <Content Include="Scripts\MyJavaScript.js" />
     <Content Include="Scripts\MyKendoGridScript.js" />
     <Content Include="Scripts\pace.js" />
+    <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\theme-chooser.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -1475,6 +1481,83 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\DetailsPartial.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\bootstrap.css.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\less\.csscomb.json" />
+    <Content Include="Content\less\.csslintrc" />
+    <Content Include="Content\less\alerts.less" />
+    <Content Include="Content\less\badges.less" />
+    <Content Include="Content\less\bootstrap.less" />
+    <Content Include="Content\less\breadcrumbs.less" />
+    <Content Include="Content\less\button-groups.less" />
+    <Content Include="Content\less\buttons.less" />
+    <Content Include="Content\less\carousel.less" />
+    <Content Include="Content\less\close.less" />
+    <Content Include="Content\less\code.less" />
+    <Content Include="Content\less\component-animations.less" />
+    <Content Include="Content\less\dropdowns.less" />
+    <Content Include="Content\less\forms.less" />
+    <Content Include="Content\less\glyphicons.less" />
+    <Content Include="Content\less\grid.less" />
+    <Content Include="Content\less\input-groups.less" />
+    <Content Include="Content\less\jumbotron.less" />
+    <Content Include="Content\less\labels.less" />
+    <Content Include="Content\less\list-group.less" />
+    <Content Include="Content\less\media.less" />
+    <Content Include="Content\less\mixins.less" />
+    <Content Include="Content\less\mixins\alerts.less" />
+    <Content Include="Content\less\mixins\background-variant.less" />
+    <Content Include="Content\less\mixins\border-radius.less" />
+    <Content Include="Content\less\mixins\buttons.less" />
+    <Content Include="Content\less\mixins\center-block.less" />
+    <Content Include="Content\less\mixins\clearfix.less" />
+    <Content Include="Content\less\mixins\forms.less" />
+    <Content Include="Content\less\mixins\gradients.less" />
+    <Content Include="Content\less\mixins\grid-framework.less" />
+    <Content Include="Content\less\mixins\grid.less" />
+    <Content Include="Content\less\mixins\hide-text.less" />
+    <Content Include="Content\less\mixins\image.less" />
+    <Content Include="Content\less\mixins\labels.less" />
+    <Content Include="Content\less\mixins\list-group.less" />
+    <Content Include="Content\less\mixins\nav-divider.less" />
+    <Content Include="Content\less\mixins\nav-vertical-align.less" />
+    <Content Include="Content\less\mixins\opacity.less" />
+    <Content Include="Content\less\mixins\pagination.less" />
+    <Content Include="Content\less\mixins\panels.less" />
+    <Content Include="Content\less\mixins\progress-bar.less" />
+    <Content Include="Content\less\mixins\reset-filter.less" />
+    <Content Include="Content\less\mixins\resize.less" />
+    <Content Include="Content\less\mixins\responsive-visibility.less" />
+    <Content Include="Content\less\mixins\size.less" />
+    <Content Include="Content\less\mixins\tab-focus.less" />
+    <Content Include="Content\less\mixins\table-row.less" />
+    <Content Include="Content\less\mixins\text-emphasis.less" />
+    <Content Include="Content\less\mixins\text-overflow.less" />
+    <Content Include="Content\less\mixins\vendor-prefixes.less" />
+    <Content Include="Content\less\modals.less" />
+    <Content Include="Content\less\navbar.less" />
+    <Content Include="Content\less\navs.less" />
+    <Content Include="Content\less\normalize.less" />
+    <Content Include="Content\less\pager.less" />
+    <Content Include="Content\less\pagination.less" />
+    <Content Include="Content\less\panels.less" />
+    <Content Include="Content\less\popovers.less" />
+    <Content Include="Content\less\print.less" />
+    <Content Include="Content\less\progress-bars.less" />
+    <Content Include="Content\less\responsive-embed.less" />
+    <Content Include="Content\less\responsive-utilities.less" />
+    <Content Include="Content\less\scaffolding.less" />
+    <Content Include="Content\less\tables.less" />
+    <Content Include="Content\less\theme.less" />
+    <Content Include="Content\less\thumbnails.less" />
+    <Content Include="Content\less\tooltip.less" />
+    <Content Include="Content\less\type.less" />
+    <Content Include="Content\less\utilities.less" />
+    <Content Include="Content\less\variables.less" />
+    <Content Include="Content\less\wells.less" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
