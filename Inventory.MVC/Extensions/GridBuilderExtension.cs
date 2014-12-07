@@ -59,17 +59,7 @@ namespace Inventory.MVC.Extensions
                                     .Create("create" + entityTypeName)
                                     .Update("update" + entityTypeName)
                                     .Destroy("destroy" + entityTypeName))
-                            )
-        //                    .Schema(schema => schema
-        //    .Data("Data")
-        //    .Total("Total")
-        //    .Aggregates("Aggregates")
-        //    .Model(model =>
-        //    {
-        //        model.Id("Id");
-        //    })
-        //)
-                            ;
+                            );
                         break;
                     case DataSourceType.Ajax:
                         dataSource
@@ -95,8 +85,6 @@ namespace Inventory.MVC.Extensions
                         break;
                 }
 
-
-
             });
             return builder;
         }
@@ -112,7 +100,7 @@ namespace Inventory.MVC.Extensions
                 .Editable(
                     e => e.DisplayDeleteConfirmation(true).Mode(GridEditMode.PopUp).Window(w => w.Title("Редакция")))
                 .ColumnMenu(c => c.Enabled(true).Columns(false)) // Columns(true) е много глупаво, трябва да се направи от централизирано място а не от всяка колона
-                
+
                 .Groupable(
                     gsb =>
                         gsb.Enabled(true))
@@ -136,43 +124,6 @@ namespace Inventory.MVC.Extensions
                 .Resizable(c => c.Columns(true))
                 .ColumnResizeHandleWidth(10)
                 .ConfigureDataSource(dst, entityTypeName);
-            //                .DataSource(dataSource => dataSource
-            //                    .SignalR()
-            //                    .AutoSync(false)
-            //                    .PageSize(5) // Това е важно! оправя Na / Na от 11 записа
-            //                    .Events(events => events.Error("errorHandler")
-            //                        .Push(@"
-            //                                   function(e) {
-            //                                   var notification = $(""#notification"").data(""kendoNotification"");
-            //                                   notification.success(e.type);
-            //                                   }
-            //                               ")
-            //                                       )
-            //                    .Batch(false)
-            //                    .Transport(tr => tr
-            //                        .Promise("hubStart")
-            //                            .Hub("crudHub")
-            //                        .Client(c => c
-            //                            .Read("read" + entityTypeName)
-            //                            .Create("create" + entityTypeName)
-            //                            .Update("update" + entityTypeName)
-            //                            .Destroy("destroy" + entityTypeName))
-            //                        .Server(s => s
-            //                            .Read("read" + entityTypeName)
-            //                            .Create("create" + entityTypeName)
-            //                            .Update("update" + entityTypeName)
-            //                            .Destroy("destroy" + entityTypeName)))
-            //                            .Schema(schema => schema
-            //                    .Model(m =>
-            //                    {
-            //                        m.Id("Id");
-            //                        m.Field("Id", typeof(long)).Editable(false);
-            //                        m.Field("ModifiedOn", typeof(DateTime?)).Editable(false).DefaultValue(null);
-            //                        m.Field("CreatedOn", typeof(DateTime?)).Editable(false).DefaultValue(null);
-
-            //                    }
-            //                    )));
-
 
             PropertyInfo[] modelEntityProperties = viewModelEntityType.GetProperties();
 
@@ -190,17 +141,17 @@ namespace Inventory.MVC.Extensions
                     .ClientTemplate(@"<input type=""checkbox"" id=""checkbox#=Id#""  title=""Избери/Изчисти"" class=""k-checkbox checkbox"">
 <label class=""k-checkbox-label""  title=""Избери/Изчисти"" for=""checkbox#=Id#""></label>");
 
-                    columns.Template(t =>  @"<text></text>")
+                    columns.Template(t => @"<text></text>")
              .Width(50)
              .HeaderTemplate("Действие")
-//http://docs.telerik.com/kendo-ui/web/appearance-styling
+                        //http://docs.telerik.com/kendo-ui/web/appearance-styling
                     .ClientTemplate(@"<a class=""k-button-icontext k-icon k-delete k-grid-delete"" href=""\#"" title=""Изтриване"">Изтриване</a> | 
 <a class=""k-button-icontext k-icon  k-edit k-grid-edit"" href=""\#"" title=""Редактиране"">Редактиране</a>");
 
-                    
-            //        columns.Template(t => t)
-            //.Width(50)
-            //.ClientTemplate(@"<a class=""k-button-icontext k-icon  k-edit k-grid-edit"" href=""\#"">Редактиране</a>");
+
+                    //        columns.Template(t => t)
+                    //.Width(50)
+                    //.ClientTemplate(@"<a class=""k-button-icontext k-icon  k-edit k-grid-edit"" href=""\#"">Редактиране</a>");
                     // за да е първо id-то
                     columns.Bound("Id"); // временно ги махам докато разбера как да са readonly е  Popup едит
                     foreach (PropertyInfo propertyInfo in modelEntityProperties)
@@ -221,9 +172,9 @@ namespace Inventory.MVC.Extensions
                                 rellAttribute.DataTextField);
 
 
-                                //.ClientTemplate("<a href='/" + rellAttribute.PropertyNameInViewModel + "/#:data." + propertyInfo.Name +
-                                //"#'>#=getTextByValue(data, " + columns.ColumnsContainer.Columns.Count + ", " + propertyInfo.Name +  ")#</a>");
-                                //.ClientTemplate("<a href=\"#:data." + propertyInfo.Name + "#\">" + "#:data." + rellAttribute.PropertyNameInViewModel + ".Name" + "#  </a>").Locked(false).Lockable(true);
+                            //.ClientTemplate("<a href='/" + rellAttribute.PropertyNameInViewModel + "/#:data." + propertyInfo.Name +
+                            //"#'>#=getTextByValue(data, " + columns.ColumnsContainer.Columns.Count + ", " + propertyInfo.Name +  ")#</a>");
+                            //.ClientTemplate("<a href=\"#:data." + propertyInfo.Name + "#\">" + "#:data." + rellAttribute.PropertyNameInViewModel + ".Name" + "#  </a>").Locked(false).Lockable(true);
                             continue;
                         }
 
@@ -238,7 +189,9 @@ namespace Inventory.MVC.Extensions
                             continue;
                         }
                         if (propertyInfo.Name == "CreatedBy" ||
-                        propertyInfo.Name == "ModifiedBy")
+                        propertyInfo.Name == "ModifiedBy" ||
+                           propertyInfo.Name == "ParentType" ||
+                             propertyInfo.Name == "ParentTypeId")
                         {
                             columns.Bound(propertyInfo.Name).Hidden();
                             continue;
@@ -247,11 +200,9 @@ namespace Inventory.MVC.Extensions
                         {
                             columns.Bound(propertyInfo.Name).Locked(true).Lockable(true); //.Width("200px"); //.Title(transaltedName);
                         }
-                     
-                    } 
-                   
+                    }
 
-                   
+
                     //columns.Command(command => { command.Edit(); //command.Destroy();
                     //});
                 });
@@ -262,7 +213,8 @@ namespace Inventory.MVC.Extensions
                 {
                     items.Add()
                         .Template(
-                            @"<a class="" k-button-icontext k-icon k-add k-grid-add"" href=""\#"" title=""Добавяне на нов запис"">Добавяне</a>");
+                        //@"<a class="" k-button k-button-icontext k-icon k-add k-grid-add"" href=""\#"" title=""Добавяне на нов запис"">Добавяне</a>");
+                            @"<a class=""k-button k-button-icontext k-grid-add"" href=""#""><span class=""k-icon k-add"" title=""Добавяне на нов запис""></span>Добави</a>");
                     items.Add()
                         .Template(
                             @"<a class=""k-button k-grid-excel k-excel"" href=""\#"" title=""Експорт в Excel"">Excel</a>");
@@ -273,7 +225,7 @@ namespace Inventory.MVC.Extensions
                     //items.Add().Template(htmlHelper.Kendo().AutoComplete().Name("autocom").ToHtmlString());
                     items.Add().Template(htmlHelper.Kendo().TextBox().Name("tbSearch").ToHtmlString());
                     items.Add().Template(htmlHelper.Kendo().Button().Name("btnSearch").Content("Търси").Events(e => e.Click("gridBtnSearchClick")).ToHtmlString());
-               
+
                 }).ToHtmlString());
             });
             builder.Events(events =>

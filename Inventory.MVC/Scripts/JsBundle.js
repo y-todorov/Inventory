@@ -13558,6 +13558,8 @@ $(document).ready(function () {
     $("label").addClass("k-label");
     $("input[type=text]").addClass("k-textbox");
     $("input[type=password]").addClass("k-textbox");
+    $("textarea").addClass("k-textbox");
+    
     $("input[type=submit]").addClass("k-button");
 });
 

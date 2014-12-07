@@ -124,6 +124,42 @@ namespace Inventory.MVC.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Описание.
+        /// </summary>
+        public static string NoteViewModel_Description_Name {
+            get {
+                return ResourceManager.GetString("NoteViewModel_Description_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Име.
+        /// </summary>
+        public static string NoteViewModel_Name_Name {
+            get {
+                return ResourceManager.GetString("NoteViewModel_Name_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Родителски тип.
+        /// </summary>
+        public static string NoteViewModel_ParentType_Name {
+            get {
+                return ResourceManager.GetString("NoteViewModel_ParentType_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Родителски тип #.
+        /// </summary>
+        public static string NoteViewModel_ParentTypeId_Name {
+            get {
+                return ResourceManager.GetString("NoteViewModel_ParentTypeId_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Изберете дата.
         /// </summary>
         public static string PlaceHolderTextDate {

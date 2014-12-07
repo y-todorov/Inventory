@@ -138,6 +138,18 @@
   <data name="Municipality" xml:space="preserve">
     <value>Община</value>
   </data>
+  <data name="NoteViewModel_Description_Name" xml:space="preserve">
+    <value>Описание</value>
+  </data>
+  <data name="NoteViewModel_Name_Name" xml:space="preserve">
+    <value>Име</value>
+  </data>
+  <data name="NoteViewModel_ParentTypeId_Name" xml:space="preserve">
+    <value>Родителски тип #</value>
+  </data>
+  <data name="NoteViewModel_ParentType_Name" xml:space="preserve">
+    <value>Родителски тип</value>
+  </data>
   <data name="PlaceHolderTextDate" xml:space="preserve">
     <value>Изберете дата</value>
   </data>

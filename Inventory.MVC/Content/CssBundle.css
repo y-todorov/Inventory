@@ -16439,6 +16439,12 @@ body {
           user-select: none;
 }
 
+/*textarea
+{
+    border-style: solid;
+    border-width: medium;
+}*/
+
 input,
 textarea {
      
@@ -16461,7 +16467,7 @@ textarea {
     height: auto;
     margin: 2em;
     overflow-x: hidden;
-    overflow-y: auto
+    overflow-y: auto;
     text-align: left;
 }
 
