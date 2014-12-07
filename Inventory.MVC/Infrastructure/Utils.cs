@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web;
 using System.Web.Mvc;
 using AutoMapper;
@@ -55,6 +56,9 @@ namespace Inventory.MVC.Infrastructure
              using (InventoryContext context = new InventoryContext())
              {
                  var viewModels = context.Set<TEntityType>().AsQueryable().Project().To<TViewModelType>().ToList();
+                 //Expression<Func<ViewModelBase, bool>> exp = null
+                 //var viewModels = context.Set<TEntityType>().Where(exp).Cast<TEntityType>().AsQueryable().Project().To<TViewModelType>().ToList();
+
                  return viewModels;
              }
          }

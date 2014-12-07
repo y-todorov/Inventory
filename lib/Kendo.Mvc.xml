@@ -22203,6 +22203,18 @@
             </summary>
             <param name="workWeekEndDay">The workWeekEndDay</param>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerTimelineViewBuilderBase`2.DateHeaderTemplate(System.String)">
+            <summary>
+            The template used to render the date header cells.
+            </summary>
+            <param name="dateHeaderTemplate">The dateHeaderTemplate</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerTimelineViewBuilderBase`2.DateHeaderTemplateId(System.String)">
+            <summary>
+            The Id of the template used to render the date header cells.
+            </summary>
+            <param name="dateHeaderTemplateId">The dateHeaderTemplateId</param>
+        </member>
         <member name="T:Kendo.Mvc.UI.Fluent.SchedulerToolbarFactory`1">
             <summary>
             Creates toolbar commands for the <see cref="T:Kendo.Mvc.UI.Scheduler`1"/> class.
@@ -35499,6 +35511,54 @@
             </code>
             </example>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerEventBuilder.PdfExport(System.Func{System.Object,System.Object})">
+            <summary>
+            Defines the inline handler of the pdfExport event.
+            </summary>
+            <param name="handler">The handler code wrapped in a text tag (Razor syntax).</param>
+            <example>
+            <code lang="Razor">
+             @(Html.Kendo().Scheduler()
+                       .Name("Scheduler")
+                       .DataSource(d => d
+                            .Model(m => m.Id(f => f.TaskID))
+                                .Read("Read", "Scheduler")
+                                .Create("Create", "Scheduler")
+                                .Destroy("Destroy", "Scheduler")
+                                .Update("Update", "Scheduler")
+                        )  
+                       .Events(events => events.PdfExport(
+                            @&lt;text&gt;
+                            function(e) {
+                                //event handling code
+                            }
+                            &lt;/text&gt;
+                       ))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.SchedulerEventBuilder.PdfExport(System.String)">
+            <summary>
+             Defines the name of the JavaScript function that will handle the the pdfExport event.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the event.</param>
+            <example>
+            <code lang="Razor">
+             @(Html.Kendo().Scheduler()
+                        .Name("Scheduler")
+                        .Events(events => events.PdfExport("pdfExport"))
+                        .DataSource(d => d
+                            .Model(m => m.Id(f => f.TaskID))
+                                .Read("Read", "Scheduler")
+                                .Create("Create", "Scheduler")
+                                .Destroy("Destroy", "Scheduler")
+                                .Update("Update", "Scheduler")
+                        )  
+            )
+            </code>
+            </example>
+        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.SchedulerEventBuilder.Add(System.Func{System.Object,System.Object})">
             <summary>
             Defines the inline handler of the add event.
@@ -43246,6 +43306,74 @@
             @(Html.Kendo().Grid()
                        .Name("Grid")
                        .Events(events => events.Edit("gridEdit"))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridEventBuilder.ExcelExport(System.Func{System.Object,System.Object})">
+            <summary>
+            Defines the name of the JavaScript function that will handle the excelExport client-side event.
+            </summary>
+            <param name="handler">The handler code wrapped in a text tag (Razor syntax).</param>
+            <example>
+            <code lang="CS">
+            @(Html.Kendo().Grid()
+                      .Name("Grid")
+                      .Events(events => events.ExcelExport(
+                           @&lt;text&gt;
+                           function(e) {
+                               //event handling code
+                           }
+                           &lt;/text&gt;
+                      ))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridEventBuilder.ExcelExport(System.String)">
+            <summary>
+            Defines the name of the JavaScript function that will handle the excelExport client-side event.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the event.</param>
+            <example>
+            <code lang="CS">
+            @(Html.Kendo().Grid()
+                       .Name("Grid")
+                       .Events(events => events.ExcelExport("gridExcelExport"))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridEventBuilder.PdfExport(System.Func{System.Object,System.Object})">
+            <summary>
+            Defines the name of the JavaScript function that will handle the pdfExport client-side event.
+            </summary>
+            <param name="handler">The handler code wrapped in a text tag (Razor syntax).</param>
+            <example>
+            <code lang="CS">
+            @(Html.Kendo().Grid()
+                      .Name("Grid")
+                      .Events(events => events.PdfExport(
+                           @&lt;text&gt;
+                           function(e) {
+                               //event handling code
+                           }
+                           &lt;/text&gt;
+                      ))
+            )
+            </code>
+            </example>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.GridEventBuilder.PdfExport(System.String)">
+            <summary>
+            Defines the name of the JavaScript function that will handle the pdfExport client-side event.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the event.</param>
+            <example>
+            <code lang="CS">
+            @(Html.Kendo().Grid()
+                       .Name("Grid")
+                       .Events(events => events.PdfExport("gridPdfExport"))
             )
             </code>
             </example>
@@ -58467,7 +58595,7 @@
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Scrollable(System.Boolean)">
             <summary>
-            If set to true the grid will display a scrollbar when the total row height (or width) exceeds the grid height (or width). By default scrolling is enabled.Can be set to a JavaScript object which represents the scrolling configuration.
+            If set to true the treelist will display a scrollbar when the total row height (or width) exceeds the treelist height (or width). By default scrolling is enabled.Can be set to a JavaScript object which represents the scrolling configuration.
             </summary>
             <param name="value">The value that configures the scrollable.</param>
         </member>
@@ -58509,18 +58637,18 @@
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Filterable">
             <summary>
-            If set to true the user can filter the data source using the grid filter menu. Filtering is disabled by default.Can be set to a JavaScript object which represents the filter menu configuration.
+            If set to true the user can filter the data source using the treelist filter menu. Filtering is disabled by default.Can be set to a JavaScript object which represents the filter menu configuration.
             </summary>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Filterable(System.Boolean)">
             <summary>
-            If set to true the user can filter the data source using the grid filter menu. Filtering is disabled by default.Can be set to a JavaScript object which represents the filter menu configuration.
+            If set to true the user can filter the data source using the treelist filter menu. Filtering is disabled by default.Can be set to a JavaScript object which represents the filter menu configuration.
             </summary>
             <param name="enabled">Enables or disables the filterable option.</param>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListBuilder`1.Filterable(System.Action{Kendo.Mvc.UI.Fluent.TreeListFilterableSettingsBuilder{`0}})">
             <summary>
-            If set to true the user can filter the data source using the grid filter menu. Filtering is disabled by default.Can be set to a JavaScript object which represents the filter menu configuration.
+            If set to true the user can filter the data source using the treelist filter menu. Filtering is disabled by default.Can be set to a JavaScript object which represents the filter menu configuration.
             </summary>
             <param name="configurator">The action that configures the filterable.</param>
         </member>
@@ -58594,14 +58722,14 @@
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListEditableSettingsBuilder`1.Template(System.String)">
             <summary>
-            The template which renders popup editor.The template should contain elements whose name HTML attributes are set as the editable fields. This is how the grid will know
+            The template which renders popup editor.The template should contain elements whose name HTML attributes are set as the editable fields. This is how the treelist will know
             which field to update. The other option is to use MVVM bindings in order to bind HTML elements to data item fields.
             </summary>
             <param name="value">The value that configures the template.</param>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListEditableSettingsBuilder`1.TemplateId(System.String)">
             <summary>
-            The template which renders popup editor.The template should contain elements whose name HTML attributes are set as the editable fields. This is how the grid will know
+            The template which renders popup editor.The template should contain elements whose name HTML attributes are set as the editable fields. This is how the treelist will know
             which field to update. The other option is to use MVVM bindings in order to bind HTML elements to data item fields.
             </summary>
             <param name="value">The value that configures the template.</param>
@@ -58663,11 +58791,23 @@
             </summary>
             <param name="handler">The name of the JavaScript function that will handle the dataBound event.</param>
         </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.ExcelExport(System.String)">
+            <summary>
+            Fired when the user clicks the "Export to Excel" toolbar button.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the excelExport event.</param>
+        </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.Expand(System.String)">
             <summary>
             Fired when an item is about to be expanded.The event handler function context (available via the this keyword) will be set to the widget instance.
             </summary>
             <param name="handler">The name of the JavaScript function that will handle the expand event.</param>
+        </member>
+        <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.PdfExport(System.String)">
+            <summary>
+            Fired when the user clicks the "Export to PDF" toolbar button.
+            </summary>
+            <param name="handler">The name of the JavaScript function that will handle the pdfExport event.</param>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListEventBuilder.Remove(System.String)">
             <summary>
@@ -58807,14 +58947,14 @@
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder`1.Sortable(System.Boolean)">
             <summary>
-            If set to true the user can click the column header and sort the grid by the column field when sorting is enabled. If set to false sorting will
+            If set to true the user can click the column header and sort the treelist by the column field when sorting is enabled. If set to false sorting will
             be disabled for this column. By default all columns are sortable if sorting is enabled via the sortable option.
             </summary>
             <param name="enabled">Enables or disables the sortable option.</param>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnBuilder`1.Sortable(System.Action{Kendo.Mvc.UI.Fluent.TreeListColumnSortableSettingsBuilder{`0}})">
             <summary>
-            If set to true the user can click the column header and sort the grid by the column field when sorting is enabled. If set to false sorting will
+            If set to true the user can click the column header and sort the treelist by the column field when sorting is enabled. If set to false sorting will
             be disabled for this column. By default all columns are sortable if sorting is enabled via the sortable option.
             </summary>
             <param name="configurator">The action that configures the sortable.</param>
@@ -58949,13 +59089,13 @@
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnCommandBuilder`1.Click(System.Func{System.Object,System.Object})">
             <summary>
-            The JavaScript function executed when the user clicks the command button. The function receives a jQuery Event as an argument.The function context (available via the this keyword) will be set to the grid instance.
+            The JavaScript function executed when the user clicks the command button. The function receives a jQuery Event as an argument.The function context (available via the this keyword) will be set to the treelist instance.
             </summary>
             <param name="value">The value that configures the click action.</param>
         </member>
         <member name="M:Kendo.Mvc.UI.Fluent.TreeListColumnCommandBuilder`1.Click(System.String)">
             <summary>
-            The JavaScript function executed when the user clicks the command button. The function receives a jQuery Event as an argument.The function context (available via the this keyword) will be set to the grid instance.
+            The JavaScript function executed when the user clicks the command button. The function receives a jQuery Event as an argument.The function context (available via the this keyword) will be set to the treelist instance.
             </summary>
             <param name="value">The value that configures the click action.</param>
         </member>

@@ -213,6 +213,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\MapController.cs" />
+    <Compile Include="Controllers\NoteController.cs" />
     <Compile Include="Controllers\ProductController.cs" />
     <Compile Include="Controllers\ElementControllers\StoreController.cs" />
     <Compile Include="Controllers\TestController.cs" />
@@ -248,7 +249,8 @@
     <Compile Include="Infrastructure\Tasks\TaskRegistry.cs" />
     <Compile Include="Infrastructure\TransactionPerRequest.cs" />
     <Compile Include="Infrastructure\Utils.cs" />
-    <Compile Include="ModelBinders\YordanDateTimeModelBinder.cs" />
+    <Compile Include="CustomModelBinders\MyModelBinder.cs" />
+    <Compile Include="CustomModelBinders\YordanDateTimeModelBinder.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\ChangeLogViewModel.cs" />
     <Compile Include="Models\DirectoryViewModel.cs" />
@@ -258,6 +260,7 @@
     <Compile Include="Models\IndustryViewModel.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\MunicipalityViewModel.cs" />
+    <Compile Include="Models\MyDataSourceRequest.cs" />
     <Compile Include="Models\NoteViewModel.cs" />
     <Compile Include="Models\Person.cs" />
     <Compile Include="Models\ProcessViewModel.cs" />
@@ -592,6 +595,7 @@
     <Content Include="Scripts\JsBundle.js" />
     <Content Include="Scripts\JsBundle.min.js" />
     <Content Include="Scripts\jszip.min.js" />
+    <Content Include="Scripts\kendo.all.min.js" />
     <Content Include="Scripts\KendoConsole.js" />
     <Content Include="Scripts\Kendo\cultures\kendo.culture.af-ZA.js" />
     <Content Include="Scripts\Kendo\cultures\kendo.culture.af.js" />
@@ -1136,6 +1140,7 @@
     <Folder Include="Areas\Admin\Views\Home\" />
     <Folder Include="Areas\Admin\Views\Shared\" />
     <Folder Include="Views\ForeignKey\" />
+    <Folder Include="Views\Note\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Inventory.MVC.Models;
@@ -11,10 +12,13 @@ using Kendo.DynamicLinq;
 using Kendo.Mvc.Extensions;
 using Microsoft.AspNet.SignalR;
 using Inventory.DAL;
+using Newtonsoft.Json;
 using StructureMap;
 using Inventory.MVC.Infrastructure;
 using Microsoft.AspNet.SignalR.Hubs;
 using System.Diagnostics;
+using Newtonsoft.Json.Linq;
+using System.Linq.Expressions;
 
 namespace SignalRLocalHub.Hubs
 {
@@ -182,6 +186,45 @@ namespace SignalRLocalHub.Hubs
             Clients.Others.destroyTown(deletedProductStoreViewModel);
         }
 
+        // Понеже бележките са закачени към различни обкети, не трябва когато добавяме бележка към 1 обект, други белецки към друг обект да се рефрешват
+        public NoteViewModel CreateNote(JObject jobject)
+        {
+            string noteAsJsonString = jobject["model"].Value<string>();
+            NoteViewModel noteViewModel = JsonConvert.DeserializeObject<NoteViewModel>(noteAsJsonString);
+
+            NoteViewModel createdNoteViewModel = Utils.CreateBase<Note, NoteViewModel>(noteViewModel);
+            //Clients.Others.createNote(createdNoteViewModel);
+            return createdNoteViewModel;
+        }
+        
+        public IEnumerable<NoteViewModel> ReadNote(JObject obj)
+        {
+            string parentType = obj["parentType"].Value<string>();
+            long parentTypeId = obj["parentTypeId"].Value<long>();
+
+            using (InventoryContext context = new InventoryContext())
+            {
+                var result = context.Notes.Where(n => n.ParentType == parentType && n.ParentTypeId == parentTypeId)
+                    .Project().To<NoteViewModel>().ToList();
+                return result;
+            }
+        }
+
+        public void UpdateNote(JObject jobject)
+        {
+            string noteAsJsonString = jobject["model"].Value<string>();
+            NoteViewModel noteViewModel = JsonConvert.DeserializeObject<NoteViewModel>(noteAsJsonString);
+            var updatedChangeLogViewModel = Utils.UpdateBase<Note, NoteViewModel>(noteViewModel);
+            //Clients.Others.updateNote(updatedChangeLogViewModel);
+        }
+
+        public void DestroyNote(JObject jobject)
+        {
+            string noteAsJsonString = jobject["model"].Value<string>();
+            NoteViewModel noteViewModel = JsonConvert.DeserializeObject<NoteViewModel>(noteAsJsonString);
+            var deletedChangeLogViewModel = Utils.DeleteBase<Note, NoteViewModel>(noteViewModel);
+            //Clients.Others.destroyNote(deletedChangeLogViewModel);
+        }
 
 
         public DataSourceResult ReadFileViewModel(DataSourceRequest request)
@@ -195,7 +238,7 @@ namespace SignalRLocalHub.Hubs
         /// <returns></returns>
         public IEnumerable<ProcessViewModel> ReadProcesses()
         {
-            IEnumerable<Process> processes = Process.GetProcesses().OrderByDescending(p => p.WorkingSet64).Take(20); ;
+            IEnumerable<Process> processes = Process.GetProcesses().OrderByDescending(p => p.WorkingSet64).Take(20);
             var res = processes.Select(p => new ProcessViewModel 
             {
                 HandleCount = p.HandleCount,

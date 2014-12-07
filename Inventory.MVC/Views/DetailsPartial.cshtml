@@ -29,15 +29,10 @@
                   .Content(Html.Partial("~/Views/CommonDataPartial.cshtml").ToHtmlString());
 
 
-          panelbar.Add().Text("Programs")
-              .Items(programs =>
-              {
-                  programs.Add().Text("Monday");
-                  programs.Add().Text("Tuesday");
-                  programs.Add().Text("Wednesday");
-                  programs.Add().Text("Thursday");
-                  programs.Add().Text("Friday");
-              });
+          panelbar.Add().Text("Бележки")
+              .Expanded(true)
+              .Content(Html.Partial("~/Views/NotesPartial.cshtml", Model).ToHtmlString());
+             
 
           panelbar.Add().Text("Communication").Enabled(false);
       })

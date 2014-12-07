@@ -75,5 +75,18 @@ namespace Inventory.MVC.Controllers
             }
             return Json(new[] { viewModel }.ToDataSourceResult(request, ModelState));
         }
+
+        public JsonResult DestroyBase<TEntityType, TViewModelType>([DataSourceRequest] DataSourceRequest request, InventoryContext context, TViewModelType viewModel) where TEntityType : class
+        {
+            if (viewModel != null && ModelState.IsValid)
+            {
+                var entity = context.Set<TEntityType>().Find((viewModel as ViewModelBase).Id);
+
+                context.Set<TEntityType>().Remove(entity);
+
+                context.SaveChanges();
+            }
+            return Json(new[] { viewModel }.ToDataSourceResult(request, ModelState));
+        }
     }
 }

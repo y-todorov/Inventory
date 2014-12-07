@@ -13,7 +13,9 @@
     <!--<file>/Scripts/JQuery/jquery-1.8.2.js</file>-->
     <file>/Scripts/jquery-1.11.1.js</file>
     <file>/Scripts/jszip.min.js</file>
-    <file>/Scripts/Kendo/kendo.all.js</file>
+    <!--<file>/Scripts/Kendo/kendo.all.js</file>-->
+    
+	<file>/Scripts/kendo.all.min.js</file>
     <file>/Scripts/Kendo/kendo.excel.js</file>
     <file>/Scripts/Kendo/kendo.angular.js</file>
     <file>/Scripts/Kendo/kendo.aspnetmvc.js</file>

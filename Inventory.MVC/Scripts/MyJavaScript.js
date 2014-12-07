@@ -30,7 +30,7 @@ $(document).ready(function () {
     
 
 
-    var centered = $("#centeredNotification").kendoNotification({
+    var centered = $("#notification").kendoNotification({
         hideOnClick: false,
         stacking: "down",
         show: onShow,
@@ -38,7 +38,7 @@ $(document).ready(function () {
         autoHideAfter: 30000
     }).data("kendoNotification");
 
-    $("#popupNotification").kendoNotification().data("kendoNotification");
+    $("#notification").kendoNotification().data("kendoNotification");
 
     function onShow(e) {
         if (!$("." + e.sender._guid)[1]) {
@@ -69,7 +69,7 @@ function onKendoGridDataSourceError(e) {
 }
 
 function onKendoGridSave(e) {
-    var popupNotification = $("#popupNotification").data("kendoNotification");
+    var popupNotification = $("#notification").data("kendoNotification");
     for (var key in e.values) {
         var value = e.values[key];
         popupNotification.show("The value of '" + key + "' changed to '" + value + "'!");
@@ -77,55 +77,13 @@ function onKendoGridSave(e) {
 }
 
 function onKendoGridSaveChanges() {
-    var popupNotification = $("#popupNotification").data("kendoNotification");
+    var popupNotification = $("#notification").data("kendoNotification");
     popupNotification.show("All pending changes are successfully saved!");
 }
 
 function onKendoGridRemove() {
-    var popupNotification = $("#popupNotification").data("kendoNotification");
+    var popupNotification = $("#notification").data("kendoNotification");
     popupNotification.show("Item removed! Press 'Save Changes' to delete the item from the database!");
 }
 
-function exportGridData(sender) {
-
-    var gridDiv = ($(sender)).parents('div[class~="k-grid"]').first(); // да точно така е!!!
-    var grid = gridDiv.data("kendoGrid");
-
-    $.ajax({
-        type: "POST",
-        url: "/Download/ExportWithOpenXML",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify({
-            html: grid.table.context.innerHTML
-        }),
-        success: function () {
-        },
-        error: function (result) {
-            alert('Oh no: ' + result.responseText);
-        },
-        async: false
-    });
-}
-
-function getWeekString(weekInt) {
-    //debugger;
-    var res;
-    $.ajax({
-        type: "POST",
-        url: "/Chart/GetWeekString",
-        contentType: "application/json; charset=utf-8",
-        data: JSON.stringify({
-            dateEncoded: weekInt
-        }),
-        success: function (data) {
-            res = data;
-        },
-        error: function (result) {
-            alert('Oh no: ' + result.responseText);
-        },
-        async: false
-    });
-
-    return res;
-}
 

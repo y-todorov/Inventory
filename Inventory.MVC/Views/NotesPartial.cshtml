@@ -1,25 +1,40 @@
-﻿@model Inventory.MVC.Models.ViewModelBase
+﻿@using Inventory.MVC.Extensions
+@using Inventory.MVC.Models
+@using Kendo.Mvc.UI;
+
+@model Inventory.MVC.Models.ViewModelBase
 
 @(
-        Html.LabelFor(m => m.CreatedBy))
+        Html.Kendo().Grid<NoteViewModel>()
+            .AddBaseOptions(Html)
+            .DataSource(ds => ds
+                .SignalR()
+                .Transport(tr => tr.ParameterMap("parameterMap"))
+                .Schema(s => s.Model(f =>
+                {
+                    f.Field(m => m.ParentType).DefaultValue(Model.GetType().Name.Replace("ViewModel", ""));
+                    f.Field(m => m.ParentTypeId).DefaultValue(Model.Id);
+                }
+                    ))
+            )
+            .Name("NoteViewModelGrid" + "_" + Model.GetType().Name + "_" + Model.Id)
+      )
 
-@(
-        Html.Kendo().TextBoxFor(m => m.CreatedBy).Enable(false))
+<script type="text/javascript">
+    // // тук апострофите са важни и трябва да ги има, иначе го смята за променлива и казва NotDefined
+    function parameterMap(data, operation) {
+        //debugger;
+        if (operation === "read") {
+            var obj = {
+                parentType: '@Model.GetType().Name.Replace("ViewModel", "")',
+                parentTypeId: @Model.Id
+            };
+            return obj;
+        } else //(operation == "create") {
+        {
+            // send the created data items as the "model" service parameter encoded in JSON
+            return { model: kendo.stringify(data) };
+        }
+    }
 
-@(
-        Html.LabelFor(m => m.CreatedOn))
-
-@(
-        Html.Kendo().DateTimePickerFor(m => m.CreatedOn).Enable(false))
-
-@(
-        Html.LabelFor(m => m.ModifiedBy))
-
-@(
-        Html.Kendo().TextBoxFor(m => m.ModifiedBy).Enable(false))
-
-@(
-        Html.LabelFor(m => m.ModifiedOn))
-
-@(
-        Html.Kendo().DateTimePickerFor(m => m.ModifiedOn).Enable(false))
+</script>

@@ -5,9 +5,11 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using Inventory.MVC.CustomModelBinders;
 using Inventory.MVC.Infrastructure;
 using Inventory.MVC.Infrastructure.Tasks;
-using Inventory.MVC.ModelBinders;
+//using Inventory.MVC.ModelBinders;
+using Inventory.MVC.Models;
 using Kendo.Mvc;
 using StructureMap;
 
@@ -35,7 +37,12 @@ namespace Inventory.MVC
                     sitemap.LoadFrom("~/sitemap.sitemap"));
             }
 
-            System.Web.Mvc.ModelBinders.Binders.Add(typeof(DateTime?), new YordanDateTimeModelBinder()); // Като се каже save от клиента тогава минаваме от тук.
+            ModelBinders.Binders.Add(typeof(DateTime?), new YordanDateTimeModelBinder()); // Като се каже save от клиента тогава минаваме от тук.
+            //System.Web.Mvc.ModelBinders.Binders.Add(typeof(ViewModelBase), new MyModelBinder()); // Като се каже save от клиента тогава минаваме от тук.
+
+            //ModelBinders.Binders.DefaultBinder = new MyModelBinder();
+            //ModelBinders.Binders.Add(typeof(ViewModelBase), new MyModelBinder());
+            
 
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

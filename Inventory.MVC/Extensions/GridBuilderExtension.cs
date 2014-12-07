@@ -59,7 +59,17 @@ namespace Inventory.MVC.Extensions
                                     .Create("create" + entityTypeName)
                                     .Update("update" + entityTypeName)
                                     .Destroy("destroy" + entityTypeName))
-                            );
+                            )
+        //                    .Schema(schema => schema
+        //    .Data("Data")
+        //    .Total("Total")
+        //    .Aggregates("Aggregates")
+        //    .Model(model =>
+        //    {
+        //        model.Id("Id");
+        //    })
+        //)
+                            ;
                         break;
                     case DataSourceType.Ajax:
                         dataSource
@@ -77,10 +87,10 @@ namespace Inventory.MVC.Extensions
                                ")
                                 .RequestEnd("gridDataSourceRequestEnd")
                             )
-                            .Create("Create" + entityTypeName, entityTypeName)
-                            .Read("Read" + entityTypeName, entityTypeName)
-                            .Update("Update" + entityTypeName, entityTypeName)
-                            .Destroy("Destroy" + entityTypeName, entityTypeName)
+                            .Create("Create", entityTypeName)
+                            .Read("Read", entityTypeName)
+                            .Update("Update", entityTypeName)
+                            .Destroy("Destroy", entityTypeName)
                             .Model(m => m.Id("Id"));
                         break;
                 }
