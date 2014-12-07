@@ -209,6 +209,7 @@
     <Compile Include="Controllers\ElementControllers\MunicipalityController.cs" />
     <Compile Include="Controllers\ElementControllers\RegionController.cs" />
     <Compile Include="Controllers\ElementControllers\TownController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\ForeignKeyController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -238,6 +239,7 @@
     <Compile Include="Infrastructure\StandardRegistry.cs" />
     <Compile Include="Infrastructure\StructureMapDependencyResolver.cs" />
     <Compile Include="Infrastructure\StructureMapFilterProvider.cs" />
+    <Compile Include="Infrastructure\TasksImplementations\RunAfterEachRequestErrorHandling.cs" />
     <Compile Include="Infrastructure\TasksImplementations\RunAfterEachRequestSignalR.cs" />
     <Compile Include="Infrastructure\TasksImplementations\RunOnEachRequestSetPingUrl.cs" />
     <Compile Include="Infrastructure\TasksImplementations\RunOnEachRequestSignalR.cs" />
@@ -1573,6 +1575,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Shared\EditorTemplates\HtmlEditorText.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Error\NotFound.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

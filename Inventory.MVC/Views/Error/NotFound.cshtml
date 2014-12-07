@@ -1,0 +1,40 @@
+﻿@model Exception
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Грешка</title>
+</head>
+<body>
+    <div>
+        <label>
+            Търсената страница не може да бъде намерена.
+        </label>
+        <br />
+        <label>
+            Повече информация:
+        </label>
+        <br />
+        <label>
+            Съобщение: @Model.Message
+        </label>
+        <br />
+        <label>
+            Програмен стек: @Model.StackTrace
+        </label>
+        <br />
+        <br />
+        @if (Model.InnerException != null)
+        {
+            <br /><label>Съобщение: @Model.InnerException.Message</label>
+            <br /><label>Програмен стек: @Model.InnerException.StackTrace</label>
+        }
+    </div>
+</body>
+
+</html>

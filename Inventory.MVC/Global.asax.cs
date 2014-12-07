@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using Inventory.MVC.Controllers;
 using Inventory.MVC.CustomModelBinders;
 using Inventory.MVC.Infrastructure;
 using Inventory.MVC.Infrastructure.Tasks;
@@ -105,6 +106,20 @@ namespace Inventory.MVC
                 TheContainer.Dispose();
                 TheContainer = null;
             }
+        }
+
+        void Application_Error(Object sender, EventArgs e)
+        {
+            // тук не може да се навигира.
+            //HttpContext.Current.Response.Clear();
+
+            //var rd = new RouteData();
+            ////rd.DataTokens["area"] = "AreaName"; // In case controller is in another area
+            //rd.Values["controller"] = "Error";
+            //rd.Values["action"] = "NotFound";
+
+            //IController c = new ErrorController();
+            //c.Execute(new RequestContext(new HttpContextWrapper(HttpContext.Current), rd));
         }
 
     }
