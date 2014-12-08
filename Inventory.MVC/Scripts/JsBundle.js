@@ -13785,6 +13785,7 @@ $(document).ready(function () {
     });
 
     $(document).ajaxError(function (event, request, settings, e) {
+        debugger;
         //console.log("Triggered ajaxError handler.");
         var popupNotification = $("#centeredNotification").data("kendoNotification");
         if (request.responseJSON.Errors) {

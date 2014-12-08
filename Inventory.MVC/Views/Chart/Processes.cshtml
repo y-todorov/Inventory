@@ -1,8 +1,4 @@
 ﻿@*http://docs.telerik.com/kendo-ui/dataviz/performance-tips*@
-
-@using System.Diagnostics
-
-
 <script>
     $(".export-pdf").click(function () {
         var chart = $("#chart").getKendoChart();
@@ -52,7 +48,7 @@
     </div>
 </div>
 
-@(Html.Kendo().Chart<Inventory.MVC.Models.ProcessViewModel>
+@(Html.Kendo().Chart<ProcessViewModel>
       ()
       .Name("chart")
       .Title("Spain electricity production (GWh)")

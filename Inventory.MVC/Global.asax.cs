@@ -13,6 +13,7 @@ using Inventory.MVC.Infrastructure.Tasks;
 using Inventory.MVC.Models;
 using Kendo.Mvc;
 using StructureMap;
+using Inventory.MVC.Attributes;
 
 namespace Inventory.MVC
 {
@@ -43,7 +44,10 @@ namespace Inventory.MVC
 
             //ModelBinders.Binders.DefaultBinder = new MyModelBinder();
             //ModelBinders.Binders.Add(typeof(ViewModelBase), new MyModelBinder());
-            
+
+            ModelBinders.Binders.Add(typeof(ViewModelBase), new YordanModelBinder());
+            ModelBinders.Binders.Add(typeof(ElementViewModel), new YordanModelBinder());
+            ModelBinders.Binders.Add(typeof(TownViewModel), new YordanModelBinder());
 
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

@@ -1,4 +1,4 @@
-﻿@model Inventory.MVC.Models.ElementViewModel
+﻿@model ElementViewModel
 
 @(Html.Kendo().PanelBar()
       .Name("panelbar")
@@ -26,7 +26,10 @@
 
           panelbar.Add().Text("Общи данни")
               .Expanded(true)
-                  .Content(Html.Partial("~/Views/CommonDataPartial.cshtml").ToHtmlString());
+                .LoadContentFrom("CommonDataPartial", "Partial", Model);
+              //Url.Content("~/Content/web/panelbar/ajax/ajaxContent1.html")
+              //.LoadContentFrom("~/Views/CommonDataPartial.cshtml");
+                  //.Content(Html.Partial("~/Views/CommonDataPartial.cshtml").ToHtmlString());
 
 
           panelbar.Add().Text("Бележки")

@@ -195,6 +195,8 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Attributes\AbstractBindAttribute.cs" />
+    <Compile Include="Attributes\YordanModelBinder.cs" />
     <Compile Include="Controllers\ChangeLogController.cs" />
     <Compile Include="Attributes\DateDisplayAttributeYordan.cs" />
     <Compile Include="Attributes\RelationAttribute.cs" />
@@ -215,6 +217,7 @@
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\MapController.cs" />
     <Compile Include="Controllers\NoteController.cs" />
+    <Compile Include="Controllers\PartialController.cs" />
     <Compile Include="Controllers\ProductController.cs" />
     <Compile Include="Controllers\ElementControllers\StoreController.cs" />
     <Compile Include="Controllers\TestController.cs" />
@@ -1104,7 +1107,9 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Views\Web.config" />
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
@@ -1578,6 +1583,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Error\NotFound.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Partial\CommonDataPartial.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
